@@ -9,6 +9,7 @@ import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/app_scaffold.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/gradient_button.dart';
+import '../../../../core/widgets/inline_failure_banner.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 
 /// Changing the owner password re-authenticates first: Supabase deliberately
@@ -93,7 +94,7 @@ class _AdminChangePasswordPageState
                   padding: const EdgeInsets.only(bottom: 16),
                   child: InlineFailureBanner(
                     failure: failure,
-                    onRetry: () => ref
+                    onDismiss: () => ref
                         .read(adminAuthControllerProvider.notifier)
                         .reset(),
                   ),

@@ -1,180 +1,342 @@
 {
   "@@locale": "en",
-
-  "appTitle": "Amu Sharif Arabiyan Majlis",
-  "brandNameEn": "Amu Sharif Arabiyan Majlis",
-  "brandNameAm": "አሙ ሸሪፍ አረቢያን መጅሊስ",
-  "brandNameAr": "المجلس العربي عمو شريف",
-  "brandMonogram": "ASM",
-  "tagline": "Luxury Arabic majlis & sofas, handcrafted for your home",
-  "aboutFallback": "Amu Sharif Arabiyan Majlis crafts premium majlis seating, floor cushions and furnishings in the Arabian tradition.",
-
-  "navHome": "Home",
-  "navCategories": "Categories",
-  "navAbout": "About",
-  "navContact": "Contact",
-  "navAdmin": "Admin",
-  "navSettings": "Settings",
-
-  "actionRetry": "Try again",
-  "actionCancel": "Cancel",
-  "actionSave": "Save",
-  "actionDelete": "Delete",
-  "actionEdit": "Edit",
-  "actionClose": "Close",
-  "actionSearch": "Search",
-  "actionShare": "Share",
-  "actionContinue": "Continue",
-  "actionViewDetails": "View details",
-  "actionContactOwner": "Contact the owner",
-  "actionOrderNow": "Order now",
-  "actionCallNow": "Call now",
-  "actionCopyLink": "Copy link",
-  "actionCopySuccess": "Link copied",
-
-  "searchHint": "Search majlis, sofas, cushions…",
-  "searchNoResults": "No products match “{query}”",
-  "@searchNoResults": {
-    "placeholders": { "query": { "type": "String" } }
-  },
-  "searchResultsCount": "{count, plural, =0{No results} =1{1 result} other{{count} results}}",
-  "@searchResultsCount": {
-    "placeholders": { "count": { "type": "int" } }
-  },
-
-  "sectionFeatured": "Featured",
-  "sectionBrowseCategories": "Browse by category",
-  "sectionAllProducts": "All products",
-  "sectionNewArrivals": "New arrivals",
-
-  "labelPrice": "Price",
-  "labelFrom": "From {price}",
-  "@labelFrom": {
-    "placeholders": { "price": { "type": "String" } }
-  },
-  "labelAvailable": "Available",
-  "labelUnavailable": "Out of stock",
-  "labelDiscount": "Save {percent}%",
-  "@labelDiscount": {
-    "placeholders": { "percent": { "type": "int" } }
-  },
-  "labelDuration": "{minutes}m {seconds}s",
-  "@labelDuration": {
+  "@a11yOpenCategory": {
     "placeholders": {
-      "minutes": { "type": "int" },
-      "seconds": { "type": "int" }
+      "name": {
+        "type": "String"
+      }
     }
   },
-
-  "contactWhatsApp": "WhatsApp",
-  "contactTelegram": "Telegram",
-  "contactPhone": "Phone",
-  "contactEmail": "Email",
-  "contactInstagram": "Instagram",
-  "contactFacebook": "Facebook",
-  "contactTikTok": "TikTok",
-  "contactYouTube": "YouTube",
-  "contactWebsite": "Website",
-  "contactLocation": "Location",
-  "contactOther": "Other",
-  "contactLaunchFailed": "Could not open that link on this device.",
-
-  "inquiryMessageTemplate": "Hello! I am interested in “{product}” ({price}).",
+  "@a11yProductImage": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@a11yVideoThumbnail": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@adminCategoryHasProducts": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@adminUploadingCount": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "@inquiryMessageTemplate": {
     "placeholders": {
-      "product": { "type": "String" },
-      "price": { "type": "String" }
+      "price": {
+        "type": "String"
+      },
+      "product": {
+        "type": "String"
+      }
     }
   },
-
-  "stateLoading": "Loading…",
-  "stateEmptyTitle": "Nothing here yet",
-  "stateEmptyMessage": "New pieces will appear here as soon as the owner publishes them.",
-  "stateErrorTitle": "Something went wrong",
-  "stateOffline": "You are offline. Check your connection and try again.",
-  "stateNotFoundTitle": "Page not found",
-  "stateNotFoundMessage": "That link does not exist any more.",
-
-  "errorNetwork": "We could not reach the store. Check your connection.",
-  "errorTimeout": "The request took too long. Please try again.",
-  "errorServer": "The service is temporarily unavailable. Please try again.",
-  "errorAuth": "We could not sign you in.",
-  "errorInvalidCredentials": "Incorrect email or password.",
-  "errorEmailNotConfirmed": "Confirm your email address before signing in.",
-  "errorTooManyAttempts": "Too many attempts. Please wait a moment and try again.",
-  "errorSessionExpired": "Your session expired. Please sign in again.",
-  "errorPermission": "You do not have permission to do that.",
-  "errorNotFound": "We could not find what you were looking for.",
-  "errorValidation": "Please correct the highlighted fields.",
-  "errorMedia": "That file could not be processed.",
-  "errorStorage": "The file could not be uploaded.",
-  "errorUnknown": "Something unexpected happened. Please try again.",
-  "errorDuplicate": "That value is already in use.",
-  "errorCheckViolation": "A value is outside the allowed range.",
-  "errorForeignKey": "Related data is missing.",
-  "errorConstraintViolation": "Some values are not allowed.",
-  "errorInvalidFormat": "That value is not in the expected format.",
-
-  "validateRequired": "This field is required",
-  "validateTooShort": "This value is too short",
-  "validateTooLong": "This value is too long",
-  "validateSlug": "Use lowercase letters, numbers and hyphens only",
-  "validateEmail": "Enter a valid email address",
-  "validatePhone": "Enter a valid phone number",
-  "validateUrl": "Enter a valid link starting with https://",
-  "validatePasswordLength": "Use at least 10 characters",
-  "validatePasswordStrength": "Include an uppercase letter, a lowercase letter and a number",
-  "validatePasswordMismatch": "Passwords do not match",
-  "validateNumber": "Enter a valid number",
-  "validateNegative": "Value cannot be negative",
-  "validatePositive": "Value must be greater than zero",
-  "validateCompareAtPrice": "Original price must be at least the selling price",
-  "validateVideoTooLong": "Videos must be 60 seconds or shorter",
-  "validateVideoUnreadable": "That video could not be read",
-
-  "settingsTitle": "Settings",
-  "settingsLanguage": "Language",
-  "settingsTheme": "Appearance",
-  "settingsThemeSystem": "System",
-  "settingsThemeLight": "Light",
-  "settingsThemeDark": "Dark",
-  "settingsAbout": "About",
-  "settingsVersion": "Version",
-  "settingsAdminEntry": "Admin",
-  "settingsAdminHint": "Owner sign in",
-
-  "adminLoginTitle": "Owner sign in",
-  "adminLoginSubtitle": "This area is restricted to the shop owner.",
-  "adminEmailLabel": "Email",
-  "adminPasswordLabel": "Password",
-  "adminSignIn": "Sign in",
-  "adminSignOut": "Sign out",
-  "adminForgotPassword": "Forgot password?",
-  "adminChangePassword": "Change password",
-  "adminDashboard": "Dashboard",
-  "adminCategories": "Categories",
-  "adminProducts": "Products",
-  "adminMedia": "Media",
-  "adminContacts": "Contact links",
-  "adminSiteSettings": "Site settings",
-  "adminInquiries": "Inquiries",
-  "adminNotAuthorised": "This account is not an administrator.",
-  "adminCurrentPassword": "Current password",
-  "adminNewPassword": "New password",
-  "adminConfirmPassword": "Confirm new password",
-  "adminPasswordChanged": "Your password has been updated.",
-  "adminResetSent": "Check your inbox for a reset link.",
-
-  "a11yProductImage": "Photo of {title}",
-  "@a11yProductImage": {
-    "placeholders": { "title": { "type": "String" } }
+  "@labelDiscount": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
   },
-  "a11yVideoThumbnail": "Play the video for {title}",
-  "@a11yVideoThumbnail": {
-    "placeholders": { "title": { "type": "String" } }
+  "@labelDuration": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      },
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "@labelFrom": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "@searchNoResults": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "@searchResultsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "a11yOpenCategory": "Open the {name} category",
-  "@a11yOpenCategory": {
-    "placeholders": { "name": { "type": "String" } }
-  }
+  "a11yProductImage": "Photo of {title}",
+  "a11yVideoThumbnail": "Play the video for {title}",
+  "aboutFallback": "Amu Sharif Arabiyan Majlis crafts premium majlis seating, floor cushions and furnishings in the Arabian tradition.",
+  "actionAdd": "Add",
+  "actionCallNow": "Call now",
+  "actionCancel": "Cancel",
+  "actionClear": "Clear",
+  "actionClose": "Close",
+  "actionConfirm": "Confirm",
+  "actionContactOwner": "Contact the owner",
+  "actionContinue": "Continue",
+  "actionCopyLink": "Copy link",
+  "actionCopySuccess": "Link copied",
+  "actionCreate": "Create",
+  "actionDelete": "Delete",
+  "actionDiscardAll": "Discard",
+  "actionEdit": "Edit",
+  "actionMove": "Move",
+  "actionOrderNow": "Order now",
+  "actionRetry": "Try again",
+  "actionSave": "Save",
+  "actionSearch": "Search",
+  "actionSelectImage": "Select image",
+  "actionShare": "Share",
+  "actionViewDetails": "View details",
+  "adminAbout": "About the store",
+  "adminAccount": "Owner account",
+  "adminAddContact": "Add link",
+  "adminAddImages": "Add images",
+  "adminAddProduct": "Add product",
+  "adminAddVideo": "Add video",
+  "adminAnonymous": "Anonymous",
+  "adminBackToGateway": "Back to gateway",
+  "adminCategories": "Categories",
+  "adminCategoryCreated": "Category created",
+  "adminCategoryDeleted": "Category deleted",
+  "adminCategoryHasProducts": "This category still has {count} products. Move them to another category first, or delete the products.",
+  "adminCategoryHidden": "Category hidden",
+  "adminCategoryName": "Name (English)",
+  "adminCategoryNameAm": "Name (Amharic)",
+  "adminCategoryNameAr": "Name (Arabic)",
+  "adminCategoryUpdated": "Category updated",
+  "adminChangePassword": "Change password",
+  "adminChannel": "Channel",
+  "adminClearInquiries": "Clear all",
+  "adminCompareAtPrice": "Compare-at price (optional)",
+  "adminConfirmDeleteCategory": "Delete this category?",
+  "adminConfirmDeleteContact": "Remove this link?",
+  "adminConfirmDeleteMessage": "This cannot be undone.",
+  "adminConfirmDeleteProduct": "Delete this product?",
+  "adminConfirmPassword": "Confirm new password",
+  "adminContactDeleted": "Link removed",
+  "adminContactLabel": "Label",
+  "adminContactSaved": "Link saved",
+  "adminContactValue": "Value",
+  "adminContacts": "Contact links",
+  "adminCover": "Cover",
+  "adminCoverImage": "Cover image",
+  "adminCreateCategory": "Create category",
+  "adminCurrency": "Currency",
+  "adminCurrentPassword": "Current password",
+  "adminDashboard": "Dashboard",
+  "adminDefaultLanguage": "Default language",
+  "adminDiscard": "Discard",
+  "adminDragToReorder": "Drag to reorder",
+  "adminDuplicate": "Duplicate",
+  "adminDuplicateCreated": "Copy created",
+  "adminEditCategory": "Edit category",
+  "adminEditContact": "Edit link",
+  "adminEditProduct": "Edit product",
+  "adminEmailLabel": "Email",
+  "adminExitPreview": "Exit preview",
+  "adminFeatured": "Featured",
+  "adminFilterAllCategories": "All categories",
+  "adminFilterAllStatus": "All",
+  "adminFilterDraft": "Draft",
+  "adminFilterPublished": "Published",
+  "adminForgotPassword": "Forgot password?",
+  "adminGatewayTitle": "Admin gateway",
+  "adminHide": "Hide",
+  "adminInquiries": "Inquiries",
+  "adminInquiriesWeek": "Inquiries this week",
+  "adminInquiryDeleted": "Inquiry cleared",
+  "adminJustNow": "just now",
+  "adminKeepEditing": "Keep editing",
+  "adminLivePreview": "Customer preview",
+  "adminLoginSubtitle": "This area is restricted to the shop owner.",
+  "adminLoginTitle": "Owner sign in",
+  "adminLogoPreview": "Logo preview",
+  "adminMarkPrimary": "Primary link",
+  "adminMedia": "Media",
+  "adminMostContacted": "Most contacted",
+  "adminMoveProductsTo": "Move products to",
+  "adminNewPassword": "New password",
+  "adminNoCategories": "No categories yet. Create the first one to group your products.",
+  "adminNoContacts": "No contact links yet. Customers reach you through these.",
+  "adminNoInquiries": "No inquiries yet. Customer taps on a contact button will show up here.",
+  "adminNoInquiriesYet": "No customer taps recorded yet. They will appear here as soon as someone taps a contact button.",
+  "adminNoMedia": "No images or videos yet.",
+  "adminNoProducts": "No products yet. Add your first piece to the catalogue.",
+  "adminNoProductsMatch": "No products match your filters.",
+  "adminNotAuthorised": "This account is not an administrator.",
+  "adminOtherSessionsSignedOut": "Other sessions were signed out.",
+  "adminPasswordChanged": "Your password has been updated.",
+  "adminPasswordLabel": "Password",
+  "adminPreviewAsCustomer": "Preview as customer",
+  "adminPreviewBadge": "Previewing as customer",
+  "adminPrice": "Price",
+  "adminPrimaryBadge": "Primary",
+  "adminProductColumn": "Product",
+  "adminProductDeleted": "Product deleted",
+  "adminProductSaved": "Product saved",
+  "adminProducts": "Products",
+  "adminPublish": "Publish",
+  "adminQuickActions": "Quick actions",
+  "adminReauthPrompt": "Enter your current password to confirm this change.",
+  "adminRemoveMedia": "Remove media",
+  "adminResetSent": "Check your inbox for a reset link.",
+  "adminSaveAndPublish": "Save and publish",
+  "adminSaveDraft": "Save draft",
+  "adminSearchProducts": "Search products",
+  "adminSectionSoon": "Coming in the next screen",
+  "adminSetCover": "Set as cover",
+  "adminShow": "Show",
+  "adminSignIn": "Sign in",
+  "adminSignOut": "Sign out",
+  "adminSignOutOthers": "Sign out other sessions",
+  "adminSiteSettings": "Site settings",
+  "adminSiteSettingsSaved": "Settings saved",
+  "adminSlug": "URL slug",
+  "adminSlugAuto": "Generated from the English name if left empty.",
+  "adminSortOrderHint": "Shown in the order below.",
+  "adminStatsCategories": "Categories",
+  "adminStatsProducts": "Products",
+  "adminStoreName": "Store name",
+  "adminStoreNameAm": "Store name (Amharic)",
+  "adminStoreNameAr": "Store name (Arabic)",
+  "adminStrength": "Strength",
+  "adminStrengthFair": "Fair",
+  "adminStrengthStrong": "Strong",
+  "adminStrengthWeak": "Weak",
+  "adminTagline": "Tagline",
+  "adminUnpublish": "Unpublish",
+  "adminUnpublished": "Unpublished",
+  "adminUnsavedMessage": "You have unsaved changes. Leaving now will lose them.",
+  "adminUnsavedTitle": "Discard changes?",
+  "adminUploadLogo": "Upload logo",
+  "adminUploadQueue": "Upload queue",
+  "adminUploadRetrying": "Retrying…",
+  "adminUploadingCount": "{done} of {total} uploaded",
+  "adminViewAll": "View all",
+  "adminViewStore": "View store",
+  "adminVisibleInStore": "Visible in store",
+  "adminWhen": "When",
+  "appTitle": "Amu Sharif Arabiyan Majlis",
+  "brandMonogram": "ASM",
+  "brandNameAm": "አሙ ሸሪፍ አረቢያን መጅሊስ",
+  "brandNameAr": "المجلس العربي عمو شريف",
+  "brandNameEn": "Amu Sharif Arabiyan Majlis",
+  "contactEmail": "Email",
+  "contactFacebook": "Facebook",
+  "contactInstagram": "Instagram",
+  "contactLaunchFailed": "Could not open that link on this device.",
+  "contactLocation": "Location",
+  "contactOther": "Other",
+  "contactPhone": "Phone",
+  "contactTelegram": "Telegram",
+  "contactTikTok": "TikTok",
+  "contactWebsite": "Website",
+  "contactWhatsApp": "WhatsApp",
+  "contactYouTube": "YouTube",
+  "errorAuth": "We could not sign you in.",
+  "errorCheckViolation": "A value is outside the allowed range.",
+  "errorConstraintViolation": "Some values are not allowed.",
+  "errorDuplicate": "That value is already in use.",
+  "errorEmailNotConfirmed": "Confirm your email address before signing in.",
+  "errorForeignKey": "Related data is missing.",
+  "errorInvalidCredentials": "Incorrect email or password.",
+  "errorInvalidFormat": "That value is not in the expected format.",
+  "errorMedia": "That file could not be processed.",
+  "errorMediaImageTooLarge": "Images must be 5 MB or smaller after compression.",
+  "errorMediaUnsupportedImage": "Use a JPG, PNG or WebP image.",
+  "errorMediaUnsupportedVideo": "Use an MP4 video.",
+  "errorMediaVideoTooLarge": "Videos must be 40 MB or smaller.",
+  "errorNetwork": "We could not reach the store. Check your connection.",
+  "errorNotFound": "We could not find what you were looking for.",
+  "errorPermission": "You do not have permission to do that.",
+  "errorServer": "The service is temporarily unavailable. Please try again.",
+  "errorSessionExpired": "Your session expired. Please sign in again.",
+  "errorStorage": "The file could not be uploaded.",
+  "errorTimeout": "The request took too long. Please try again.",
+  "errorTooManyAttempts": "Too many attempts. Please wait a moment and try again.",
+  "errorUnknown": "Something unexpected happened. Please try again.",
+  "errorValidation": "Please correct the highlighted fields.",
+  "inquiryMessageTemplate": "Hello! I am interested in “{product}” ({price}).",
+  "labelAvailable": "Available",
+  "labelDiscount": "Save {percent}%",
+  "labelDuration": "{minutes}m {seconds}s",
+  "labelFrom": "From {price}",
+  "labelPrice": "Price",
+  "labelUnavailable": "Out of stock",
+  "navAbout": "About",
+  "navAdmin": "Admin",
+  "navCategories": "Categories",
+  "navContact": "Contact",
+  "navHome": "Home",
+  "navSettings": "Settings",
+  "searchHint": "Search majlis, sofas, cushions…",
+  "searchNoResults": "No products match “{query}”",
+  "searchResultsCount": "{count, plural, =0{No results} =1{1 result} other{{count} results}}",
+  "sectionAllProducts": "All products",
+  "sectionBrowseCategories": "Browse by category",
+  "sectionFeatured": "Featured",
+  "sectionNewArrivals": "New arrivals",
+  "settingsAbout": "About",
+  "settingsAdminEntry": "Admin",
+  "settingsAdminHint": "Owner sign in",
+  "settingsLanguage": "Language",
+  "settingsTheme": "Appearance",
+  "settingsThemeDark": "Dark",
+  "settingsThemeLight": "Light",
+  "settingsThemeSystem": "System",
+  "settingsTitle": "Settings",
+  "settingsVersion": "Version",
+  "stateEmptyMessage": "New pieces will appear here as soon as the owner publishes them.",
+  "stateEmptyTitle": "Nothing here yet",
+  "stateErrorTitle": "Something went wrong",
+  "stateLoading": "Loading…",
+  "stateNoResults": "No results",
+  "stateNotFoundMessage": "That link does not exist any more.",
+  "stateNotFoundTitle": "Page not found",
+  "stateOffline": "You are offline. Check your connection and try again.",
+  "stateSaved": "Saved",
+  "stateSaving": "Saving…",
+  "tagline": "Luxury Arabic majlis & sofas, handcrafted for your home",
+  "validateCompareAtPrice": "Original price must be at least the selling price",
+  "validateEmail": "Enter a valid email address",
+  "validateNegative": "Value cannot be negative",
+  "validateNumber": "Enter a valid number",
+  "validatePasswordLength": "Use at least 10 characters",
+  "validatePasswordMismatch": "Passwords do not match",
+  "validatePasswordStrength": "Include an uppercase letter, a lowercase letter and a number",
+  "validatePhone": "Enter a valid phone number",
+  "validatePositive": "Value must be greater than zero",
+  "validateRequired": "This field is required",
+  "validateSlug": "Use lowercase letters, numbers and hyphens only",
+  "validateTelegramHandle": "Enter a Telegram handle like @username or a t.me link",
+  "validateTooLong": "This value is too long",
+  "validateTooShort": "This value is too short",
+  "validateUrl": "Enter a valid link starting with https://",
+  "validateVideoTooLong": "Videos must be 60 seconds or shorter",
+  "validateVideoUnreadable": "That video could not be read"
 }

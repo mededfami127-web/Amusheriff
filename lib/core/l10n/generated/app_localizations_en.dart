@@ -10,10 +10,493 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String a11yOpenCategory(String name) {
+    return 'Open the $name category';
+  }
+
+  @override
+  String a11yProductImage(String title) {
+    return 'Photo of $title';
+  }
+
+  @override
+  String a11yVideoThumbnail(String title) {
+    return 'Play the video for $title';
+  }
+
+  @override
+  String get aboutFallback =>
+      'Amu Sharif Arabiyan Majlis crafts premium majlis seating, floor cushions and furnishings in the Arabian tradition.';
+
+  @override
+  String get actionAdd => 'Add';
+
+  @override
+  String get actionCallNow => 'Call now';
+
+  @override
+  String get actionCancel => 'Cancel';
+
+  @override
+  String get actionClear => 'Clear';
+
+  @override
+  String get actionClose => 'Close';
+
+  @override
+  String get actionConfirm => 'Confirm';
+
+  @override
+  String get actionContactOwner => 'Contact the owner';
+
+  @override
+  String get actionContinue => 'Continue';
+
+  @override
+  String get actionCopyLink => 'Copy link';
+
+  @override
+  String get actionCopySuccess => 'Link copied';
+
+  @override
+  String get actionCreate => 'Create';
+
+  @override
+  String get actionDelete => 'Delete';
+
+  @override
+  String get actionDiscardAll => 'Discard';
+
+  @override
+  String get actionEdit => 'Edit';
+
+  @override
+  String get actionMove => 'Move';
+
+  @override
+  String get actionOrderNow => 'Order now';
+
+  @override
+  String get actionRetry => 'Try again';
+
+  @override
+  String get actionSave => 'Save';
+
+  @override
+  String get actionSearch => 'Search';
+
+  @override
+  String get actionSelectImage => 'Select image';
+
+  @override
+  String get actionShare => 'Share';
+
+  @override
+  String get actionViewDetails => 'View details';
+
+  @override
+  String get adminAbout => 'About the store';
+
+  @override
+  String get adminAccount => 'Owner account';
+
+  @override
+  String get adminAddContact => 'Add link';
+
+  @override
+  String get adminAddImages => 'Add images';
+
+  @override
+  String get adminAddProduct => 'Add product';
+
+  @override
+  String get adminAddVideo => 'Add video';
+
+  @override
+  String get adminAnonymous => 'Anonymous';
+
+  @override
+  String get adminBackToGateway => 'Back to gateway';
+
+  @override
+  String get adminCategories => 'Categories';
+
+  @override
+  String get adminCategoryCreated => 'Category created';
+
+  @override
+  String get adminCategoryDeleted => 'Category deleted';
+
+  @override
+  String adminCategoryHasProducts(int count) {
+    return 'This category still has $count products. Move them to another category first, or delete the products.';
+  }
+
+  @override
+  String get adminCategoryHidden => 'Category hidden';
+
+  @override
+  String get adminCategoryName => 'Name (English)';
+
+  @override
+  String get adminCategoryNameAm => 'Name (Amharic)';
+
+  @override
+  String get adminCategoryNameAr => 'Name (Arabic)';
+
+  @override
+  String get adminCategoryUpdated => 'Category updated';
+
+  @override
+  String get adminChangePassword => 'Change password';
+
+  @override
+  String get adminChannel => 'Channel';
+
+  @override
+  String get adminClearInquiries => 'Clear all';
+
+  @override
+  String get adminCompareAtPrice => 'Compare-at price (optional)';
+
+  @override
+  String get adminConfirmDeleteCategory => 'Delete this category?';
+
+  @override
+  String get adminConfirmDeleteContact => 'Remove this link?';
+
+  @override
+  String get adminConfirmDeleteMessage => 'This cannot be undone.';
+
+  @override
+  String get adminConfirmDeleteProduct => 'Delete this product?';
+
+  @override
+  String get adminConfirmPassword => 'Confirm new password';
+
+  @override
+  String get adminContactDeleted => 'Link removed';
+
+  @override
+  String get adminContactLabel => 'Label';
+
+  @override
+  String get adminContactSaved => 'Link saved';
+
+  @override
+  String get adminContactValue => 'Value';
+
+  @override
+  String get adminContacts => 'Contact links';
+
+  @override
+  String get adminCover => 'Cover';
+
+  @override
+  String get adminCoverImage => 'Cover image';
+
+  @override
+  String get adminCreateCategory => 'Create category';
+
+  @override
+  String get adminCurrency => 'Currency';
+
+  @override
+  String get adminCurrentPassword => 'Current password';
+
+  @override
+  String get adminDashboard => 'Dashboard';
+
+  @override
+  String get adminDefaultLanguage => 'Default language';
+
+  @override
+  String get adminDiscard => 'Discard';
+
+  @override
+  String get adminDragToReorder => 'Drag to reorder';
+
+  @override
+  String get adminDuplicate => 'Duplicate';
+
+  @override
+  String get adminDuplicateCreated => 'Copy created';
+
+  @override
+  String get adminEditCategory => 'Edit category';
+
+  @override
+  String get adminEditContact => 'Edit link';
+
+  @override
+  String get adminEditProduct => 'Edit product';
+
+  @override
+  String get adminEmailLabel => 'Email';
+
+  @override
+  String get adminExitPreview => 'Exit preview';
+
+  @override
+  String get adminFeatured => 'Featured';
+
+  @override
+  String get adminFilterAllCategories => 'All categories';
+
+  @override
+  String get adminFilterAllStatus => 'All';
+
+  @override
+  String get adminFilterDraft => 'Draft';
+
+  @override
+  String get adminFilterPublished => 'Published';
+
+  @override
+  String get adminForgotPassword => 'Forgot password?';
+
+  @override
+  String get adminGatewayTitle => 'Admin gateway';
+
+  @override
+  String get adminHide => 'Hide';
+
+  @override
+  String get adminInquiries => 'Inquiries';
+
+  @override
+  String get adminInquiriesWeek => 'Inquiries this week';
+
+  @override
+  String get adminInquiryDeleted => 'Inquiry cleared';
+
+  @override
+  String get adminJustNow => 'just now';
+
+  @override
+  String get adminKeepEditing => 'Keep editing';
+
+  @override
+  String get adminLivePreview => 'Customer preview';
+
+  @override
+  String get adminLoginSubtitle => 'This area is restricted to the shop owner.';
+
+  @override
+  String get adminLoginTitle => 'Owner sign in';
+
+  @override
+  String get adminLogoPreview => 'Logo preview';
+
+  @override
+  String get adminMarkPrimary => 'Primary link';
+
+  @override
+  String get adminMedia => 'Media';
+
+  @override
+  String get adminMostContacted => 'Most contacted';
+
+  @override
+  String get adminMoveProductsTo => 'Move products to';
+
+  @override
+  String get adminNewPassword => 'New password';
+
+  @override
+  String get adminNoCategories =>
+      'No categories yet. Create the first one to group your products.';
+
+  @override
+  String get adminNoContacts =>
+      'No contact links yet. Customers reach you through these.';
+
+  @override
+  String get adminNoInquiries =>
+      'No inquiries yet. Customer taps on a contact button will show up here.';
+
+  @override
+  String get adminNoInquiriesYet =>
+      'No customer taps recorded yet. They will appear here as soon as someone taps a contact button.';
+
+  @override
+  String get adminNoMedia => 'No images or videos yet.';
+
+  @override
+  String get adminNoProducts =>
+      'No products yet. Add your first piece to the catalogue.';
+
+  @override
+  String get adminNoProductsMatch => 'No products match your filters.';
+
+  @override
+  String get adminNotAuthorised => 'This account is not an administrator.';
+
+  @override
+  String get adminOtherSessionsSignedOut => 'Other sessions were signed out.';
+
+  @override
+  String get adminPasswordChanged => 'Your password has been updated.';
+
+  @override
+  String get adminPasswordLabel => 'Password';
+
+  @override
+  String get adminPreviewAsCustomer => 'Preview as customer';
+
+  @override
+  String get adminPreviewBadge => 'Previewing as customer';
+
+  @override
+  String get adminPrice => 'Price';
+
+  @override
+  String get adminPrimaryBadge => 'Primary';
+
+  @override
+  String get adminProductColumn => 'Product';
+
+  @override
+  String get adminProductDeleted => 'Product deleted';
+
+  @override
+  String get adminProductSaved => 'Product saved';
+
+  @override
+  String get adminProducts => 'Products';
+
+  @override
+  String get adminPublish => 'Publish';
+
+  @override
+  String get adminQuickActions => 'Quick actions';
+
+  @override
+  String get adminReauthPrompt =>
+      'Enter your current password to confirm this change.';
+
+  @override
+  String get adminRemoveMedia => 'Remove media';
+
+  @override
+  String get adminResetSent => 'Check your inbox for a reset link.';
+
+  @override
+  String get adminSaveAndPublish => 'Save and publish';
+
+  @override
+  String get adminSaveDraft => 'Save draft';
+
+  @override
+  String get adminSearchProducts => 'Search products';
+
+  @override
+  String get adminSectionSoon => 'Coming in the next screen';
+
+  @override
+  String get adminSetCover => 'Set as cover';
+
+  @override
+  String get adminShow => 'Show';
+
+  @override
+  String get adminSignIn => 'Sign in';
+
+  @override
+  String get adminSignOut => 'Sign out';
+
+  @override
+  String get adminSignOutOthers => 'Sign out other sessions';
+
+  @override
+  String get adminSiteSettings => 'Site settings';
+
+  @override
+  String get adminSiteSettingsSaved => 'Settings saved';
+
+  @override
+  String get adminSlug => 'URL slug';
+
+  @override
+  String get adminSlugAuto => 'Generated from the English name if left empty.';
+
+  @override
+  String get adminSortOrderHint => 'Shown in the order below.';
+
+  @override
+  String get adminStatsCategories => 'Categories';
+
+  @override
+  String get adminStatsProducts => 'Products';
+
+  @override
+  String get adminStoreName => 'Store name';
+
+  @override
+  String get adminStoreNameAm => 'Store name (Amharic)';
+
+  @override
+  String get adminStoreNameAr => 'Store name (Arabic)';
+
+  @override
+  String get adminStrength => 'Strength';
+
+  @override
+  String get adminStrengthFair => 'Fair';
+
+  @override
+  String get adminStrengthStrong => 'Strong';
+
+  @override
+  String get adminStrengthWeak => 'Weak';
+
+  @override
+  String get adminTagline => 'Tagline';
+
+  @override
+  String get adminUnpublish => 'Unpublish';
+
+  @override
+  String get adminUnpublished => 'Unpublished';
+
+  @override
+  String get adminUnsavedMessage =>
+      'You have unsaved changes. Leaving now will lose them.';
+
+  @override
+  String get adminUnsavedTitle => 'Discard changes?';
+
+  @override
+  String get adminUploadLogo => 'Upload logo';
+
+  @override
+  String get adminUploadQueue => 'Upload queue';
+
+  @override
+  String get adminUploadRetrying => 'Retrying…';
+
+  @override
+  String adminUploadingCount(int done, int total) {
+    return '$done of $total uploaded';
+  }
+
+  @override
+  String get adminViewAll => 'View all';
+
+  @override
+  String get adminViewStore => 'View store';
+
+  @override
+  String get adminVisibleInStore => 'Visible in store';
+
+  @override
+  String get adminWhen => 'When';
+
+  @override
   String get appTitle => 'Amu Sharif Arabiyan Majlis';
 
   @override
-  String get brandNameEn => 'Amu Sharif Arabiyan Majlis';
+  String get brandMonogram => 'ASM';
 
   @override
   String get brandNameAm => 'አሙ ሸሪፍ አረቢያን መጅሊስ';
@@ -22,78 +505,165 @@ class AppLocalizationsEn extends AppLocalizations {
   String get brandNameAr => 'المجلس العربي عمو شريف';
 
   @override
-  String get brandMonogram => 'ASM';
+  String get brandNameEn => 'Amu Sharif Arabiyan Majlis';
 
   @override
-  String get tagline =>
-      'Luxury Arabic majlis & sofas, handcrafted for your home';
+  String get contactEmail => 'Email';
 
   @override
-  String get aboutFallback =>
-      'Amu Sharif Arabiyan Majlis crafts premium majlis seating, floor cushions and furnishings in the Arabian tradition.';
+  String get contactFacebook => 'Facebook';
 
   @override
-  String get navHome => 'Home';
+  String get contactInstagram => 'Instagram';
 
   @override
-  String get navCategories => 'Categories';
+  String get contactLaunchFailed => 'Could not open that link on this device.';
+
+  @override
+  String get contactLocation => 'Location';
+
+  @override
+  String get contactOther => 'Other';
+
+  @override
+  String get contactPhone => 'Phone';
+
+  @override
+  String get contactTelegram => 'Telegram';
+
+  @override
+  String get contactTikTok => 'TikTok';
+
+  @override
+  String get contactWebsite => 'Website';
+
+  @override
+  String get contactWhatsApp => 'WhatsApp';
+
+  @override
+  String get contactYouTube => 'YouTube';
+
+  @override
+  String get errorAuth => 'We could not sign you in.';
+
+  @override
+  String get errorCheckViolation => 'A value is outside the allowed range.';
+
+  @override
+  String get errorConstraintViolation => 'Some values are not allowed.';
+
+  @override
+  String get errorDuplicate => 'That value is already in use.';
+
+  @override
+  String get errorEmailNotConfirmed =>
+      'Confirm your email address before signing in.';
+
+  @override
+  String get errorForeignKey => 'Related data is missing.';
+
+  @override
+  String get errorInvalidCredentials => 'Incorrect email or password.';
+
+  @override
+  String get errorInvalidFormat => 'That value is not in the expected format.';
+
+  @override
+  String get errorMedia => 'That file could not be processed.';
+
+  @override
+  String get errorMediaImageTooLarge =>
+      'Images must be 5 MB or smaller after compression.';
+
+  @override
+  String get errorMediaUnsupportedImage => 'Use a JPG, PNG or WebP image.';
+
+  @override
+  String get errorMediaUnsupportedVideo => 'Use an MP4 video.';
+
+  @override
+  String get errorMediaVideoTooLarge => 'Videos must be 40 MB or smaller.';
+
+  @override
+  String get errorNetwork =>
+      'We could not reach the store. Check your connection.';
+
+  @override
+  String get errorNotFound => 'We could not find what you were looking for.';
+
+  @override
+  String get errorPermission => 'You do not have permission to do that.';
+
+  @override
+  String get errorServer =>
+      'The service is temporarily unavailable. Please try again.';
+
+  @override
+  String get errorSessionExpired =>
+      'Your session expired. Please sign in again.';
+
+  @override
+  String get errorStorage => 'The file could not be uploaded.';
+
+  @override
+  String get errorTimeout => 'The request took too long. Please try again.';
+
+  @override
+  String get errorTooManyAttempts =>
+      'Too many attempts. Please wait a moment and try again.';
+
+  @override
+  String get errorUnknown => 'Something unexpected happened. Please try again.';
+
+  @override
+  String get errorValidation => 'Please correct the highlighted fields.';
+
+  @override
+  String inquiryMessageTemplate(String price, String product) {
+    return 'Hello! I am interested in “$product” ($price).';
+  }
+
+  @override
+  String get labelAvailable => 'Available';
+
+  @override
+  String labelDiscount(int percent) {
+    return 'Save $percent%';
+  }
+
+  @override
+  String labelDuration(int minutes, int seconds) {
+    return '${minutes}m ${seconds}s';
+  }
+
+  @override
+  String labelFrom(String price) {
+    return 'From $price';
+  }
+
+  @override
+  String get labelPrice => 'Price';
+
+  @override
+  String get labelUnavailable => 'Out of stock';
 
   @override
   String get navAbout => 'About';
 
   @override
-  String get navContact => 'Contact';
-
-  @override
   String get navAdmin => 'Admin';
 
   @override
+  String get navCategories => 'Categories';
+
+  @override
+  String get navContact => 'Contact';
+
+  @override
+  String get navHome => 'Home';
+
+  @override
   String get navSettings => 'Settings';
-
-  @override
-  String get actionRetry => 'Try again';
-
-  @override
-  String get actionCancel => 'Cancel';
-
-  @override
-  String get actionSave => 'Save';
-
-  @override
-  String get actionDelete => 'Delete';
-
-  @override
-  String get actionEdit => 'Edit';
-
-  @override
-  String get actionClose => 'Close';
-
-  @override
-  String get actionSearch => 'Search';
-
-  @override
-  String get actionShare => 'Share';
-
-  @override
-  String get actionContinue => 'Continue';
-
-  @override
-  String get actionViewDetails => 'View details';
-
-  @override
-  String get actionContactOwner => 'Contact the owner';
-
-  @override
-  String get actionOrderNow => 'Order now';
-
-  @override
-  String get actionCallNow => 'Call now';
-
-  @override
-  String get actionCopyLink => 'Copy link';
-
-  @override
-  String get actionCopySuccess => 'Link copied';
 
   @override
   String get searchHint => 'Search majlis, sofas, cushions…';
@@ -116,240 +686,19 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get sectionFeatured => 'Featured';
+  String get sectionAllProducts => 'All products';
 
   @override
   String get sectionBrowseCategories => 'Browse by category';
 
   @override
-  String get sectionAllProducts => 'All products';
+  String get sectionFeatured => 'Featured';
 
   @override
   String get sectionNewArrivals => 'New arrivals';
 
   @override
-  String get labelPrice => 'Price';
-
-  @override
-  String labelFrom(String price) {
-    return 'From $price';
-  }
-
-  @override
-  String get labelAvailable => 'Available';
-
-  @override
-  String get labelUnavailable => 'Out of stock';
-
-  @override
-  String labelDiscount(int percent) {
-    return 'Save $percent%';
-  }
-
-  @override
-  String labelDuration(int minutes, int seconds) {
-    return '${minutes}m ${seconds}s';
-  }
-
-  @override
-  String get contactWhatsApp => 'WhatsApp';
-
-  @override
-  String get contactTelegram => 'Telegram';
-
-  @override
-  String get contactPhone => 'Phone';
-
-  @override
-  String get contactEmail => 'Email';
-
-  @override
-  String get contactInstagram => 'Instagram';
-
-  @override
-  String get contactFacebook => 'Facebook';
-
-  @override
-  String get contactTikTok => 'TikTok';
-
-  @override
-  String get contactYouTube => 'YouTube';
-
-  @override
-  String get contactWebsite => 'Website';
-
-  @override
-  String get contactLocation => 'Location';
-
-  @override
-  String get contactOther => 'Other';
-
-  @override
-  String get contactLaunchFailed => 'Could not open that link on this device.';
-
-  @override
-  String inquiryMessageTemplate(String product, String price) {
-    return 'Hello! I am interested in “$product” ($price).';
-  }
-
-  @override
-  String get stateLoading => 'Loading…';
-
-  @override
-  String get stateEmptyTitle => 'Nothing here yet';
-
-  @override
-  String get stateEmptyMessage =>
-      'New pieces will appear here as soon as the owner publishes them.';
-
-  @override
-  String get stateErrorTitle => 'Something went wrong';
-
-  @override
-  String get stateOffline =>
-      'You are offline. Check your connection and try again.';
-
-  @override
-  String get stateNotFoundTitle => 'Page not found';
-
-  @override
-  String get stateNotFoundMessage => 'That link does not exist any more.';
-
-  @override
-  String get errorNetwork =>
-      'We could not reach the store. Check your connection.';
-
-  @override
-  String get errorTimeout => 'The request took too long. Please try again.';
-
-  @override
-  String get errorServer =>
-      'The service is temporarily unavailable. Please try again.';
-
-  @override
-  String get errorAuth => 'We could not sign you in.';
-
-  @override
-  String get errorInvalidCredentials => 'Incorrect email or password.';
-
-  @override
-  String get errorEmailNotConfirmed =>
-      'Confirm your email address before signing in.';
-
-  @override
-  String get errorTooManyAttempts =>
-      'Too many attempts. Please wait a moment and try again.';
-
-  @override
-  String get errorSessionExpired =>
-      'Your session expired. Please sign in again.';
-
-  @override
-  String get errorPermission => 'You do not have permission to do that.';
-
-  @override
-  String get errorNotFound => 'We could not find what you were looking for.';
-
-  @override
-  String get errorValidation => 'Please correct the highlighted fields.';
-
-  @override
-  String get errorMedia => 'That file could not be processed.';
-
-  @override
-  String get errorStorage => 'The file could not be uploaded.';
-
-  @override
-  String get errorUnknown => 'Something unexpected happened. Please try again.';
-
-  @override
-  String get errorDuplicate => 'That value is already in use.';
-
-  @override
-  String get errorCheckViolation => 'A value is outside the allowed range.';
-
-  @override
-  String get errorForeignKey => 'Related data is missing.';
-
-  @override
-  String get errorConstraintViolation => 'Some values are not allowed.';
-
-  @override
-  String get errorInvalidFormat => 'That value is not in the expected format.';
-
-  @override
-  String get validateRequired => 'This field is required';
-
-  @override
-  String get validateTooShort => 'This value is too short';
-
-  @override
-  String get validateTooLong => 'This value is too long';
-
-  @override
-  String get validateSlug => 'Use lowercase letters, numbers and hyphens only';
-
-  @override
-  String get validateEmail => 'Enter a valid email address';
-
-  @override
-  String get validatePhone => 'Enter a valid phone number';
-
-  @override
-  String get validateUrl => 'Enter a valid link starting with https://';
-
-  @override
-  String get validatePasswordLength => 'Use at least 10 characters';
-
-  @override
-  String get validatePasswordStrength =>
-      'Include an uppercase letter, a lowercase letter and a number';
-
-  @override
-  String get validatePasswordMismatch => 'Passwords do not match';
-
-  @override
-  String get validateNumber => 'Enter a valid number';
-
-  @override
-  String get validateNegative => 'Value cannot be negative';
-
-  @override
-  String get validatePositive => 'Value must be greater than zero';
-
-  @override
-  String get validateCompareAtPrice =>
-      'Original price must be at least the selling price';
-
-  @override
-  String get validateVideoTooLong => 'Videos must be 60 seconds or shorter';
-
-  @override
-  String get validateVideoUnreadable => 'That video could not be read';
-
-  @override
-  String get settingsTitle => 'Settings';
-
-  @override
-  String get settingsLanguage => 'Language';
-
-  @override
-  String get settingsTheme => 'Appearance';
-
-  @override
-  String get settingsThemeSystem => 'System';
-
-  @override
-  String get settingsThemeLight => 'Light';
-
-  @override
-  String get settingsThemeDark => 'Dark';
-
-  @override
   String get settingsAbout => 'About';
-
-  @override
-  String get settingsVersion => 'Version';
 
   @override
   String get settingsAdminEntry => 'Admin';
@@ -358,80 +707,113 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAdminHint => 'Owner sign in';
 
   @override
-  String get adminLoginTitle => 'Owner sign in';
+  String get settingsLanguage => 'Language';
 
   @override
-  String get adminLoginSubtitle => 'This area is restricted to the shop owner.';
+  String get settingsTheme => 'Appearance';
 
   @override
-  String get adminEmailLabel => 'Email';
+  String get settingsThemeDark => 'Dark';
 
   @override
-  String get adminPasswordLabel => 'Password';
+  String get settingsThemeLight => 'Light';
 
   @override
-  String get adminSignIn => 'Sign in';
+  String get settingsThemeSystem => 'System';
 
   @override
-  String get adminSignOut => 'Sign out';
+  String get settingsTitle => 'Settings';
 
   @override
-  String get adminForgotPassword => 'Forgot password?';
+  String get settingsVersion => 'Version';
 
   @override
-  String get adminChangePassword => 'Change password';
+  String get stateEmptyMessage =>
+      'New pieces will appear here as soon as the owner publishes them.';
 
   @override
-  String get adminDashboard => 'Dashboard';
+  String get stateEmptyTitle => 'Nothing here yet';
 
   @override
-  String get adminCategories => 'Categories';
+  String get stateErrorTitle => 'Something went wrong';
 
   @override
-  String get adminProducts => 'Products';
+  String get stateLoading => 'Loading…';
 
   @override
-  String get adminMedia => 'Media';
+  String get stateNoResults => 'No results';
 
   @override
-  String get adminContacts => 'Contact links';
+  String get stateNotFoundMessage => 'That link does not exist any more.';
 
   @override
-  String get adminSiteSettings => 'Site settings';
+  String get stateNotFoundTitle => 'Page not found';
 
   @override
-  String get adminInquiries => 'Inquiries';
+  String get stateOffline =>
+      'You are offline. Check your connection and try again.';
 
   @override
-  String get adminNotAuthorised => 'This account is not an administrator.';
+  String get stateSaved => 'Saved';
 
   @override
-  String get adminCurrentPassword => 'Current password';
+  String get stateSaving => 'Saving…';
 
   @override
-  String get adminNewPassword => 'New password';
+  String get tagline =>
+      'Luxury Arabic majlis & sofas, handcrafted for your home';
 
   @override
-  String get adminConfirmPassword => 'Confirm new password';
+  String get validateCompareAtPrice =>
+      'Original price must be at least the selling price';
 
   @override
-  String get adminPasswordChanged => 'Your password has been updated.';
+  String get validateEmail => 'Enter a valid email address';
 
   @override
-  String get adminResetSent => 'Check your inbox for a reset link.';
+  String get validateNegative => 'Value cannot be negative';
 
   @override
-  String a11yProductImage(String title) {
-    return 'Photo of $title';
-  }
+  String get validateNumber => 'Enter a valid number';
 
   @override
-  String a11yVideoThumbnail(String title) {
-    return 'Play the video for $title';
-  }
+  String get validatePasswordLength => 'Use at least 10 characters';
 
   @override
-  String a11yOpenCategory(String name) {
-    return 'Open the $name category';
-  }
+  String get validatePasswordMismatch => 'Passwords do not match';
+
+  @override
+  String get validatePasswordStrength =>
+      'Include an uppercase letter, a lowercase letter and a number';
+
+  @override
+  String get validatePhone => 'Enter a valid phone number';
+
+  @override
+  String get validatePositive => 'Value must be greater than zero';
+
+  @override
+  String get validateRequired => 'This field is required';
+
+  @override
+  String get validateSlug => 'Use lowercase letters, numbers and hyphens only';
+
+  @override
+  String get validateTelegramHandle =>
+      'Enter a Telegram handle like @username or a t.me link';
+
+  @override
+  String get validateTooLong => 'This value is too long';
+
+  @override
+  String get validateTooShort => 'This value is too short';
+
+  @override
+  String get validateUrl => 'Enter a valid link starting with https://';
+
+  @override
+  String get validateVideoTooLong => 'Videos must be 60 seconds or shorter';
+
+  @override
+  String get validateVideoUnreadable => 'That video could not be read';
 }

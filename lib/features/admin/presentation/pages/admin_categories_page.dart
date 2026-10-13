@@ -1,237 +1,298 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:reorderables/reorderables.dart';
 
-import '../../../../core/errors/error_mapper.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/router/routes.dart';
 import '../../../../core/theme/brand_colors.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
-import '../../../../core/widgets/gradient_button.dart';
-import '../../../catalog/domain/entities/category.dart';
-import '../../../catalog/presentation/providers/catalog_providers.dart';
+import '../controllers/admin_editors.dart';
 import '../widgets/admin_scaffold.dart';
-import 'admin_category_editor_sheet.dart';
 
-/// Category manager: reorder by drag, create, edit, hide and delete.
-///
-/// Deleting is blocked while the category still holds products — the dialog
-/// offers to move them instead, so a product can never be stranded.
-class AdminCategoriesPage extends ConsumerWidget {
+class AdminCategoriesPage extends ConsumerStatefulWidget {
   const AdminCategoriesPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final AppLocalizations l10n = AppLocalizations.of(context);
-    final AsyncValue<List<Category>> async = ref.watch(allCategoriesProvider);
-    final AsyncValue<Map<String, int>> counts =
-        ref.watch(categoryProductCountsProvider);
+  ConsumerState<AdminCategoriesPage> createState() =>
+      _AdminCategoriesPageState();
+}
 
-    late final Widget body;
-    body = async.when<Widget>(
-      loading: () => const _CategorySkeleton(),
-      error: (Object error, StackTrace __) => ErrorStateView(
-        failure: ErrorMapper.map(error),
-        onRetry: () => ref.invalidate(allCategoriesProvider),
-      ),
-      data: (List<Category> categories) {
-        if (categories.isEmpty) {
-          return EmptyState(
-            title: l10n.adminNoCategories,
-            message: l10n.adminCreateCategory,
-            icon: Icons.category_outlined,
-            action: GradientButton(
-              label: l10n.adminCreateCategory,
-              icon: Icons.add_rounded,
-              expand: false,
-              height: 48,
-              onPressed: () => showCategoryEditorSheet(context),
-            ),
-          );
-        }
-        return _ReorderableCategoryList(
-          categories: categories,
-          counts: counts.value ?? const <String, int>{},
-        );
-      },
-    );
+class _AdminCategoriesPageState extends ConsumerState<AdminCategoriesPage> {
+  final TextEditingController _name = TextEditingController();
+  final TextEditingController _slug = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    _name.dispose();
+    _slug.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final AsyncValue<List<Category>> async =
+        ref.watch(adminCategoriesProvider);
 
     return AdminScaffold(
       title: l10n.adminCategories,
       selectedRoute: Routes.adminCategories,
-      floatingActionButton: categoriesAreEmpty(async)
-          ? null
-          : FloatingActionButton.extended(
-              backgroundColor: BrandColors.royalViolet,
-              foregroundColor: BrandColors.ivory,
-              icon: const Icon(Icons.add_rounded),
-              label: Text(l10n.adminCreateCategory),
-              onPressed: () => showCategoryEditorSheet(context),
-            ),
-      child: body,
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: BrandColors.royalViolet,
+        foregroundColor: BrandColors.ivory,
+        child: const Icon(Icons.add, size: 28),
+        onPressed: () => _showCreateSheet(context),
+      ),
+      child: async.when(
+        loading: () => const _LoadingIndicator(),
+        error: (Object error, _) => ErrorStateView(
+          failure: error is AppFailure ? error : UnknownFailure(cause: error),
+          onRetry: () => ref.invalidate(adminCategoriesProvider),
+        ),
+        data: (List<Category> cats) {
+          if (cats.isEmpty) {
+            return EmptyState(
+              title: l10n.adminNoCategories,
+              message: l10n.adminNoCategoriesPlaceholder,
+              icon: Icons.category_outlined,
+            );
+          }
+          return _CategoryGrid(categories: cats);
+        },
+      ),
     );
   }
 
-  bool categoriesAreEmpty(AsyncValue<List<Category>> value) =>
-      value.value?.isEmpty ?? false;
+  void _showCreateSheet(BuildContext context) {
+    _name.clear();
+    _slug.clear();
+    _formKey.currentState?.reset();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => _CategoryEditorSheet(
+        existing: null,
+        nameController: _name,
+        slugController: _slug,
+        formKey: _formKey,
+      ),
+    );
+  }
 }
 
-class _ReorderableCategoryList extends ConsumerWidget {
-  const _ReorderableCategoryList({
-    required this.categories,
-    required this.counts,
-  });
+class _CategoryGrid extends StatelessWidget {
+  const _CategoryGrid({required this.categories});
 
   final List<Category> categories;
-  final Map<String, int> counts;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final AppLocalizations l10n = AppLocalizations.of(context);
-    return ReorderableListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
-      buildDefaultDragHandles: true,
-      itemCount: categories.length,
-      onReorderItem: (int oldIndex, int newIndex) async {
-        // `onReorderItem` has already adjusted for the removal.
-        final List<Category> moved = List<Category>.from(categories);
-        final Category item = moved.removeAt(oldIndex);
-        moved.insert(newIndex, item);
-        await ref
-            .read(categoryRepositoryProvider)
-            .reorder(moved.map((Category c) => c.id).toList(growable: false));
-      },
-      itemBuilder: (BuildContext context, int index) {
-        final Category category = categories[index];
-        return _CategoryTile(
-          key: ValueKey<String>(category.id),
-          index: index,
-          category: category,
-          productCount: counts[category.id] ?? 0,
-          dragLabel: l10n.adminDragToReorder,
-        );
-      },
+  Widget build(BuildContext context) {
+    final bool dark = Theme.of(context).brightness == Brightness.dark;
+    return ReorderableListView(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
+      buildDefaultDragHandles: false,
+      children: [
+        for (final Category c in categories)
+          _CategoryTile(category: c, onEdit: () => _showEditSheet(context, c)),
+        _BuildPermissionButton(),
+      ],
     );
   }
 }
 
-class _CategoryTile extends ConsumerWidget {
-  const _CategoryTile({
-    super.key,
-    required this.index,
-    required this.category,
-    required this.productCount,
-    required this.dragLabel,
-  });
+class _CategoryTile extends StatelessWidget {
+  const _CategoryTile({required this.category, required this.onEdit});
 
-  final int index;
   final Category category;
-  final int productCount;
-  final String dragLabel;
+  final VoidCallback onEdit;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final AppLocalizations l10n = AppLocalizations.of(context);
+  Widget build(BuildContext context) {
     final bool dark = Theme.of(context).brightness == Brightness.dark;
-
-    return Container(
+    return Card(
       margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
-        color: dark ? BrandColors.plumSurface : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: BrandColors.goldHairline),
+      child: ListTile(
+        leading: category.hasCover
+            ? Image.asset(
+                category.coverPath!,
+                width: 40,
+                height: 40,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) =>
+                    const CircleAvatar(child: Icon(Icons.category_outlined)),
+              )
+            : CircleAvatar(
+                backgroundColor: BrandColors.royalViolet,
+                child: const Icon(Icons.category_outlined, color: BrandColors.ivory),
+              ),
+        title: Text(category.nameFor(Localizations.localeOf(context).languageCode),
+            style: BrandTypography.titleMedium),
+        subtitle: Text(
+          'slug: ${category.slug} · ${category.productCount} products',
+          style: BrandTypography.bodySmall,
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.edit_outlined),
+              onPressed: onEdit,
+            ),
+            IconButton(
+              icon: const Icon(Icons.visibility_outlined),
+              onPressed: () => _toggleVisibility(context, category),
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete_outlined),
+              onPressed: () => _deleteCategory(context, category),
+            ),
+          ],
+        ),
       ),
-      child: Row(
-        children: <Widget>[
-          ReorderableDragStartListener(
-            index: index,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
-              child: Icon(
-                Icons.drag_indicator_rounded,
-                color: BrandTypography.mutedOn(Theme.of(context).brightness),
-                semanticLabel: dragLabel,
-              ),
-            ),
-          ),
-          Expanded(
-            child: ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(category.name, style: BrandTypography.titleMedium),
-              subtitle: Text(
-                '${category.slug} · $productCount',
-                style: BrandTypography.bodySmall.copyWith(
-                  color: BrandTypography.mutedOn(
-                    Theme.of(context).brightness,
-                  ),
-                ),
-              ),
-              onTap: () => showCategoryEditorSheet(context, category: category),
-            ),
-          ),
-          IconButton(
-            tooltip: category.isVisible ? l10n.adminHide : l10n.adminShow,
-            icon: Icon(
-              category.isVisible
-                  ? Icons.visibility_outlined
-                  : Icons.visibility_off_outlined,
-              color: category.isVisible ? BrandColors.gold : BrandColors.danger,
-            ),
-            onPressed: () async {
-              await ref.read(categoryRepositoryProvider).setVisibility(
-                    category.id,
-                    isVisible: !category.isVisible,
-                  );
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(l10n.adminCategoryHidden)),
-                );
-              }
-            },
-          ),
-          IconButton(
-            tooltip: l10n.actionEdit,
-            icon: const Icon(Icons.edit_outlined, color: BrandColors.gold),
-            onPressed: () => showCategoryEditorSheet(context, category: category),
-          ),
-          IconButton(
-            tooltip: l10n.actionDelete,
-            icon: const Icon(Icons.delete_outline_rounded,
-                color: BrandColors.danger),
-            onPressed: () => confirmCategoryDeletion(
-              context,
-              ref,
-              category: category,
-              productCount: productCount,
-            ),
+    );
+  }
+
+  void _toggleVisibility(BuildContext context, Category c) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(l10n.adminCategoryHidden),
+        actions: [
+          TextButton(
+            onPressed: () =>
+                Navigator.of(context).pop(ref.read(categoryRepositoryProvider).watchAll()),
+            child: Text(l10n.actionCancel),
           ),
         ],
       ),
     );
   }
 
-
-}
-
-class _CategorySkeleton extends StatelessWidget {
-  const _CategorySkeleton();
-
-  @override
-  Widget build(BuildContext context) {
-    final bool dark = Theme.of(context).brightness == Brightness.dark;
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
-      itemCount: 6,
-      itemBuilder: (BuildContext context, int index) => Container(
-        height: 72,
-        margin: const EdgeInsets.only(bottom: 10),
-        decoration: BoxDecoration(
-          color: (dark ? BrandColors.plumSurface : Colors.grey.shade200)
-              .withValues(alpha: 0.6),
-          borderRadius: BorderRadius.circular(16),
-        ),
+  void _deleteCategory(BuildContext context, Category c) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(l10n.adminConfirmDeleteCategory),
+        content: Text(l10n.adminConfirmDeleteMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.actionCancel),
+          ),
+          FilledButton(
+            onPressed: () async {
+              await ref.read(categoryRepositoryProvider).delete(c.id);
+              if (mounted) Navigator.of(context).pop();
+            },
+            style: FilledButton.secondary,
+            child: Text(l10n.actionDelete),
+          ),
+        ],
       ),
     );
+  }
+}
+
+class _BuildPermissionButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Text(
+        'Build permission check — no external build step is configured.',
+        style: BrandTypography.bodySmall.copyWith(color: Colors.grey),
+      ),
+    );
+  }
+}
+
+class _CategoryEditorSheet extends ConsumerWidget {
+  const _CategoryEditorSheet({
+    required this.existing,
+    required this.nameController,
+    required this.slugController,
+    required this.formKey,
+  });
+
+  final Category? existing;
+  final TextEditingController nameController;
+  final TextEditingController slugController;
+  final GlobalKey<FormState> formKey;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final CategoryEditorController controller =
+        ref.watch(categoryEditorControllerProvider);
+
+    return ConsumerBuilder(
+      builder: (context, ref, child) {
+        return Form(
+          key: formKey,
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+              left: 20,
+              right: 20,
+              top: 20,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    existing == null ? l10n.adminCreateCategory : l10n.adminEditCategory,
+                    style: BrandTypography.titleMedium,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: nameController,
+                    decoration: InputDecoration(labelText: l10n.adminCategoryName),
+                    validator: (v) => Validators.categoryName(v).toString(),
+                  ),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: slugController,
+                    decoration: InputDecoration(
+                      labelText: l10n.adminCategoryName,
+                      helperText: l10n.adminSlugAuto,
+                    ),
+                    validator: (v) => Validators.slug(v).toString(),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.adminSlugAuto,
+                    style: BrandTypography.bodySmall,
+                  ),
+                  const SizedBox(height: 24),
+                  FilledButton.icon(
+                    onPressed: () => _save(context, ref, controller, nameController, slugController),
+                    icon: const Icon(Icons.save_outlined),
+                    label: Text(l10n.actionSave),
+                  ),
+                  const SizedBox(height: 12),
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text(l10n.actionCancel),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _save(BuildContext context, WidgetRef ref, CategoryEditorController controller, TextEditingController name, TextEditingController slug) async {
+    if (!formKey.currentState!.validate()) return;
+    final bool ok = await controller.save();
+    if (ok && mounted) Navigator.of(context).pop();
   }
 }

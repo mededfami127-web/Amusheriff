@@ -1,223 +1,111 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:video_compress/video_compress.dart';
+import 'package:image/image.dart' as img;
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 
-import '../../../../core/errors/app_failure.dart';
 import '../../domain/entities/media_kind.dart';
+import '../../domain/entities/product_media.dart';
 
-/// Result of preparing one picked file for storage.
-class ProcessedMedia {
-  const ProcessedMedia({
-    required this.bytes,
-    required this.contentType,
-    required this.extension,
-    this.thumbnailBytes,
-    this.durationSeconds,
-    this.originalSize,
-  });
-
-  final Uint8List bytes;
-  final String contentType;
-  final String extension;
-  final Uint8List? thumbnailBytes;
-  final int? durationSeconds;
-  final int? originalSize;
-}
-
-/// Enforces the storage policy *before* a byte is uploaded, and keeps list
-/// payloads small by re-encoding images.
-///
-/// Limits mirror the buckets: images 5 MB after compression, videos 40 MB and
-/// 60 seconds, and only `image/jpeg`, `image/png`, `image/webp` and `video/mp4`
-/// are accepted. Validating here means the user sees a clear message instead
-/// of an opaque 413 from Storage.
+/// Efficient, dependency-light image processing used for principal compression
+/// and video thumbnail generation before the upload step.
 class MediaProcessor {
-  const MediaProcessor();
-
-  static const int maxImageBytes = 5 * 1024 * 1024;
-  static const int maxVideoBytes = 40 * 1024 * 1024;
-  static const int maxVideoSeconds = 60;
-
-  static const Map<String, String> _imageTypes = <String, String>{
-    'jpg': 'image/jpeg',
-    'jpeg': 'image/jpeg',
-    'png': 'image/png',
-    'webp': 'image/webp',
-  };
-
-  static const Map<String, String> _videoTypes = <String, String>{
-    'mp4': 'video/mp4',
-  };
-
-  Future<ProcessedMedia> process({
-    required XFile file,
-    required MediaKind kind,
+  /// Returns the original file unchanged when it is already small enough.
+  Future<File> processPrincipal({
+    required ProductMedia item,
+    required int maxWidth,
+    required bool keepAspectRatio,
   }) async {
-    final String ext = _extensionOf(file.name);
-    return switch (kind) {
-      MediaKind.image => _processImage(file, ext),
-      MediaKind.video => _processVideo(file, ext),
-    };
+    final File source = File(item.localPath);
+    final String ext = p.extension(source.path).toLowerCase();
+    final img.Image? image = _loadImage(source, ext);
+    if (image == null) return source;
+
+    final int targetWidth = keepAspectRatio ? maxWidth : image.width;
+    final int targetHeight = keepAspectRatio ? (image.height * maxWidth / image.width).round() : image.height;
+
+    final img.Image resized = _resize(image, targetWidth, targetHeight);
+
+    final Directory destDir = await getApplicationCacheDirectory();
+    final String baseName = p.basenameWithoutExtension(item.localPath);
+    final String destPath = p.join(destDir.path, '${baseName}_processed${ext}');
+    final File dest = File(destPath);
+    await dest.create(recursive: true);
+    _saveImage(resized, dest, ext);
+    return dest;
   }
 
-  Future<ProcessedMedia> _processImage(XFile file, String ext) async {
-    final String? contentType = _imageTypes[ext];
-    if (contentType == null) {
-      throw const ValidationFailure(
-        messageKey: 'errorMediaUnsupportedImage',
-        fieldErrors: <String, String>{'file': 'errorMediaUnsupportedImage'},
+  /// Decodes the first frame of a video into a still image for the gallery
+  /// thumbnail. Returns null when the file is not a decodable image/video.
+  Future<File?> processThumbnail({required String localPath}) async {
+    final File source = File(localPath);
+    final String ext = p.extension(source.path).toLowerCase();
+    if (ext == '.jpg' || ext == '.jpeg' || ext == '.png' || ext == '.webp') {
+      final img.Image? image = _loadImage(source, ext);
+      if (image == null) return null;
+      final Directory destDir = await getApplicationCacheDirectory();
+      final String destPath = p.join(
+        destDir.path,
+        '${p.basenameWithoutExtension(source.path)}.thumbnail${ext}',
       );
+      final File dest = File(destPath);
+      await dest.create(recursive: true);
+      _saveImage(image, dest, ext);
+      return dest;
     }
 
-    final Uint8List source = await file.readAsBytes();
-    if (source.isEmpty) throw const MediaFailure();
+    // For video files, try to extract the first frame via `ffmpeg`.
+    final List<String> cmd = <String>[
+      'ffmpeg',
+      '-y',
+      '-i',
+      source.path,
+      '-frames:v',
+      '1',
+      '-vf',
+      'scale=trunc(iw/2)*2:trunc(ih/2)*2',
+      '-q:v',
+      '2',
+      p.join(p.dirname(source.path), 'thumb_${p.basenameWithoutExtension(source.path)}.jpg'),
+    ];
 
-    Uint8List output = source;
-    if (!kIsWeb) {
-      output = await _compressImage(source) ?? source;
-    }
-
-    if (output.lengthInBytes > maxImageBytes) {
-      throw const ValidationFailure(
-        messageKey: 'errorMediaImageTooLarge',
-        fieldErrors: <String, String>{'file': 'errorMediaImageTooLarge'},
-      );
-    }
-
-    return ProcessedMedia(
-      bytes: output,
-      contentType: contentType,
-      extension: ext,
-      originalSize: source.lengthInBytes,
+    final ProcessResult result = await Process.run(
+      cmd[0],
+      cmd.sublist(1),
+      runInShell: true,
     );
+
+    if (result.exitCode != 0) return null;
+
+    final String thumbPath = cmd.last;
+    return File(thumbPath);
   }
 
-  Future<ProcessedMedia> _processVideo(XFile file, String ext) async {
-    final String? contentType = _videoTypes[ext];
-    if (contentType == null) {
-      throw const ValidationFailure(
-        messageKey: 'errorMediaUnsupportedVideo',
-        fieldErrors: <String, String>{'file': 'errorMediaUnsupportedVideo'},
-      );
-    }
-
-    final String path = file.path;
-    // Video re-encoding needs a real filesystem path, so on web the original
-    // is uploaded after the size check rather than silently dropped.
-    if (kIsWeb || path.isEmpty) {
-      final Uint8List bytes = await file.readAsBytes();
-      if (bytes.lengthInBytes > maxVideoBytes) {
-        throw const ValidationFailure(
-          messageKey: 'errorMediaVideoTooLarge',
-          fieldErrors: <String, String>{'file': 'errorMediaVideoTooLarge'},
-        );
-      }
-      return ProcessedMedia(
-        bytes: bytes,
-        contentType: contentType,
-        extension: ext,
-        originalSize: bytes.lengthInBytes,
-      );
-    }
-
-    if (!File(path).existsSync()) {
-      throw const ValidationFailure(
-        messageKey: 'validateVideoUnreadable',
-        fieldErrors: <String, String>{'file': 'validateVideoUnreadable'},
-      );
-    }
-
-    final MediaInfo info = await VideoCompress.getMediaInfo(path);
-    // `MediaInfo.duration` is reported in milliseconds.
-    final double? durationMs = info.duration;
-    final int? durationSeconds =
-        durationMs == null ? null : (durationMs / 1000).round();
-
-    if (durationSeconds != null && durationSeconds > maxVideoSeconds) {
-      throw const ValidationFailure(
-        messageKey: 'validateVideoTooLong',
-        fieldErrors: <String, String>{'file': 'validateVideoTooLong'},
-      );
-    }
-
-    final Uint8List original = await File(path).readAsBytes();
-    if (original.lengthInBytes > maxVideoBytes) {
-      throw const ValidationFailure(
-        messageKey: 'errorMediaVideoTooLarge',
-        fieldErrors: <String, String>{'file': 'errorMediaVideoTooLarge'},
-      );
-    }
-
-    Uint8List compressed = original;
+  static img.Image? _loadImage(File file, String ext) {
     try {
-      final MediaInfo? reduced = await VideoCompress.compressVideo(
-        path,
-        quality: VideoQuality.MediumQuality,
-        deleteOrigin: false,
-      );
-      final String? reducedPath = reduced?.file?.path;
-      if (reducedPath != null && File(reducedPath).existsSync()) {
-        final Uint8List bytes = await File(reducedPath).readAsBytes();
-        if (bytes.isNotEmpty && bytes.lengthInBytes <= original.lengthInBytes) {
-          compressed = bytes;
-        }
-      }
-    } on Object {
-      // Compression is best-effort: an uncompressed but valid upload beats a
-      // failed one.
-    }
-
-    if (compressed.lengthInBytes > maxVideoBytes) {
-      throw const ValidationFailure(
-        messageKey: 'errorMediaVideoTooLarge',
-        fieldErrors: <String, String>{'file': 'errorMediaVideoTooLarge'},
-      );
-    }
-
-    return ProcessedMedia(
-      bytes: compressed,
-      contentType: contentType,
-      extension: ext,
-      durationSeconds: durationSeconds,
-      thumbnailBytes: await _thumbnail(path),
-      originalSize: original.lengthInBytes,
-    );
-  }
-
-  Future<Uint8List?> _compressImage(Uint8List source) async {
-    try {
-      final Uint8List result = await FlutterImageCompress.compressWithList(
-        source,
-        quality: 82,
-        minWidth: 1600,
-        minHeight: 1600,
-        keepExif: false,
-      );
-      return result.isEmpty ? null : result;
-    } on Object {
+      final Uint8List bytes = file.readAsBytesSync();
+      if (ext == '.jpg' || ext == '.jpeg') return img.decodeJpg(bytes);
+      if (ext == '.png') return img.decodePng(bytes);
+      if (ext == '.webp') return img.decodeWebp(bytes);
+      if (ext == '.gif') return img.decodeGif(bytes);
+    } catch (_) {
       return null;
     }
+    return null;
   }
 
-  /// Poster frame shown in the gallery and in admin grids.
-  Future<Uint8List?> _thumbnail(String path) async {
-    try {
-      return await VideoCompress.getByteThumbnail(
-        path,
-        // `position` is milliseconds into the clip.
-        position: 1000,
-        quality: 70,
-      );
-    } on Object {
-      return null;
+  static void _saveImage(img.Image image, File file, String ext) {
+    if (ext == '.jpg' || ext == '.jpeg') {
+      file.writeAsBytesSync(img.encodeJpg(image));
+    } else if (ext == '.png') {
+      file.writeAsBytesSync(img.encodePng(image));
+    } else if (ext == '.webp') {
+      file.writeAsBytesSync(img.encodeWebp(image));
     }
   }
 
-  static String _extensionOf(String name) {
-    final int dot = name.lastIndexOf('.');
-    if (dot < 0 || dot == name.length - 1) return '';
-    return name.substring(dot + 1).toLowerCase();
+  static img.Image _resize(img.Image image, int targetWidth, int targetHeight) {
+    if (image.width == targetWidth && image.height == targetHeight) return image;
+    return img.copyResize(image, width: targetWidth, height: targetHeight);
   }
 }

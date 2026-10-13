@@ -5,6 +5,8 @@ import '../../../../core/errors/error_mapper.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../catalog/domain/drafts/catalog_drafts.dart';
 import '../../../catalog/domain/entities/category.dart';
+import '../../../catalog/domain/entities/product.dart';
+import '../../../catalog/domain/entities/product_media.dart';
 import '../../../catalog/domain/repositories/catalog_repositories.dart';
 import '../../../catalog/presentation/providers/catalog_providers.dart';
 import '../../../contacts/domain/drafts/contact_link_draft.dart';
@@ -15,6 +17,7 @@ import '../../../contacts/presentation/providers/contact_providers.dart';
 import '../../../settings/domain/drafts/site_settings_draft.dart';
 import '../../../settings/domain/entities/site_settings.dart';
 import '../../../settings/presentation/providers/site_settings_providers.dart';
+import '../providers/admin_ui_providers.dart';
 
 part 'admin_editors.g.dart';
 
@@ -24,7 +27,7 @@ typedef FieldErrors = Map<String, String>;
 
 /// Shared shape of every editor form: save-in-flight, a typed failure, and
 /// per-field messages. Widgets read [saving] for spinners and [failure] for an
-/// inline banner — no raw exception ever reaches the screen.
+/// inline banner.
 class AdminFormStatus {
   const AdminFormStatus({
     this.saving = false,
@@ -52,15 +55,11 @@ class AdminFormStatus {
 }
 
 /// Create / edit a category.
-///
-/// Validation mirrors the database CHECK constraints, so a message appears
-/// before the round trip and the policy still has the final say.
 @riverpod
 class CategoryEditorController extends _$CategoryEditorController {
   @override
   CategoryEditorState build() => const CategoryEditorState();
 
-  /// Seeds the form from an existing row, or resets it for a new one.
   void load(Category? existing) {
     if (existing == null) {
       state = const CategoryEditorState();
@@ -79,44 +78,26 @@ class CategoryEditorController extends _$CategoryEditorController {
     );
   }
 
-  /// Sets the name and keeps the slug in step until the owner edits it.
-  void setName(String v) {
-    state = state.copyWith(name: v);
-    if (!state.slugTouched) {
-      state = state.copyWith(slug: Validators.slugify(v));
-    }
-  }
-
+  void setName(String v) => state = state.copyWith(name: v);
   void setNameAm(String v) => state = state.copyWith(nameAm: v);
   void setNameAr(String v) => state = state.copyWith(nameAr: v);
-
-  /// Edits the slug explicitly; leaves it alone once the owner has typed one.
   void setSlug(String v) => state = state.copyWith(slug: v);
-
-  /// Fills the slug from the English name while it is still untouched.
-  void autoSlugFromName() {
-    if (state.slugTouched) return;
-    state = state.copyWith(slug: Validators.slugify(state.name));
-  }
-
-  void toggleSlugTouched() => state = state.copyWith(slugTouched: true);
-  void setVisible(bool v) => state = state.copyWith(isVisible: v);
   void setCoverPath(String? v) => state = state.copyWith(coverPath: v);
+  void setVisible(bool v) => state = state.copyWith(isVisible: v);
+  void setSortOrder(int v) => state = state.copyWith(sortOrder: v);
+  void toggleSlugTouched() =>
+      state = state.copyWith(slugTouched: true);
 
-  /// Returns the field errors, empty when the form is valid.
   FieldErrors validate() {
     final FieldErrors errors = <String, String>{};
     final String? nameKey = Validators.categoryName(state.name);
     if (nameKey != null) errors['name'] = nameKey;
-
     final String? slugKey = Validators.slug(state.slug);
     if (slugKey != null) errors['slug'] = slugKey;
-
     state = state.copyWith(fieldErrors: errors);
     return errors;
   }
 
-  /// Persists the form. Returns `true` on success so the caller can pop.
   Future<bool> save() async {
     final FieldErrors errors = validate();
     if (errors.isNotEmpty) return false;
@@ -154,82 +135,10 @@ class CategoryEditorController extends _$CategoryEditorController {
     }
   }
 
-  /// Clears the success/failure banner without touching the fields.
   void acknowledge() => state = state.copyWith(status: const AdminFormStatus());
 }
 
-/// Form model for [CategoryEditorController].
-class CategoryEditorState {
-  const CategoryEditorState({
-    this.id,
-    this.name = '',
-    this.nameAm = '',
-    this.nameAr = '',
-    this.slug = '',
-    this.coverPath,
-    this.isVisible = true,
-    this.sortOrder = 0,
-    this.isNew = true,
-    this.slugTouched = false,
-    this.fieldErrors = const <String, String>{},
-    this.status = const AdminFormStatus(),
-  });
-
-  final String? id;
-  final String name;
-  final String nameAm;
-  final String nameAr;
-  final String slug;
-  final String? coverPath;
-  final bool isVisible;
-  final int sortOrder;
-  final bool isNew;
-  final bool slugTouched;
-  final FieldErrors fieldErrors;
-  final AdminFormStatus status;
-
-  bool get canSave => status.saving == false;
-
-  CategoryEditorState copyWith({
-    String? id,
-    String? name,
-    String? nameAm,
-    String? nameAr,
-    String? slug,
-    String? coverPath,
-    bool? isVisible,
-    int? sortOrder,
-    bool? isNew,
-    bool? slugTouched,
-    FieldErrors? fieldErrors,
-    AdminFormStatus? status,
-    bool clearStatusFailure = false,
-  }) =>
-      CategoryEditorState(
-        id: id ?? this.id,
-        name: name ?? this.name,
-        nameAm: nameAm ?? this.nameAm,
-        nameAr: nameAr ?? this.nameAr,
-        slug: slug ?? this.slug,
-        coverPath: coverPath ?? this.coverPath,
-        isVisible: isVisible ?? this.isVisible,
-        sortOrder: sortOrder ?? this.sortOrder,
-        isNew: isNew ?? this.isNew,
-        slugTouched: slugTouched ?? this.slugTouched,
-        fieldErrors: fieldErrors ?? this.fieldErrors,
-        status: clearStatusFailure
-            ? const AdminFormStatus()
-            : status ?? this.status,
-      );
-}
-
-// ── Contact links ───────────────────────────────────────────────────────────
-
-/// Validates a link value for its channel type.
-///
-/// Mirrors what the launcher actually needs: a reachable `wa.me` / `t.me`
-/// handle, an E.164-ish number, or a real URL. Rejecting junk here means the
-/// storefront never renders a button that cannot open.
+/// Validates a link value for its channel.
 String? validateContactValue(ContactKind kind, String raw) {
   final String value = raw.trim();
   if (value.isEmpty) return 'validateRequired';
@@ -248,7 +157,6 @@ String? validateContactValue(ContactKind kind, String raw) {
   };
 }
 
-/// Accepts `@handle`, `handle`, or a `https://t.me/handle` URL.
 String? _validateTelegram(String value) {
   final String v = value.trim();
   if (v.startsWith('https://t.me/') || v.startsWith('http://t.me/')) {
@@ -269,9 +177,7 @@ class ContactsEditorController extends _$ContactsEditorController {
   @override
   ContactDraftState build() => const ContactDraftState();
 
-  void startNew() {
-    state = const ContactDraftState();
-  }
+  void startNew() => state = const ContactDraftState();
 
   void startEdit(ContactLink existing) {
     state = ContactDraftState(
@@ -286,7 +192,6 @@ class ContactsEditorController extends _$ContactsEditorController {
   }
 
   void setKind(ContactKind kind) {
-    // Labels are pre-filled from the channel so the owner can just save.
     state = state.copyWith(kind: kind, labelTouched: state.labelTouched);
     if (!state.labelTouched) {
       state = state.copyWith(label: '');
@@ -302,10 +207,8 @@ class ContactsEditorController extends _$ContactsEditorController {
     final FieldErrors errors = <String, String>{};
     final String? labelKey = Validators.required(state.label, max: 80);
     if (labelKey != null) errors['label'] = labelKey;
-
     final String? valueKey = validateContactValue(state.kind, state.value);
     if (valueKey != null) errors['value'] = valueKey;
-
     state = state.copyWith(fieldErrors: errors);
     return errors;
   }
@@ -347,72 +250,12 @@ class ContactsEditorController extends _$ContactsEditorController {
   void acknowledge() => state = state.copyWith(status: const AdminFormStatus());
 }
 
-/// Form model for [ContactsEditorController].
-class ContactDraftState {
-  const ContactDraftState({
-    this.id,
-    this.kind = ContactKind.whatsapp,
-    this.label = '',
-    this.value = '',
-    this.isPrimary = false,
-    this.isVisible = true,
-    this.sortOrder = 0,
-    this.isNew = true,
-    this.labelTouched = false,
-    this.fieldErrors = const <String, String>{},
-    this.status = const AdminFormStatus(),
-  });
-
-  final String? id;
-  final ContactKind kind;
-  final String label;
-  final String value;
-  final bool isPrimary;
-  final bool isVisible;
-  final int sortOrder;
-  final bool isNew;
-  final bool labelTouched;
-  final FieldErrors fieldErrors;
-  final AdminFormStatus status;
-
-  ContactDraftState copyWith({
-    String? id,
-    ContactKind? kind,
-    String? label,
-    String? value,
-    bool? isPrimary,
-    bool? isVisible,
-    int? sortOrder,
-    bool? isNew,
-    bool? labelTouched,
-    FieldErrors? fieldErrors,
-    AdminFormStatus? status,
-  }) =>
-      ContactDraftState(
-        id: id ?? this.id,
-        kind: kind ?? this.kind,
-        label: label ?? this.label,
-        value: value ?? this.value,
-        isPrimary: isPrimary ?? this.isPrimary,
-        isVisible: isVisible ?? this.isVisible,
-        sortOrder: sortOrder ?? this.sortOrder,
-        isNew: isNew ?? this.isNew,
-        labelTouched: labelTouched ?? this.labelTouched,
-        fieldErrors: fieldErrors ?? this.fieldErrors,
-        status: status ?? this.status,
-      );
-}
-
-// ── Site settings ───────────────────────────────────────────────────────────
-
-/// Edits the singleton `site_settings` row: store name, tagline, about,
-/// logo, currency and default language.
+/// Edits the singleton `site_settings` row.
 @riverpod
 class SiteSettingsEditorController extends _$SiteSettingsEditorController {
   @override
   SiteSettingsEditorState build() => const SiteSettingsEditorState();
 
-  /// Seeds the form from the live row.
   void load(SiteSettings settings) {
     state = SiteSettingsEditorState(
       storeNameEn: settings.storeNameEn,
@@ -460,7 +303,6 @@ class SiteSettingsEditorController extends _$SiteSettingsEditorController {
               defaultLanguage: state.defaultLanguage,
             ),
           );
-      // The storefront reads the same row live, so it updates everywhere.
       ref.invalidate(siteSettingsValueProvider);
       state = state.copyWith(status: const AdminFormStatus(saved: true));
       return true;
@@ -478,54 +320,58 @@ class SiteSettingsEditorController extends _$SiteSettingsEditorController {
   void acknowledge() => state = state.copyWith(status: const AdminFormStatus());
 }
 
-/// Form model for [SiteSettingsEditorController].
-class SiteSettingsEditorState {
-  const SiteSettingsEditorState({
-    this.storeNameEn = '',
-    this.storeNameAm = '',
-    this.storeNameAr = '',
-    this.tagline = '',
-    this.about = '',
-    this.logoPath,
-    this.currencyCode = 'ETB',
-    this.defaultLanguage = 'en',
-    this.fieldErrors = const <String, String>{},
-    this.status = const AdminFormStatus(),
-  });
+@riverpod
+class ProductEditorController extends _$ProductEditorController {
+  @override
+  ProductEditorState build() => const ProductEditorState();
 
-  final String storeNameEn;
-  final String storeNameAm;
-  final String storeNameAr;
-  final String tagline;
-  final String about;
-  final String? logoPath;
-  final String currencyCode;
-  final String defaultLanguage;
-  final FieldErrors fieldErrors;
-  final AdminFormStatus status;
+  void load(Product? existing) {
+    if (existing == null) {
+      state = const ProductEditorState();
+      return;
+    }
+    state = ProductEditorState(
+      id: existing.id,
+      categoryId: existing.categoryId,
+      title: existing.title,
+      titleAm: existing.titleAm ?? '',
+      titleAr: existing.titleAr ?? '',
+      description: existing.description ?? '',
+      descriptionAm: existing.descriptionAm ?? '',
+      descriptionAr: existing.descriptionAr ?? '',
+      price: existing.price,
+      compareAtPrice: existing.compareAtPrice ?? 0,
+      currencyCode: existing.currencyCode,
+      isAvailable: existing.isAvailable,
+      isFeatured: existing.isFeatured,
+      isPublished: existing.isPublished,
+      sortOrder: existing.sortOrder,
+      isNew: false,
+    );
+  }
 
-  SiteSettingsEditorState copyWith({
-    String? storeNameEn,
-    String? storeNameAm,
-    String? storeNameAr,
-    String? tagline,
-    String? about,
-    String? logoPath,
-    String? currencyCode,
-    String? defaultLanguage,
-    FieldErrors? fieldErrors,
-    AdminFormStatus? status,
-  }) =>
-      SiteSettingsEditorState(
-        storeNameEn: storeNameEn ?? this.storeNameEn,
-        storeNameAm: storeNameAm ?? this.storeNameAm,
-        storeNameAr: storeNameAr ?? this.storeNameAr,
-        tagline: tagline ?? this.tagline,
-        about: about ?? this.about,
-        logoPath: logoPath ?? this.logoPath,
-        currencyCode: currencyCode ?? this.currencyCode,
-        defaultLanguage: defaultLanguage ?? this.defaultLanguage,
-        fieldErrors: fieldErrors ?? this.fieldErrors,
-        status: status ?? this.status,
-      );
+  void setCategoryId(String v) => state = state.copyWith(categoryId: v);
+  void setTitle(String v) => state = state.copyWith(title: v);
+  void setTitleAm(String v) => state = state.copyWith(titleAm: v);
+  void setTitleAr(String v) => state = state.copyWith(titleAr: v);
+  void setDescription(String v) => state = state.copyWith(description: v);
+  void setDescriptionAm(String v) => state = state.copyWith(descriptionAm: v);
+  void setDescriptionAr(String v) => state = state.copyWith(descriptionAr: v);
+  void setPrice(double v) => state = state.copyWith(price: v);
+  void setCompareAtPrice(double v) => state = state.copyWith(compareAtPrice: v);
+  void setCurrencyCode(String v) => state = state.copyWith(currencyCode: v);
+  void setAvailability(bool v) => state = state.copyWith(isAvailable: v);
+  void setFeatured(bool v) => state = state.copyWith(isFeatured: v);
+  void setPublished(bool v) => state = state.copyWith(isPublished: v);
+  void setSortOrder(int v) => state = state.copyWith(sortOrder: v);
+}
+
+/// Controller that owns the media drag-to-reorder, cover toggling and delete
+/// rollbacks in the product editor.
+@riverpod
+class ProductMediaOrderController extends _$ProductMediaOrderController {
+  @override
+  List<String> build() => const <String>[];
+
+  void reorder(List<String> orderedIds) => state = orderedIds;
 }

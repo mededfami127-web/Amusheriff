@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../features/admin/presentation/pages/admin_categories_page.dart';
 import '../../features/admin/presentation/pages/admin_change_password_page.dart';
+import '../../features/admin/presentation/pages/admin_contacts_page.dart';
 import '../../features/admin/presentation/pages/admin_dashboard_page.dart';
+import '../../features/admin/presentation/pages/admin_site_settings_page.dart';
+import '../../features/admin/presentation/pages/admin_inquiries_page.dart';
 import '../../features/admin/presentation/pages/admin_login_page.dart';
 import '../../features/admin/presentation/pages/admin_section_placeholder_page.dart';
 import '../../features/auth/presentation/providers/auth_providers.dart';
@@ -100,11 +104,7 @@ GoRouter appRouter(Ref ref) {
           GoRoute(
             path: 'categories',
             name: 'adminCategories',
-            builder: (_, __) => const AdminSectionPlaceholderPage(
-              titleKey: 'adminCategories',
-              icon: Icons.category_outlined,
-              plannedFor: 'Part 2',
-            ),
+            builder: (_, __) => const AdminCategoriesPage(),
           ),
           GoRoute(
             path: 'products',
@@ -131,29 +131,17 @@ GoRouter appRouter(Ref ref) {
           GoRoute(
             path: 'contacts',
             name: 'adminContacts',
-            builder: (_, __) => const AdminSectionPlaceholderPage(
-              titleKey: 'adminContacts',
-              icon: Icons.share_outlined,
-              plannedFor: 'Part 2',
-            ),
+            builder: (_, __) => const AdminContactsPage(),
           ),
           GoRoute(
             path: 'settings',
             name: 'adminSiteSettings',
-            builder: (_, __) => const AdminSectionPlaceholderPage(
-              titleKey: 'adminSiteSettings',
-              icon: Icons.tune_outlined,
-              plannedFor: 'Part 2',
-            ),
+            builder: (_, __) => const AdminSiteSettingsPage(),
           ),
           GoRoute(
             path: 'inquiries',
             name: 'adminInquiries',
-            builder: (_, __) => const AdminSectionPlaceholderPage(
-              titleKey: 'adminInquiries',
-              icon: Icons.insights_outlined,
-              plannedFor: 'Part 2',
-            ),
+            builder: (_, __) => const AdminInquiriesPage(),
           ),
           GoRoute(
             path: 'password',
