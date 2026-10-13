@@ -1,0 +1,170 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '../../features/admin/presentation/pages/admin_change_password_page.dart';
+import '../../features/admin/presentation/pages/admin_dashboard_page.dart';
+import '../../features/admin/presentation/pages/admin_login_page.dart';
+import '../../features/admin/presentation/pages/admin_section_placeholder_page.dart';
+import '../../features/auth/presentation/providers/auth_providers.dart';
+import '../../features/settings/presentation/pages/about_page.dart';
+import '../../features/settings/presentation/pages/settings_page.dart';
+import '../../features/storefront/presentation/pages/category_page.dart';
+import '../../features/storefront/presentation/pages/not_found_page.dart';
+import '../../features/storefront/presentation/pages/product_detail_page.dart';
+import '../../features/storefront/presentation/pages/search_page.dart';
+import '../../features/storefront/presentation/pages/storefront_home_page.dart';
+import '../network/supabase_client_provider.dart';
+import 'guards.dart';
+import 'routes.dart';
+
+part 'app_router.g.dart';
+
+/// The single router for both surfaces.
+///
+/// One decision point — [resolveAdminRedirect] — decides whether a path lands
+/// on the public storefront or the guarded admin gateway, so the two
+/// experiences can never disagree about who is allowed where.
+@Riverpod(keepAlive: true)
+GoRouter appRouter(Ref ref) {
+  final RouterRefreshNotifier refresher = RouterRefreshNotifier();
+
+  ref.listen(currentSessionProvider, (_, __) => refresher.refresh());
+  ref.listen(adminStatusProvider, (_, __) => refresher.refresh());
+  ref.onDispose(refresher.dispose);
+
+  return GoRouter(
+    initialLocation: Routes.storefront,
+    refreshListenable: refresher,
+    redirect: (BuildContext context, GoRouterState state) {
+      final bool signedIn = ref.read(currentSessionProvider) != null;
+      final AsyncValue<bool> adminStatus = ref.read(adminStatusProvider);
+      return resolveAdminRedirect(
+        location: state.matchedLocation,
+        isSignedIn: signedIn,
+        adminStatus: adminStatus,
+      );
+    },
+    routes: <RouteBase>[
+      // ── Storefront (public, no login) ─────────────────────────────────────
+      GoRoute(
+        path: Routes.storefront,
+        name: 'storefront',
+        builder: (_, __) => const StorefrontHomePage(),
+      ),
+      GoRoute(
+        path: Routes.search,
+        name: 'search',
+        builder: (_, __) => const SearchPage(),
+      ),
+      GoRoute(
+        path: Routes.settings,
+        name: 'settings',
+        builder: (_, __) => const SettingsPage(),
+      ),
+      GoRoute(
+        path: Routes.about,
+        name: 'about',
+        builder: (_, __) => const AboutPage(),
+      ),
+      GoRoute(
+        path: Routes.categoryPattern,
+        name: 'category',
+        builder: (_, GoRouterState state) => CategoryPage(
+          slug: state.pathParameters['slug'] ?? '',
+        ),
+      ),
+      GoRoute(
+        path: Routes.productPattern,
+        name: 'product',
+        builder: (_, GoRouterState state) => ProductDetailPage(
+          productId: state.pathParameters['id'] ?? '',
+        ),
+      ),
+
+      // ── Admin gateway (guarded by `resolveAdminRedirect`) ─────────────────
+      GoRoute(
+        path: Routes.adminLogin,
+        name: 'adminLogin',
+        builder: (_, GoRouterState state) => AdminLoginPage(
+          returnTo: state.uri.queryParameters[Routes.returnToParam],
+          showNotAuthorised:
+              state.uri.queryParameters['error'] == 'notAdmin',
+        ),
+      ),
+      GoRoute(
+        path: Routes.adminRoot,
+        name: 'adminDashboard',
+        builder: (_, __) => const AdminDashboardPage(),
+        routes: <RouteBase>[
+          GoRoute(
+            path: 'categories',
+            name: 'adminCategories',
+            builder: (_, __) => const AdminSectionPlaceholderPage(
+              titleKey: 'adminCategories',
+              icon: Icons.category_outlined,
+              plannedFor: 'Part 2',
+            ),
+          ),
+          GoRoute(
+            path: 'products',
+            name: 'adminProducts',
+            builder: (_, __) => const AdminSectionPlaceholderPage(
+              titleKey: 'adminProducts',
+              icon: Icons.chair_outlined,
+              plannedFor: 'Part 2',
+            ),
+            routes: <RouteBase>[
+              GoRoute(
+                path: ':id',
+                name: 'adminProductEditor',
+                builder: (_, GoRouterState state) =>
+                    AdminSectionPlaceholderPage(
+                  titleKey: 'adminProducts',
+                  icon: Icons.edit_outlined,
+                  plannedFor: 'Part 2',
+                  detail: 'product ${state.pathParameters['id']}',
+                ),
+              ),
+            ],
+          ),
+          GoRoute(
+            path: 'contacts',
+            name: 'adminContacts',
+            builder: (_, __) => const AdminSectionPlaceholderPage(
+              titleKey: 'adminContacts',
+              icon: Icons.share_outlined,
+              plannedFor: 'Part 2',
+            ),
+          ),
+          GoRoute(
+            path: 'settings',
+            name: 'adminSiteSettings',
+            builder: (_, __) => const AdminSectionPlaceholderPage(
+              titleKey: 'adminSiteSettings',
+              icon: Icons.tune_outlined,
+              plannedFor: 'Part 2',
+            ),
+          ),
+          GoRoute(
+            path: 'inquiries',
+            name: 'adminInquiries',
+            builder: (_, __) => const AdminSectionPlaceholderPage(
+              titleKey: 'adminInquiries',
+              icon: Icons.insights_outlined,
+              plannedFor: 'Part 2',
+            ),
+          ),
+          GoRoute(
+            path: 'password',
+            name: 'adminChangePassword',
+            builder: (_, __) => const AdminChangePasswordPage(),
+          ),
+        ],
+      ),
+    ],
+    errorBuilder: (_, GoRouterState state) => NotFoundPage(
+      location: state.uri.toString(),
+    ),
+  );
+}

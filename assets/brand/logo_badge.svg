@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="Amu Sharif Arabiyan Majlis">
+  <defs>
+    <linearGradient id="brandGradient" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#6A11CB"/>
+      <stop offset="1" stop-color="#D41F8F"/>
+    </linearGradient>
+    <linearGradient id="goldGradient" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#E6C97A"/>
+      <stop offset="1" stop-color="#B8893A"/>
+    </linearGradient>
+    <radialGradient id="sheen" cx="0.28" cy="0.18" r="0.85">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Badge plate -->
+  <rect x="0" y="0" width="1024" height="1024" rx="232" ry="232" fill="url(#brandGradient)"/>
+  <rect x="0" y="0" width="1024" height="1024" rx="232" ry="232" fill="url(#sheen)"/>
+
+  <!-- Inner gold hairline -->
+  <rect x="46" y="46" width="932" height="932" rx="196" ry="196"
+        fill="none" stroke="url(#goldGradient)" stroke-width="6" opacity="0.85"/>
+
+  <!-- Sofa glyph -->
+  <g fill="#FFFFFF">
+    <rect x="252" y="300" width="520" height="182" rx="60" ry="60"/>
+    <rect x="176" y="392" width="128" height="226" rx="60" ry="60"/>
+    <rect x="720" y="392" width="128" height="226" rx="60" ry="60"/>
+    <rect x="228" y="468" width="568" height="150" rx="50" ry="50"/>
+    <rect x="262" y="612" width="36" height="54" rx="17" ry="17"/>
+    <rect x="726" y="612" width="36" height="54" rx="17" ry="17"/>
+  </g>
+
+  <!-- Cushion seams -->
+  <g stroke="#7A1E86" stroke-width="13" stroke-linecap="round" opacity="0.30">
+    <line x1="428" y1="486" x2="428" y2="598"/>
+    <line x1="596" y1="486" x2="596" y2="598"/>
+    <line x1="405" y1="330" x2="405" y2="452"/>
+    <line x1="619" y1="330" x2="619" y2="452"/>
+  </g>
+
+  <!-- ASM wordmark -->
+  <text x="512" y="822" text-anchor="middle"
+        font-family="DejaVu Serif, Georgia, 'Times New Roman', serif"
+        font-size="176" font-weight="700" letter-spacing="26"
+        fill="url(#goldGradient)">ASM</text>
+
+  <!-- Gold rule under wordmark -->
+  <rect x="360" y="872" width="304" height="7" rx="3.5" fill="url(#goldGradient)" opacity="0.9"/>
+</svg>

@@ -1,0 +1,180 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "Amu Sharif Arabiyan Majlis",
+  "brandNameEn": "Amu Sharif Arabiyan Majlis",
+  "brandNameAm": "አሙ ሸሪፍ አረቢያን መጅሊስ",
+  "brandNameAr": "المجلس العربي عمو شريف",
+  "brandMonogram": "ASM",
+  "tagline": "Luxury Arabic majlis & sofas, handcrafted for your home",
+  "aboutFallback": "Amu Sharif Arabiyan Majlis crafts premium majlis seating, floor cushions and furnishings in the Arabian tradition.",
+
+  "navHome": "Home",
+  "navCategories": "Categories",
+  "navAbout": "About",
+  "navContact": "Contact",
+  "navAdmin": "Admin",
+  "navSettings": "Settings",
+
+  "actionRetry": "Try again",
+  "actionCancel": "Cancel",
+  "actionSave": "Save",
+  "actionDelete": "Delete",
+  "actionEdit": "Edit",
+  "actionClose": "Close",
+  "actionSearch": "Search",
+  "actionShare": "Share",
+  "actionContinue": "Continue",
+  "actionViewDetails": "View details",
+  "actionContactOwner": "Contact the owner",
+  "actionOrderNow": "Order now",
+  "actionCallNow": "Call now",
+  "actionCopyLink": "Copy link",
+  "actionCopySuccess": "Link copied",
+
+  "searchHint": "Search majlis, sofas, cushions…",
+  "searchNoResults": "No products match “{query}”",
+  "@searchNoResults": {
+    "placeholders": { "query": { "type": "String" } }
+  },
+  "searchResultsCount": "{count, plural, =0{No results} =1{1 result} other{{count} results}}",
+  "@searchResultsCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "sectionFeatured": "Featured",
+  "sectionBrowseCategories": "Browse by category",
+  "sectionAllProducts": "All products",
+  "sectionNewArrivals": "New arrivals",
+
+  "labelPrice": "Price",
+  "labelFrom": "From {price}",
+  "@labelFrom": {
+    "placeholders": { "price": { "type": "String" } }
+  },
+  "labelAvailable": "Available",
+  "labelUnavailable": "Out of stock",
+  "labelDiscount": "Save {percent}%",
+  "@labelDiscount": {
+    "placeholders": { "percent": { "type": "int" } }
+  },
+  "labelDuration": "{minutes}m {seconds}s",
+  "@labelDuration": {
+    "placeholders": {
+      "minutes": { "type": "int" },
+      "seconds": { "type": "int" }
+    }
+  },
+
+  "contactWhatsApp": "WhatsApp",
+  "contactTelegram": "Telegram",
+  "contactPhone": "Phone",
+  "contactEmail": "Email",
+  "contactInstagram": "Instagram",
+  "contactFacebook": "Facebook",
+  "contactTikTok": "TikTok",
+  "contactYouTube": "YouTube",
+  "contactWebsite": "Website",
+  "contactLocation": "Location",
+  "contactOther": "Other",
+  "contactLaunchFailed": "Could not open that link on this device.",
+
+  "inquiryMessageTemplate": "Hello! I am interested in “{product}” ({price}).",
+  "@inquiryMessageTemplate": {
+    "placeholders": {
+      "product": { "type": "String" },
+      "price": { "type": "String" }
+    }
+  },
+
+  "stateLoading": "Loading…",
+  "stateEmptyTitle": "Nothing here yet",
+  "stateEmptyMessage": "New pieces will appear here as soon as the owner publishes them.",
+  "stateErrorTitle": "Something went wrong",
+  "stateOffline": "You are offline. Check your connection and try again.",
+  "stateNotFoundTitle": "Page not found",
+  "stateNotFoundMessage": "That link does not exist any more.",
+
+  "errorNetwork": "We could not reach the store. Check your connection.",
+  "errorTimeout": "The request took too long. Please try again.",
+  "errorServer": "The service is temporarily unavailable. Please try again.",
+  "errorAuth": "We could not sign you in.",
+  "errorInvalidCredentials": "Incorrect email or password.",
+  "errorEmailNotConfirmed": "Confirm your email address before signing in.",
+  "errorTooManyAttempts": "Too many attempts. Please wait a moment and try again.",
+  "errorSessionExpired": "Your session expired. Please sign in again.",
+  "errorPermission": "You do not have permission to do that.",
+  "errorNotFound": "We could not find what you were looking for.",
+  "errorValidation": "Please correct the highlighted fields.",
+  "errorMedia": "That file could not be processed.",
+  "errorStorage": "The file could not be uploaded.",
+  "errorUnknown": "Something unexpected happened. Please try again.",
+  "errorDuplicate": "That value is already in use.",
+  "errorCheckViolation": "A value is outside the allowed range.",
+  "errorForeignKey": "Related data is missing.",
+  "errorConstraintViolation": "Some values are not allowed.",
+  "errorInvalidFormat": "That value is not in the expected format.",
+
+  "validateRequired": "This field is required",
+  "validateTooShort": "This value is too short",
+  "validateTooLong": "This value is too long",
+  "validateSlug": "Use lowercase letters, numbers and hyphens only",
+  "validateEmail": "Enter a valid email address",
+  "validatePhone": "Enter a valid phone number",
+  "validateUrl": "Enter a valid link starting with https://",
+  "validatePasswordLength": "Use at least 10 characters",
+  "validatePasswordStrength": "Include an uppercase letter, a lowercase letter and a number",
+  "validatePasswordMismatch": "Passwords do not match",
+  "validateNumber": "Enter a valid number",
+  "validateNegative": "Value cannot be negative",
+  "validatePositive": "Value must be greater than zero",
+  "validateCompareAtPrice": "Original price must be at least the selling price",
+  "validateVideoTooLong": "Videos must be 60 seconds or shorter",
+  "validateVideoUnreadable": "That video could not be read",
+
+  "settingsTitle": "Settings",
+  "settingsLanguage": "Language",
+  "settingsTheme": "Appearance",
+  "settingsThemeSystem": "System",
+  "settingsThemeLight": "Light",
+  "settingsThemeDark": "Dark",
+  "settingsAbout": "About",
+  "settingsVersion": "Version",
+  "settingsAdminEntry": "Admin",
+  "settingsAdminHint": "Owner sign in",
+
+  "adminLoginTitle": "Owner sign in",
+  "adminLoginSubtitle": "This area is restricted to the shop owner.",
+  "adminEmailLabel": "Email",
+  "adminPasswordLabel": "Password",
+  "adminSignIn": "Sign in",
+  "adminSignOut": "Sign out",
+  "adminForgotPassword": "Forgot password?",
+  "adminChangePassword": "Change password",
+  "adminDashboard": "Dashboard",
+  "adminCategories": "Categories",
+  "adminProducts": "Products",
+  "adminMedia": "Media",
+  "adminContacts": "Contact links",
+  "adminSiteSettings": "Site settings",
+  "adminInquiries": "Inquiries",
+  "adminNotAuthorised": "This account is not an administrator.",
+  "adminCurrentPassword": "Current password",
+  "adminNewPassword": "New password",
+  "adminConfirmPassword": "Confirm new password",
+  "adminPasswordChanged": "Your password has been updated.",
+  "adminResetSent": "Check your inbox for a reset link.",
+
+  "a11yProductImage": "Photo of {title}",
+  "@a11yProductImage": {
+    "placeholders": { "title": { "type": "String" } }
+  },
+  "a11yVideoThumbnail": "Play the video for {title}",
+  "@a11yVideoThumbnail": {
+    "placeholders": { "title": { "type": "String" } }
+  },
+  "a11yOpenCategory": "Open the {name} category",
+  "@a11yOpenCategory": {
+    "placeholders": { "name": { "type": "String" } }
+  }
+}

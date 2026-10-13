@@ -1,1 +1,129 @@
-name: amu_sharif_majlis<br/>description: Amu Sharif Arabiyan Majlis<br/>publish_to: none<br/>version: 1.0.0+1<br/>environment:<br/>  sdk: \&#39;&gt;=3.2.0 &lt;4.0.0\&#39;<br/>dependencies:<br/>  flutter:<br/>    sdk: flutter<br/>  flutter_riverpod: ^2.5.1<br/>  supabase_flutter: ^2.5.6<br/>  go_router: ^14.2.7<br/>dev_dependencies:<br/>  flutter_test:<br/>    sdk: flutter<br/>  flutter_lints: ^4.0.0<br/>flutter:<br/>  uses-material-design: true<br/>  assets:<br/>    - assets/brand/
+name: amu_sharif_majlis
+description: "Amu Sharif Arabiyan Majlis (ASM) — luxury Arabic majlis & sofa catalogue with an owner admin gateway."
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  # Language version is derived from this constraint. Generator output
+  # (json_serializable 6.14, freezed 4) uses dot-shorthands and
+  # null-aware-elements, so the floor must be >= 3.10.
+  sdk: ">=3.13.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+  cupertino_icons: ^1.0.8
+
+  # State management (Riverpod + code-gen)
+  flutter_riverpod: ^3.0.0
+  riverpod_annotation: ^4.0.0
+
+  # Routing
+  go_router: ^14.2.7
+
+  # Backend
+  supabase_flutter: ^2.5.6
+
+  # Models
+  freezed_annotation: ^3.1.0
+  json_annotation: ^4.12.0
+
+  # Media
+  cached_network_image: ^3.4.1
+  video_player: ^2.9.2
+  chewie: ^1.8.5
+  image_picker: ^1.1.2
+  file_picker: ^8.0.6
+  flutter_image_compress: ^2.3.0
+  video_compress: ^3.1.3
+
+  # UX / platform
+  url_launcher: ^6.3.0
+  share_plus: ^10.0.0
+  shimmer: ^3.0.0
+  flutter_animate: ^4.5.0
+  connectivity_plus: ^6.0.3
+  flutter_secure_storage: ^9.2.2
+  sentry_flutter: ^8.6.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  build_runner: ^2.16.0
+  riverpod_generator: ^4.0.0
+  freezed: ^4.0.0
+  json_serializable: ^6.14.0
+  mocktail: ^1.0.4
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.6
+
+# ── Launcher icon generation (dart run flutter_launcher_icons) ─────────────
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/brand/icon.png
+  adaptive_icon_background: "#6A11CB"
+  adaptive_icon_foreground: assets/brand/icon_adaptive_fg.png
+  remove_alpha_ios: true
+  min_sdk_android: 23
+  web:
+    generate: true
+    image_path: assets/brand/icon.png
+    background_color: "#16121C"
+    theme_color: "#6A11CB"
+
+# ── Splash screen (dart run flutter_native_splash:create) ──────────────────
+flutter_native_splash:
+  color: "#16121C"
+  color_dark: "#16121C"
+  image: assets/brand/splash.png
+  image_dark: assets/brand/splash.png
+  android_12:
+    color: "#16121C"
+    color_dark: "#16121C"
+    image: assets/brand/splash.png
+    icon_background_color: "#6A11CB"
+  fullscreen: true
+  web: false
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  assets:
+    - assets/brand/
+
+  fonts:
+    - family: PlayfairDisplay
+      fonts:
+        - asset: assets/fonts/PlayfairDisplay-Variable.ttf
+        - asset: assets/fonts/PlayfairDisplay-Italic-Variable.ttf
+          style: italic
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Poppins-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Poppins-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 700
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Variable.ttf
+    - family: Cairo
+      fonts:
+        - asset: assets/fonts/Cairo-Variable.ttf
+    - family: NotoNaskhArabic
+      fonts:
+        - asset: assets/fonts/NotoNaskhArabic-Variable.ttf
+    - family: NotoSansEthiopic
+      fonts:
+        - asset: assets/fonts/NotoSansEthiopic-Variable.ttf

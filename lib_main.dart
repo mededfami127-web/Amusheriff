@@ -1,1 +1,0 @@
-import \&#39;bootstrap.dart\&#39;;<br/>void main() =&gt; bootstrap();

@@ -1,0 +1,57 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# Supabase CLI project configuration — Amu Sharif Arabiyan Majlis
+#
+# Only the settings that matter for this project are pinned here; the rest
+# inherit the CLI defaults.
+# ═══════════════════════════════════════════════════════════════════════════
+
+project_id = "amu-sharif-arabiyan-majlis"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 200
+
+[db]
+port = 54322
+major_version = 16
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+site_url = "https://amusheriff.app"
+
+# The storefront is public and there is exactly ONE account: the owner's,
+# provisioned by hand and flagged admin via SQL. Public sign-up must stay off.
+enable_signup = false
+enable_anonymous_sign_ins = false
+enable_confirmations = true
+
+# Custom scheme used by the password-recovery email.
+additional_redirect_urls = ["amusheriff://reset-password"]
+
+[auth.email]
+enable_signup = false
+
+# The owner's password is set from the dashboard or by the create-admin script;
+# no self-service email signup path exists.
+[auth.sms]
+enable_signup = false
+
+[storage]
+enabled = true
+# Buckets and their policies are declared in
+# supabase/migrations/20260101000400_storage_buckets.sql so they travel with
+# the schema instead of living in dashboard state.
+
+[edge_runtime]
+enabled = true
+policy = "per_worker"
+
+[analytics]
+enabled = false

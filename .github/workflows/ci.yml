@@ -1,0 +1,86 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_CHANNEL: stable
+
+jobs:
+  # ── Dart / Flutter ────────────────────────────────────────────────────────
+  flutter:
+    name: analyze & test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Verify generated sources are up to date
+        run: |
+          dart run build_runner build --delete-conflicting-outputs
+          if ! git diff --quiet -- '*.g.dart' '*.freezed.dart' 'lib/core/l10n/generated'; then
+            echo "::error::Generated sources are stale. Run 'dart run build_runner build --delete-conflicting-outputs' and commit the output."
+            git diff --stat -- '*.g.dart' '*.freezed.dart' 'lib/core/l10n/generated'
+            exit 1
+          fi
+
+      - name: Analyze (fatal on infos)
+        run: flutter analyze --fatal-infos
+
+      - name: Unit tests
+        run: flutter test --coverage
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage
+          path: coverage/lcov.info
+          if-no-files-found: ignore
+
+  # ── Database: RLS acceptance suite ────────────────────────────────────────
+  rls:
+    name: RLS acceptance suite
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install PostgreSQL 16 client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-16
+
+      - name: Apply shim, migrations, seed and run the RLS suite
+        run: bash scripts/run_rls_tests.sh

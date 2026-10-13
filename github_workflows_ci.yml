@@ -1,1 +1,0 @@
-name: ci<br/>on: {push: {branches: [main]}}<br/>jobs:<br/>  ci:<br/>    runs-on: ubuntu-latest<br/>    steps:<br/>      - uses: actions/checkout@v4<br/>      - uses: subosito/flutter-action@v2<br/>        with: {channel: stable}<br/>      - run: flutter pub get<br/>      - run: flutter analyze --fatal-infos<br/>      - run: flutter test --coverage
