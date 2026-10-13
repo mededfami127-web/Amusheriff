@@ -57,6 +57,20 @@ abstract final class Formatters {
   static String dateTime(DateTime date, {String? locale}) =>
       DateFormat.yMMMd(locale).add_jm().format(date.toLocal());
 
+  /// Compact age label for activity feeds: `now`, `14min`, `3h`, `2d`, and a
+  /// short date once the value is a week old.
+  ///
+  /// The abbreviations are unit symbols rather than prose, so the same label
+  /// reads correctly in every shipped locale.
+  static String relativeTime(DateTime date, {String? locale}) {
+    final Duration age = DateTime.now().difference(date);
+    if (age.inMinutes < 1) return 'now';
+    if (age.inMinutes < 60) return '${age.inMinutes}min';
+    if (age.inHours < 24) return '${age.inHours}h';
+    if (age.inDays < 7) return '${age.inDays}d';
+    return shortDate(date, locale: locale);
+  }
+
   /// `mm:ss` for video durations.
   static String duration(Duration d) {
     final String mm = d.inMinutes.remainder(60).toString().padLeft(2, '0');

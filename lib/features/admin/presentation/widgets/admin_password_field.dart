@@ -62,7 +62,7 @@ class _AdminPasswordFieldState extends State<AdminPasswordField> {
   }
 
   Color _colorFor(double ratio) {
-    if (ratio <= 0.4) return BrandColors.error;
+    if (ratio <= 0.4) return BrandColors.danger;
     if (ratio <= 0.7) return const Color(0xFFFFB454);
     return BrandColors.goldLight;
   }
@@ -78,7 +78,7 @@ class _AdminPasswordFieldState extends State<AdminPasswordField> {
     if (v.isEmpty) return 0;
     final String? failure = Validators.strongPassword(v);
     final int score = _score(v, failure: failure);
-    final int max = 4;
+    const int max = 4;
     return (score / max).clamp(0.0, 1.0);
   }
 
@@ -184,7 +184,8 @@ class _AdminPasswordFieldState extends State<AdminPasswordField> {
             const SizedBox(height: 6),
             Text(
               widget.error!,
-              style: BrandTypography.bodySmall.copyWith(color: BrandColors.error),
+              style:
+                  BrandTypography.bodySmall.copyWith(color: BrandColors.danger),
             ),
           ],
         ],

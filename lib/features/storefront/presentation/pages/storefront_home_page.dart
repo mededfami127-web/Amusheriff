@@ -13,6 +13,7 @@ import '../../../../core/widgets/app_scaffold.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/gold_divider.dart';
+import '../../../../core/widgets/inline_failure_banner.dart';
 import '../../../../core/widgets/shimmer_card.dart';
 import '../../../catalog/domain/entities/category.dart';
 import '../../../catalog/domain/entities/product.dart';

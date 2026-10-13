@@ -12,7 +12,7 @@ import '../../../../core/widgets/error_state.dart';
 import '../../../contacts/domain/entities/contact_kind.dart';
 import '../../../inquiries/domain/entities/inquiry.dart';
 import '../../../inquiries/presentation/providers/inquiry_providers.dart';
-import '../../widgets/admin_scaffold.dart';
+import '../widgets/admin_scaffold.dart';
 
 /// Lead log: which product, which channel, when. Filterable by channel.
 class AdminInquiriesPage extends ConsumerStatefulWidget {

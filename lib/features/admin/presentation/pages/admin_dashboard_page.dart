@@ -1,12 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/l10n/generated/app_localizations.dart';
+import '../../../../core/router/routes.dart';
 import '../../../../core/theme/brand_colors.dart';
+import '../../../../core/theme/gradients.dart';
 import '../../../../core/theme/typography.dart';
-import '../controllers/admin_editors.dart';
+import '../../../catalog/domain/entities/category.dart';
+import '../../../catalog/domain/entities/product.dart';
+import '../../../catalog/presentation/providers/catalog_providers.dart';
+import '../../../inquiries/domain/entities/inquiry.dart';
+import '../../../inquiries/presentation/providers/inquiry_providers.dart';
 import '../widgets/admin_scaffold.dart';
 
+/// Gateway home: the numbers the owner checks first, plus shortcuts into the
+/// catalogue.
+///
+/// Every figure is derived from a stream the gateway is already subscribed to,
+/// so the dashboard costs no extra round trips and updates live.
 class AdminDashboardPage extends ConsumerWidget {
   const AdminDashboardPage({super.key});
 
@@ -14,13 +26,13 @@ class AdminDashboardPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final AppLocalizations l10n = AppLocalizations.of(context);
 
-    final AsyncValue<int> categories =
-        ref.watch(adminCategoriesCountProvider);
-    final AsyncValue<int> products =
-        ref.watch(adminProductsCountProvider);
-    final AsyncValue<int> inquiries =
-        ref.watch(adminInquiriesWeekProvider);
-    final AsyncValue<List<MapEntry<String, int>>> mostContacted =
+    final AsyncValue<List<Category>> categories =
+        ref.watch(allCategoriesProvider);
+    final AsyncValue<List<Product>> products =
+        ref.watch(adminProductsProvider());
+    final AsyncValue<List<Inquiry>> inquiries = ref.watch(adminInquiriesProvider);
+    final int inquiriesThisWeek = ref.watch(inquiriesThisWeekProvider);
+    final List<MapEntry<String, int>> mostContacted =
         ref.watch(mostContactedProductsProvider);
 
     return AdminScaffold(
@@ -29,58 +41,117 @@ class AdminDashboardPage extends ConsumerWidget {
       floatingActionButton: FloatingActionButton(
         backgroundColor: BrandColors.royalViolet,
         foregroundColor: BrandColors.ivory,
+        tooltip: l10n.adminAddProduct,
+        onPressed: () => context.go(Routes.adminProducts),
         child: const Icon(Icons.add, size: 28),
-        onPressed: () =>
-            Navigator.of(context).pushNamed(Routes.adminProducts),
       ),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(l10n.adminDashboardTitle, style: BrandTypography.displayMedium),
-            const SizedBox(height: 24),
-            _StatsCard(
-              label: l10n.adminStatsCategories,
-              value: categories.value ?? 0,
-              loading: categories.isLoading,
-              error: categories.hasError,
-            ),
-            const SizedBox(height: 14),
-            _StatsCard(
-              label: l10n.adminStatsProducts,
-              value: products.value ?? 0,
-              loading: products.isLoading,
-              error: products.hasError,
-            ),
-            const SizedBox(height: 14),
-            _StatsCard(
-              label: l10n.adminInquiriesWeek,
-              value: inquiries.value ?? 0,
-              loading: inquiries.isLoading,
-              error: inquiries.hasError,
-            ),
-            const SizedBox(height: 24),
-            _SectionHeader(title: l10n.adminMostContacted),
-            if (mostContacted.isLoading)
-              const _LoadingIndicator()
-            else if (mostContacted.hasError)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Text(
-                  mostContacted.error.toString(),
-                  style: BrandTypography.bodySmall,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
+        children: <Widget>[
+          Text(
+            l10n.adminDashboard,
+            style: BrandTypography.displayMedium,
+          ),
+          const SizedBox(height: 6),
+          Text(l10n.adminSortOrderHint, style: BrandTypography.bodySmall),
+          const SizedBox(height: 20),
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: _StatsCard(
+                  label: l10n.adminStatsCategories,
+                  icon: Icons.category_outlined,
+                  value: categories.value?.length,
+                  loading: categories.isLoading,
+                  error: categories.hasError,
                 ),
-              )
-            else if (mostContacted.value == null ||
-                mostContacted.value!.isEmpty)
-              Text(l10n.adminNoInquiriesYet,
-                  style: BrandTypography.bodySmall)
-            else
-              _MostContactedList(
-                  entries: mostContacted.value!),
-          ],
-        ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _StatsCard(
+                  label: l10n.adminStatsProducts,
+                  icon: Icons.chair_outlined,
+                  value: products.value?.length,
+                  loading: products.isLoading,
+                  error: products.hasError,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: _StatsCard(
+                  label: l10n.adminInquiriesWeek,
+                  icon: Icons.insights_outlined,
+                  value: inquiriesThisWeek,
+                  loading: inquiries.isLoading,
+                  error: inquiries.hasError,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _StatsCard(
+                  label: l10n.adminMostContacted,
+                  icon: Icons.favorite_outline_rounded,
+                  value: mostContacted.length,
+                  loading: inquiries.isLoading,
+                  error: inquiries.hasError,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 26),
+          _SectionHeader(title: l10n.adminQuickActions),
+          const SizedBox(height: 10),
+          _QuickAction(
+            label: l10n.adminProducts,
+            icon: Icons.chair_outlined,
+            route: Routes.adminProducts,
+          ),
+          _QuickAction(
+            label: l10n.adminCategories,
+            icon: Icons.category_outlined,
+            route: Routes.adminCategories,
+          ),
+          _QuickAction(
+            label: l10n.adminContacts,
+            icon: Icons.share_outlined,
+            route: Routes.adminContacts,
+          ),
+          _QuickAction(
+            label: l10n.adminInquiries,
+            icon: Icons.insights_outlined,
+            route: Routes.adminInquiries,
+          ),
+          _QuickAction(
+            label: l10n.adminSiteSettings,
+            icon: Icons.tune_outlined,
+            route: Routes.adminSiteSettings,
+          ),
+          const SizedBox(height: 26),
+          _SectionHeader(title: l10n.adminMostContacted),
+          const SizedBox(height: 6),
+          if (mostContacted.isEmpty)
+            Text(l10n.adminNoInquiriesYet, style: BrandTypography.bodySmall)
+          else
+            for (final MapEntry<String, int> entry in mostContacted)
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                dense: true,
+                leading: const Icon(
+                  Icons.local_fire_department_outlined,
+                  color: BrandColors.gold,
+                  size: 20,
+                ),
+                title: Text(entry.key, style: BrandTypography.bodyMedium),
+                trailing: Text(
+                  entry.value.toString(),
+                  style: BrandTypography.labelLarge,
+                ),
+              ),
+        ],
       ),
     );
   }
@@ -89,32 +160,57 @@ class AdminDashboardPage extends ConsumerWidget {
 class _StatsCard extends StatelessWidget {
   const _StatsCard({
     required this.label,
+    required this.icon,
     required this.value,
     required this.loading,
     required this.error,
   });
 
   final String label;
-  final int value;
+  final IconData icon;
+  final int? value;
   final bool loading;
   final bool error;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(label, style: BrandTypography.bodySmall),
-            const SizedBox(height: 6),
-            Text(
-              value.toString(),
-              style: BrandTypography.displayWeighted(700, size: 36),
-            ),
-          ],
-        ),
+    final bool dark = Theme.of(context).brightness == Brightness.dark;
+    final String display = error
+        ? '—'
+        : loading && value == null
+            ? '…'
+            : (value ?? 0).toString();
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: dark ? BrandColors.deepPlum : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: BrandColors.goldHairline),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Icon(icon, size: 18, color: BrandColors.gold),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  label,
+                  style: BrandTypography.bodySmall,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            display,
+            style: BrandTypography.displayWeighted(700, size: 30),
+          ),
+        ],
       ),
     );
   }
@@ -127,37 +223,45 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+    return ShaderMask(
+      shaderCallback: BrandGradients.goldHorizontal.createShader,
+      blendMode: BlendMode.srcIn,
       child: Text(
         title,
         style: BrandTypography.displaySmall.copyWith(
-          color: BrandColors.goldLight,
+          fontSize: 18,
+          color: BrandColors.gold,
         ),
       ),
     );
   }
 }
 
-class _MostContactedList extends StatelessWidget {
-  const _MostContactedList({required this.entries});
+class _QuickAction extends StatelessWidget {
+  const _QuickAction({
+    required this.label,
+    required this.icon,
+    required this.route,
+  });
 
-  final List<MapEntry<String, int>> entries;
+  final String label;
+  final IconData icon;
+  final String route;
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
-     shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: entries.length,
-      separatorBuilder: (_, __) => const Divider(height: 1),
-      itemBuilder: (context, index) {
-        final entry = entries[index];
-        return ListTile(
-          title: Text(entry.key),
-          trailing: Text(entry.value.toString()),
-        );
-      },
+    final bool dark = Theme.of(context).brightness == Brightness.dark;
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        leading: Icon(icon, color: BrandColors.gold),
+        title: Text(label, style: BrandTypography.bodyLarge),
+        trailing: Icon(
+          Icons.chevron_right_rounded,
+          color: dark ? BrandColors.goldLight : BrandColors.charcoal,
+        ),
+        onTap: () => context.go(route),
+      ),
     );
   }
 }

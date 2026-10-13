@@ -14,10 +14,13 @@ Both surfaces share one catalogue and one contact-link repository, and the store
 front subscribes to Supabase Realtime — so anything the owner changes is live on
 every customer device without a restart.
 
-**Status: Phase 1 of 2 complete.** Scaffold, branding, architecture, full
-database schema, RLS, storage policies, seed data and the RLS acceptance suite
-are done and green. Screens, state polish, CI/CD gates, integration testing and
-acceptance criteria are Part 2.
+**Status: both phases implemented.** Scaffold, branding, architecture, the full
+database schema (RLS + storage policies), seed data and the RLS acceptance
+suite are done and green, and so are the screens: the storefront catalogue and
+the admin gateway (categories, products with media, contact links, branding,
+inquiries, password). What is still open — screen-level integration tests,
+CI/CD promotion gates and release Android/iOS builds — is tracked in
+`docs/DECISIONS.md` → "Open items handed to Part 2".
 
 ---
 
@@ -25,9 +28,9 @@ acceptance criteria are Part 2.
 
 | Check | Command | Result |
 | --- | --- | --- |
-| Code generation | `dart run build_runner build --delete-conflicting-outputs` | 21+ outputs, 0 errors |
+| Code generation | `dart run build_runner build --delete-conflicting-outputs` | 0 errors |
 | Static analysis | `flutter analyze` | **No issues found** |
-| Unit tests | `flutter test` | **50 passed** |
+| Unit + widget tests | `flutter test` | **64 passed** |
 | RLS acceptance suite | `bash scripts/run_rls_tests.sh` | **19/19 groups passed** on PostgreSQL 16.15 |
 
 Not yet exercised in this environment: release Android/iOS builds (no Android

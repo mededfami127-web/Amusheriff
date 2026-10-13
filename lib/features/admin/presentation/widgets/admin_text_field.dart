@@ -142,7 +142,8 @@ class _AdminTextFieldState extends State<AdminTextField> {
             const SizedBox(height: 6),
             Text(
               widget.error!,
-              style: BrandTypography.bodySmall.copyWith(color: BrandColors.error),
+              style:
+                  BrandTypography.bodySmall.copyWith(color: BrandColors.danger),
             ),
           ],
         ],

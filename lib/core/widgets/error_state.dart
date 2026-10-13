@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import '../errors/app_failure.dart';
 import '../errors/error_localizer.dart';
 import '../l10n/generated/app_localizations.dart';
-import '../theme/brand_colors.dart';
-import '../theme/typography.dart';
 import 'empty_state.dart';
 import 'gradient_button.dart';
 
@@ -52,54 +50,4 @@ class ErrorStateView extends StatelessWidget {
         ServerFailure() => Icons.dns_outlined,
         UnknownFailure() => Icons.error_outline_rounded,
       };
-}
-
-/// Non-scrolling inline error banner, for use inside a form or sheet.
-class InlineFailureBanner extends StatelessWidget {
-  const InlineFailureBanner({super.key, required this.failure, this.onRetry});
-
-  final AppFailure failure;
-  final VoidCallback? onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final AppLocalizations l10n = AppLocalizations.of(context);
-    final bool dark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: (dark ? BrandColors.gold : BrandColors.danger)
-            .withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: (dark ? BrandColors.gold : BrandColors.danger)
-              .withValues(alpha: 0.45),
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Icon(
-            Icons.info_outline_rounded,
-            size: 20,
-            color: dark ? BrandColors.goldLight : BrandColors.danger,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              localizeFailure(l10n, failure),
-              style: BrandTypography.bodySmall.copyWith(
-                color: dark ? BrandColors.goldLight : BrandColors.danger,
-              ),
-            ),
-          ),
-          if (onRetry != null && failure.isRetryable)
-            TextButton(
-              onPressed: onRetry,
-              child: Text(l10n.actionRetry),
-            ),
-        ],
-      ),
-    );
-  }
 }

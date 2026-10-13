@@ -360,7 +360,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminProductDeleted => 'Product deleted';
 
   @override
+  String get adminProductDescriptionAr => 'Description (Arabic)';
+
+  @override
+  String get adminProductDescriptionAm => 'Description (Amharic)';
+
+  @override
+  String get adminProductDescription => 'Description (English)';
+
+  @override
   String get adminProductSaved => 'Product saved';
+
+  @override
+  String get adminProductTitleAr => 'Title (Arabic)';
+
+  @override
+  String get adminProductTitleAm => 'Title (Amharic)';
+
+  @override
+  String get adminProductTitle => 'Title (English)';
 
   @override
   String get adminProducts => 'Products';

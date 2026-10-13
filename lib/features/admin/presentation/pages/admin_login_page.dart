@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/router/routes.dart';
 import '../../../../core/theme/brand_colors.dart';
+import '../../../../core/theme/gradients.dart';
 import '../../../../core/theme/typography.dart';
+import '../../../../core/utils/validators.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../widgets/admin_scaffold.dart';
 
@@ -28,9 +30,14 @@ class _AdminLoginPageState extends ConsumerState<AdminLoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscure = true;
+
+  /// Failed attempts in this session. Five in a row locks the form, matching
+  /// the brute-force protection on the auth endpoint.
   int _failedAttempts = 0;
-  bool _isLocked = false;
-  bool _isLoading = false;
+
+  static const int _lockoutAfter = 5;
+
+  bool get _isLocked => _failedAttempts >= _lockoutAfter;
 
   @override
   void dispose() {
@@ -40,36 +47,29 @@ class _AdminLoginPageState extends ConsumerState<AdminLoginPage> {
   }
 
   Future<void> _submit() async {
-    if (_isLocked || _isLoading) return;
-    if (!formKey.currentState!.validate()) return;
-
-    _isLoading = true;
-    setState(() {});
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    if (_isLocked || ref.read(adminAuthControllerProvider).isLoading) return;
+    FocusScope.of(context).unfocus();
+    if (!(_formKey.currentState?.validate() ?? false)) return;
 
     final bool ok = await ref
         .read(adminAuthControllerProvider.notifier)
         .signIn(email: _emailController.text, password: _passwordController.text);
 
     if (!mounted) return;
-    _isLoading = false;
-    setState(() {});
 
     if (ok) {
-      if (widget.returnTo != null && widget.returnTo!.isNotEmpty) {
-        context.go(widget.returnTo!);
-      } else {
-        context.go(Routes.adminRoot);
-      }
+      final String? returnTo = widget.returnTo;
+      context.go(
+        returnTo != null && returnTo.isNotEmpty ? returnTo : Routes.adminRoot,
+      );
     } else {
-      _failedAttempts++;
-      if (_failedAttempts >= 5) {
-        _isLocked = true;
-      }
+      setState(() => _failedAttempts++);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(_isLocked
-              ? 'Too many failed attempts. Try again later.'
-              : 'Invalid email or password.'),
+          content: Text(
+            _isLocked ? l10n.errorTooManyAttempts : l10n.errorInvalidCredentials,
+          ),
         ),
       );
     }
@@ -77,38 +77,34 @@ class _AdminLoginPageState extends ConsumerState<AdminLoginPage> {
 
   Future<void> _forgotPassword() async {
     final AppLocalizations l10n = AppLocalizations.of(context);
-    if (emailController.text.isEmpty) {
+    if (_emailController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter your email first')),
+        SnackBar(content: Text(l10n.adminEmailLabel)),
       );
       return;
     }
 
     final bool sent = await ref
         .read(adminAuthControllerProvider.notifier)
-        .forgotPassword(email: _emailController.text);
+        .sendPasswordReset(_emailController.text);
 
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          sent ? l10n.adminResetSent : l10n.errorServer,
-        ),
-      ),
+      SnackBar(content: Text(sent ? l10n.adminResetSent : l10n.errorServer)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
-    final AsyncValue<void> state = ref.watch(adminAuthControllerProvider);
+    final bool busy = ref.watch(adminAuthControllerProvider).isLoading;
 
     return AdminScaffold(
       title: l10n.adminLoginTitle,
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Form(
-          key: formKey,
+          key: _formKey,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -166,7 +162,7 @@ class _AdminLoginPageState extends ConsumerState<AdminLoginPage> {
                   child: Card(
                     child: Padding(
                       padding: const EdgeInsets.all(12),
-                      child: Text(l10n.adminLockoutMessage),
+                      child: Text(l10n.errorTooManyAttempts),
                     ),
                   ),
                 ),
@@ -177,8 +173,9 @@ class _AdminLoginPageState extends ConsumerState<AdminLoginPage> {
                   labelText: l10n.adminEmailLabel,
                   prefixIcon: const Icon(Icons.mail_outlined),
                 ),
-                validator: (v) =>
-                    Validators.email(v)?.toString(),
+                textInputAction: TextInputAction.next,
+                validator: (String? v) =>
+                    Validators.email(v) == null ? null : l10n.validateEmail,
               ),
               const SizedBox(height: 14),
               TextFormField(
@@ -200,21 +197,22 @@ class _AdminLoginPageState extends ConsumerState<AdminLoginPage> {
                     },
                   ),
                 ),
-                validator: (v) =>
+                textInputAction: TextInputAction.done,
+                validator: (String? v) =>
                     (v?.isEmpty ?? true) ? l10n.validateRequired : null,
               ),
-              if (_failedAttempts > 0)
+              if (_failedAttempts > 0 && !_isLocked)
                 Padding(
-                  padding: const EdgeInsets.only(top: 8),
+                  padding: const EdgeInsets.only(top: 10),
                   child: Text(
-                    '${(_failedAttempts)} failures',
+                    '$_failedAttempts / $_lockoutAfter',
                     style: BrandTypography.bodySmall,
                   ),
                 ),
               const SizedBox(height: 24),
               FilledButton.icon(
-                onPressed: _isLoading ? null : _submit,
-                icon: _isLoading
+                onPressed: (busy || _isLocked) ? null : _submit,
+                icon: busy
                     ? const SizedBox(
                         width: 20,
                         height: 20,
@@ -225,7 +223,7 @@ class _AdminLoginPageState extends ConsumerState<AdminLoginPage> {
               ),
               const SizedBox(height: 16),
               TextButton(
-                onPressed: _failedAttempts >= 5 ? null : _forgotPassword,
+                onPressed: _isLocked ? null : _forgotPassword,
                 child: Text(l10n.adminForgotPassword),
               ),
             ],

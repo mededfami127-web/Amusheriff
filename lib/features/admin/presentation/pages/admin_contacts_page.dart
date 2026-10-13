@@ -1,41 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:reorderables/reorderables.dart';
 
+import '../../../../core/errors/error_localizer.dart';
+import '../../../../core/errors/error_mapper.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/router/routes.dart';
 import '../../../../core/theme/brand_colors.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
+import '../../../contacts/domain/entities/contact_link.dart';
+import '../../../contacts/presentation/providers/contact_providers.dart';
 import '../controllers/admin_editors.dart';
 import '../widgets/admin_scaffold.dart';
+import 'admin_contact_editor_sheet.dart';
 
-class AdminContactsPage extends ConsumerStatefulWidget {
+/// Contact channels: the ways a customer reaches the owner.
+///
+/// Order is the storefront order, so the list is reorderable and persisted in
+/// one `reorder` round trip. Exactly one link should be primary — the
+/// repository clears the old flag when a new primary is set.
+class AdminContactsPage extends ConsumerWidget {
   const AdminContactsPage({super.key});
 
   @override
-  ConsumerState<AdminContactsPage> createState() =>
-      _AdminContactsPageState();
-}
-
-class _AdminContactsPageState extends ConsumerState<AdminContactsPage> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _label = TextEditingController();
-  final TextEditingController _value = TextEditingController();
-
-  @override
-  void dispose() {
-    _label.dispose();
-    _value.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final AppLocalizations l10n = AppLocalizations.of(context);
-    final AsyncValue<List<ContactLink>> async =
-        ref.watch(adminContactsProvider);
+    final AsyncValue<List<ContactLink>> async = ref.watch(allContactLinksProvider);
 
     return AdminScaffold(
       title: l10n.adminContacts,
@@ -43,322 +34,213 @@ class _AdminContactsPageState extends ConsumerState<AdminContactsPage> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: BrandColors.royalViolet,
         foregroundColor: BrandColors.ivory,
+        tooltip: l10n.adminAddContact,
+        onPressed: () => _openSheet(context, ref, null),
         child: const Icon(Icons.add, size: 28),
-        onPressed: () => _showCreateSheet(context),
       ),
       child: async.when(
-        loading: () => const _LoadingIndicator(),
-        error: (Object error, _) => ErrorStateView(
-          failure: error is AppFailure ? error : UnknownFailure(cause: error),
-          onRetry: () => ref.invalidate(adminContactsProvider),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (Object error, StackTrace _) => ErrorStateView(
+          failure: ErrorMapper.map(error),
+          onRetry: () => ref.invalidate(allContactLinksProvider),
         ),
         data: (List<ContactLink> links) {
           if (links.isEmpty) {
             return EmptyState(
-              title: l10n.adminNoContacts,
-              message: l10n.adminNoContactsPlaceholder,
+              title: l10n.adminContacts,
+              message: l10n.adminNoContacts,
               icon: Icons.share_outlined,
+              action: FilledButton.icon(
+                onPressed: () => _openSheet(context, ref, null),
+                icon: const Icon(Icons.add),
+                label: Text(l10n.adminAddContact),
+              ),
             );
           }
-          return _LinkGrid(links);
+          return _ContactList(
+            links: links,
+            onEditRequested: (ContactLink link) => _openSheet(context, ref, link),
+          );
         },
       ),
     );
   }
 
-  void _showCreateSheet(BuildContext context) {
-    _label.clear();
-    _value.clear();
-    _formKey.currentState?.reset();
-    showModalBottomSheet(
+  void _openSheet(BuildContext context, WidgetRef ref, ContactLink? existing) {
+    final ContactsEditorController controller =
+        ref.read(contactsEditorControllerProvider.notifier);
+    if (existing == null) {
+      controller.startNew();
+    } else {
+      controller.startEdit(existing);
+    }
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (_) => _ContactsEditorSheet(
-        existing: null,
-        labelController: _label,
-        valueController: _value,
-        formKey: _formKey,
-      ),
+      builder: (_) => ContactsEditorSheet(existing: existing),
     );
   }
 }
 
-class _LinkGrid extends StatelessWidget {
-  const _LinkGrid(this.links);
+class _ContactList extends ConsumerWidget {
+  const _ContactList({required this.links, required this.onEditRequested});
 
   final List<ContactLink> links;
+  final ValueChanged<ContactLink> onEditRequested;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return ReorderableListView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
-      buildDefaultDragHandles: true,
-      children: [
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+      onReorderItem: (int oldIndex, int newIndex) {
+        final List<ContactLink> ordered = <ContactLink>[...links];
+        final ContactLink moved = ordered.removeAt(oldIndex);
+        ordered.insert(newIndex, moved);
+        ref
+            .read(contactRepositoryProvider)
+            .reorder(ordered.map((ContactLink l) => l.id).toList(growable: false));
+      },
+      children: <Widget>[
         for (final ContactLink link in links)
-          _LinkTile(
+          _ContactTile(
+            key: ValueKey<String>(link.id),
             link: link,
-            onEdit: () => _showEditSheet(context, link),
-            onDelete: () => _deleteLink(context, link),
+            onEdit: () => onEditRequested(link),
           ),
       ],
     );
   }
 }
 
-class _LinkTile extends StatelessWidget {
-  const _LinkTile({
-    required this.link,
-    required this.onEdit,
-    required this.onDelete,
-  });
+class _ContactTile extends ConsumerWidget {
+  const _ContactTile({super.key, required this.link, required this.onEdit});
 
   final ContactLink link;
   final VoidCallback onEdit;
-  final VoidCallback onDelete;
 
   @override
-  Widget build(BuildContext context) {
-    final bool dark = Theme.of(context).brightness == Brightness.dark;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final bool hidden = !link.isVisible;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         leading: CircleAvatar(
-          backgroundColor: link.isPrimary
-              ? BrandColors.gold
-              : BrandColors.royalViolet,
+          backgroundColor:
+              link.isPrimary ? BrandColors.gold : BrandColors.royalViolet,
           child: Icon(
             link.kind.icon,
             color: link.isPrimary ? BrandColors.deepPlum : BrandColors.ivory,
           ),
         ),
-        title: Text(link.label, style: BrandTypography.titleMedium),
+        title: Row(
+          children: <Widget>[
+            Flexible(
+              child: Text(
+                link.label,
+                style: BrandTypography.titleMedium,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (link.isPrimary) ...<Widget>[
+              const SizedBox(width: 8),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: BrandColors.gold.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  l10n.adminPrimaryBadge,
+                  style: BrandTypography.labelSmall,
+                ),
+              ),
+            ],
+          ],
+        ),
         subtitle: Text(
-          link.kind.name.toUpperCase() + ' · ' + link.value,
-          style: BrandTypography.bodySmall,
+          '${link.kind.name} · ${link.displayValue}',
+          style: BrandTypography.bodySmall.copyWith(
+            color: hidden ? BrandColors.warning : null,
+          ),
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            Checkbox(
-              value: link.isPrimary,
-              onChanged: (v) =>
-                  ref.read(contactRepositoryProvider).setPrimary(link.id, isPrimary: v!),
+          children: <Widget>[
+            IconButton(
+              icon: Icon(
+                hidden
+                    ? Icons.visibility_off_outlined
+                    : Icons.visibility_outlined,
+              ),
+              tooltip: hidden ? l10n.adminShow : l10n.adminHide,
+              onPressed: () => ref
+                  .read(contactRepositoryProvider)
+                  .setVisibility(link.id, isVisible: hidden),
             ),
             IconButton(
               icon: const Icon(Icons.edit_outlined),
+              tooltip: l10n.actionEdit,
               onPressed: onEdit,
             ),
             IconButton(
-              icon: const Icon(Icons.delete_outlined),
-              onPressed: onDelete,
+              icon: const Icon(Icons.delete_outline_rounded),
+              tooltip: l10n.actionDelete,
+              onPressed: () => _confirmDelete(context, ref, l10n),
             ),
           ],
         ),
+        onTap: () => ref
+            .read(contactRepositoryProvider)
+            .setPrimary(link.id, isPrimary: !link.isPrimary),
       ),
     );
   }
-}
 
-void _deleteLink(BuildContext context, ContactLink link) {
-  showDialog(
-    context: context,
-    builder: (_) => AlertDialog(
-      title: Text('Remove link?'),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: () async {
-            await ref.read(contactRepositoryProvider).delete(link.id);
-            Navigator.of(context).pop();
-          },
-          style: FilledButton.secondary,
-          child: Text('Remove'),
-        ),
-      ],
-    ),
-  );
-}
-
-void _showEditSheet(BuildContext context, ContactLink link) {
-  final form = GlobalKey<FormState>();
-  final l = TextEditingController(text: link.label);
-  final v = TextEditingController(text: link.value);
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    builder: (_) => Consumer(
-      builder: (c, r, _) {
-        return Form(
-          key: form,
-          child: Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(c).viewInsets.bottom,
-              left: 20,
-              right: 20,
-              top: 20,
-            ),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('Edit link'),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: l,
-                    decoration: InputDecoration(labelText: 'Label'),
-                    validator: (x) =>
-                        Validators.required(x)?.toString(),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: v,
-                    decoration: InputDecoration(labelText: 'Value'),
-                    validator: (x) =>
-                        validateContactValue(link.kind, x)?.toString(),
-                  ),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField<ContactKind>(
-                    value: link.kind,
-                    items: ContactKind.values
-                        .map((k) => DropdownMenuItem(
-                              value: k,
-                              child: Text(k.name),
-                            ))
-                        .toList(),
-                    onChanged: (k) {
-                      if (k != null) {
-                        l.text = '';
-                        form.currentState!.validate();
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  FilledButton.icon(
-                    onPressed: () {
-                      if (!form.currentState!.validate()) return;
-                      ref
-                          .read(contactRepositoryProvider)
-                          .update(link.id, ContactLinkDraft(
-                                kind: link.kind,
-                                label: l.text.trim(),
-                                value: v.text.trim(),
-                              ))
-                          .then((_) {
-                            if (context.mounted) Navigator.of(context).pop();
-                          });
-                    },
-                    icon: const Icon(Icons.save_outlined),
-                    label: Text('Save'),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: Text('Cancel'),
-                  ),
-                ],
+  Future<void> _confirmDelete(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n,
+  ) async {
+    final bool confirmed = await showDialog<bool>(
+          context: context,
+          builder: (BuildContext dialogContext) => AlertDialog(
+            title: Text(l10n.adminConfirmDeleteContact),
+            content: Text(l10n.adminConfirmDeleteMessage),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: Text(l10n.actionCancel),
               ),
-            ),
-          ),
-        );
-      },
-    ),
-  );
-}
-
-void _showCreateSheet(BuildContext context) {
-  final form = GlobalKey<FormState>();
-  final l = TextEditingController();
-  final v = TextEditingController();
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    builder: (_) => Consumer(
-      builder: (c, r, _) {
-        return Form(
-          key: form,
-          child: Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(c).viewInsets.bottom,
-              left: 20,
-              right: 20,
-              top: 20,
-            ),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('Add link'),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: l,
-                    decoration: InputDecoration(labelText: 'Label'),
-                    validator: (x) =>
-                        Validators.required(x)?.toString(),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: v,
-                    decoration: InputDecoration(labelText: 'Value'),
-                    validator: (x) =>
-                        validateContactValue(ContactKind.whatsapp, x)?.toString(),
-                  ),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField<ContactKind>(
-                    items: ContactKind.values
-                        .map((k) => DropdownMenuItem(
-                              value: k,
-                              child: Text(k.name),
-                            ))
-                        .toList(),
-                    onChanged: (k) {
-                      if (k != null) {
-                        l.text = '';
-                        form.currentState!.validate();
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  FilledButton.icon(
-                    onPressed: () {
-                      if (!form.currentState!.validate()) return;
-                      ref
-                          .read(contactRepositoryProvider)
-                          .create(ContactLinkDraft(
-                                kind: ContactKind.whatsapp,
-                                label: l.text.trim(),
-                                value: v.text.trim(),
-                              ))
-                          .then((_) {
-                            if (context.mounted) Navigator.of(context).pop();
-                          });
-                    },
-                    icon: const Icon(Icons.add),
-                    label: Text('Add'),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: Text('Cancel'),
-                  ),
-                ],
+              FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: BrandColors.danger,
+                  foregroundColor: BrandColors.ivory,
+                ),
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                child: Text(l10n.actionDelete),
               ),
-            ),
+            ],
           ),
-        );
-      },
-    ),
-  );
-}
+        ) ??
+        false;
 
-class _LoadingIndicator extends StatelessWidget {
-  const _LoadingIndicator();
+    if (!confirmed || !context.mounted) return;
 
-  @override
-  Widget build(BuildContext context) {
-    return const Center(child: CircularProgressIndicator());
+    final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref.read(contactRepositoryProvider).delete(link.id);
+      messenger.showSnackBar(SnackBar(content: Text(l10n.adminContactDeleted)));
+    } on Object catch (error) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(localizeFailure(l10n, ErrorMapper.map(error)))),
+      );
+    }
   }
 }

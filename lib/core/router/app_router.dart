@@ -9,7 +9,8 @@ import '../../features/admin/presentation/pages/admin_dashboard_page.dart';
 import '../../features/admin/presentation/pages/admin_site_settings_page.dart';
 import '../../features/admin/presentation/pages/admin_inquiries_page.dart';
 import '../../features/admin/presentation/pages/admin_login_page.dart';
-import '../../features/admin/presentation/pages/admin_section_placeholder_page.dart';
+import '../../features/admin/presentation/pages/admin_product_editor_page.dart';
+import '../../features/admin/presentation/pages/admin_products_page.dart';
 import '../../features/auth/presentation/providers/auth_providers.dart';
 import '../../features/settings/presentation/pages/about_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
@@ -109,21 +110,20 @@ GoRouter appRouter(Ref ref) {
           GoRoute(
             path: 'products',
             name: 'adminProducts',
-            builder: (_, __) => const AdminSectionPlaceholderPage(
-              titleKey: 'adminProducts',
-              icon: Icons.chair_outlined,
-              plannedFor: 'Part 2',
-            ),
+            builder: (_, __) => const AdminProductsPage(),
             routes: <RouteBase>[
+              // Declared before `:id` so `/admin/products/new` is not read as
+              // the id of a product called "new".
+              GoRoute(
+                path: 'new',
+                name: 'adminProductNew',
+                builder: (_, __) => const AdminProductEditorPage(),
+              ),
               GoRoute(
                 path: ':id',
                 name: 'adminProductEditor',
-                builder: (_, GoRouterState state) =>
-                    AdminSectionPlaceholderPage(
-                  titleKey: 'adminProducts',
-                  icon: Icons.edit_outlined,
-                  plannedFor: 'Part 2',
-                  detail: 'product ${state.pathParameters['id']}',
+                builder: (_, GoRouterState state) => AdminProductEditorPage(
+                  productId: state.pathParameters['id'],
                 ),
               ),
             ],

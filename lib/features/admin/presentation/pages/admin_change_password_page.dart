@@ -7,7 +7,6 @@ import '../../../../core/network/supabase_client_provider.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/app_scaffold.dart';
-import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/gradient_button.dart';
 import '../../../../core/widgets/inline_failure_banner.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';

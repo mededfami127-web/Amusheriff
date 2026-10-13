@@ -356,7 +356,25 @@ class AppLocalizationsAm extends AppLocalizations {
   String get adminProductDeleted => 'ምርት ተሰርዟል';
 
   @override
+  String get adminProductDescriptionAr => 'መግለጫ (አረብኛ)';
+
+  @override
+  String get adminProductDescriptionAm => 'መግለጫ (አማርኛ)';
+
+  @override
+  String get adminProductDescription => 'መግለጫ (እንግሊዝኛ)';
+
+  @override
   String get adminProductSaved => 'ምርት ተቀምጧል';
+
+  @override
+  String get adminProductTitleAr => 'ርዕስ (አረብኛ)';
+
+  @override
+  String get adminProductTitleAm => 'ርዕስ (አማርኛ)';
+
+  @override
+  String get adminProductTitle => 'ርዕስ (እንግሊዝኛ)';
 
   @override
   String get adminProducts => 'ምርቶች';

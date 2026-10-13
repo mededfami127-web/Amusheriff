@@ -772,11 +772,47 @@ abstract class AppLocalizations {
   /// **'Product deleted'**
   String get adminProductDeleted;
 
+  /// No description provided for @adminProductDescriptionAr.
+  ///
+  /// In en, this message translates to:
+  /// **'Description (Arabic)'**
+  String get adminProductDescriptionAr;
+
+  /// No description provided for @adminProductDescriptionAm.
+  ///
+  /// In en, this message translates to:
+  /// **'Description (Amharic)'**
+  String get adminProductDescriptionAm;
+
+  /// No description provided for @adminProductDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description (English)'**
+  String get adminProductDescription;
+
   /// No description provided for @adminProductSaved.
   ///
   /// In en, this message translates to:
   /// **'Product saved'**
   String get adminProductSaved;
+
+  /// No description provided for @adminProductTitleAr.
+  ///
+  /// In en, this message translates to:
+  /// **'Title (Arabic)'**
+  String get adminProductTitleAr;
+
+  /// No description provided for @adminProductTitleAm.
+  ///
+  /// In en, this message translates to:
+  /// **'Title (Amharic)'**
+  String get adminProductTitleAm;
+
+  /// No description provided for @adminProductTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title (English)'**
+  String get adminProductTitle;
 
   /// No description provided for @adminProducts.
   ///

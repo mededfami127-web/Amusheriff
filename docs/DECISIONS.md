@@ -345,12 +345,27 @@ boundary — the real boundary is RLS plus keeping the key out of `config/*.json
 
 ## E. Open items handed to Part 2
 
+Closed since this list was written:
+
+* The admin gateway screens are implemented and wired to the router:
+  categories, products (list + editor), product media, contact links, site
+  settings, inquiries and password. The placeholder pages are gone.
+* The media pipeline is implemented. `MediaProcessor.process` compresses images
+  with `flutter_image_compress` and videos with `video_compress` (quality tier,
+  poster frame, duration), and throws a localized `MediaFailure` when a file
+  breaks the bucket caps. `MediaUploadController` runs the queue at concurrency
+  2 with per-file phase, cancel, retry and a compensating delete, and the
+  product editor drives it.
+* `test/unit/admin_gateway_test.dart` covers the gateway widgets end to end
+  (list, empty state, list → editor seeding, save-through-repository, and
+  validation blocking a bad slug) against fake repositories.
+
+Still open:
+
 * Replace the generated logo with the supplied master asset (D-006).
 * Verify the Edge Function under the Edge Runtime (D-010).
 * Native Android product flavors for side-by-side installs (D-019).
 * Verify release Android/iOS builds (no Android SDK or Xcode in this
-  environment) — `flutter build` was not exercised.
-* Screen-level integration tests and CI/CD promotion gates.
-* `chewie`, `video_player`, `image_picker`, `file_picker`,
-  `flutter_image_compress` and `video_compress` are declared and their domain
-  models exist, but the upload/playback pipeline itself is Part 2 work.
+  environment) — `flutter build` was not exercised, and `chewie` /
+  `video_player` playback is therefore unverified on device.
+* Screen-level integration tests on a device/emulator and CI/CD promotion gates.

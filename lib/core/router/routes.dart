@@ -22,6 +22,7 @@ abstract final class Routes {
   static const String adminRoot = '/admin';
   static const String adminCategories = '/admin/categories';
   static const String adminProducts = '/admin/products';
+  static const String adminProductNew = '/admin/products/new';
   static const String adminProductEditorPattern = '/admin/products/:id';
   static String adminProductEditor(String id) => '/admin/products/$id';
   static const String adminContacts = '/admin/contacts';
