@@ -238,7 +238,7 @@ final class ProductEditorControllerProvider
 }
 
 String _$productEditorControllerHash() =>
-    r'fc546491819ae8a820dcb8d7ff6dd54547890aef';
+    r'f228a6753ad5c2d9e50f108070f8e050b57a41e9';
 
 abstract class _$ProductEditorController extends $Notifier<ProductEditorState> {
   ProductEditorState build();
