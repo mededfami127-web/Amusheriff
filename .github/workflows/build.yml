@@ -50,14 +50,23 @@ jobs:
 
       # Values live in repository secrets; nothing secret is committed. Only the
       # public anon key ships to clients — never the service-role key.
+      #
+      # `CONFIG_BASE64` wins when set: it is the base64 of the whole flavor JSON,
+      # which is useful when the values are easier to keep as one secret.
       - name: Write flavor config
         env:
           FLAVOR: ${{ steps.flavor.outputs.name }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          CONFIG_BASE64: ${{ secrets.CONFIG_BASE64 }}
         run: |
           mkdir -p config
+          if [ -n "$CONFIG_BASE64" ]; then
+            printf '%s' "$CONFIG_BASE64" | base64 --decode > "config/${FLAVOR}.json"
+            echo "Wrote config/${FLAVOR}.json from the CONFIG_BASE64 secret."
+            exit 0
+          fi
           cat > "config/${FLAVOR}.json" <<JSON
           {
             "FLAVOR": "${FLAVOR}",
@@ -66,6 +75,49 @@ jobs:
             "SENTRY_DSN": "${SENTRY_DSN}"
           }
           JSON
+
+      # `ANDROID_KEYSTORE_BASE64` is the base64 of the upload keystore (.jks).
+      # Decoding it here is what lets the release AAB be signed without ever
+      # committing the keystore; `android/key.properties` is gitignored too.
+      # Without the secret the build still runs, but the AAB is debug-signed and
+      # Play will reject it — hence the explicit warning.
+      - name: Decode the upload keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::warning::ANDROID_KEYSTORE_BASE64 is not set — the release AAB will be signed with the debug keystore and cannot be uploaded to Play. See README → Release signing."
+            exit 0
+          fi
+
+          for name in KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name must be set alongside ANDROID_KEYSTORE_BASE64."
+              exit 1
+            fi
+          done
+
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
+
+          # A truncated or mistyped secret decodes to a file that is not a
+          # keystore; fail here rather than inside a Gradle task.
+          if ! keytool -list -keystore android/app/upload-keystore.jks \
+              -storepass "$KEYSTORE_PASSWORD" > /dev/null 2>&1; then
+            echo "::error::android/app/upload-keystore.jks is not a valid keystore — re-check ANDROID_KEYSTORE_BASE64 and KEYSTORE_PASSWORD."
+            exit 1
+          fi
+
+          cat > android/key.properties <<PROPS
+          storePassword=$KEYSTORE_PASSWORD
+          keyPassword=$KEY_PASSWORD
+          keyAlias=$KEY_ALIAS
+          storeFile=$GITHUB_WORKSPACE/android/app/upload-keystore.jks
+          PROPS
+
+          echo "Release keystore decoded — the AAB will be signed with alias '$KEY_ALIAS'."
 
       - name: Build APK
         run: >
@@ -76,6 +128,11 @@ jobs:
         run: >
           flutter build appbundle --release
           --dart-define-from-file=config/${{ steps.flavor.outputs.name }}.json
+
+      - name: Record which key signed the bundle
+        run: |
+          AAB=build/app/outputs/bundle/release/app-release.aab
+          keytool -printcert -jarfile "$AAB" | grep -E "Owner|SHA256" || true
 
       - uses: actions/upload-artifact@v4
         with:

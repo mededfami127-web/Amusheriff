@@ -115,6 +115,60 @@ dart run flutter_launcher_icons
 dart run flutter_native_splash:create
 ```
 
+### 5. Release signing (the AAB)
+
+A Play-ready AAB must be signed with **your** upload key. Neither the keystore
+nor `android/key.properties` is ever committed — `android/app/build.gradle.kts`
+reads `android/key.properties` when it exists and otherwise falls back to the
+debug keys (so local `flutter build --release` still works, but such a bundle
+cannot be uploaded to Play).
+
+**Create the upload key once** (needs a JDK, i.e. `keytool`):
+
+```bash
+keytool -genkeypair -v -keystore ~/upload-keystore.jks \
+  -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+```
+
+**Base64-encode it** — this is the string that goes into the GitHub secret:
+
+```bash
+# macOS
+base64 -i ~/upload-keystore.jks | tr -d '\n' > ~/upload-keystore.jks.b64
+# Linux / Windows (Git Bash) / WSL
+base64 -w0 ~/upload-keystore.jks > ~/upload-keystore.jks.b64
+```
+
+**Add four repository secrets** — GitHub → repo → *Settings → Secrets and
+variables → Actions → New repository secret*:
+
+| Secret | Value |
+| --- | --- |
+| `ANDROID_KEYSTORE_BASE64` | the whole contents of `~/upload-keystore.jks.b64` (one line, no line breaks) |
+| `KEYSTORE_PASSWORD` | the `storePassword` you chose when creating the keystore |
+| `KEY_ALIAS` | `upload` (the `-alias` above) |
+| `KEY_PASSWORD` | the key password (same as the store password unless you set a different one) |
+
+`.github/workflows/build.yml` decodes `ANDROID_KEYSTORE_BASE64` into
+`android/app/upload-keystore.jks`, writes `android/key.properties`, checks the
+decoded file really is a keystore with `keytool -list`, and then builds the APK
+and the AAB — so the bundle is signed with your upload key. If the secret is
+missing the job still runs but prints a loud `::warning::` and ships a
+debug-signed bundle; if a companion secret is missing, or the base64 is not a
+keystore, the job fails instead of producing an unusable artifact.
+
+**Optional shortcut** — `CONFIG_BASE64` (see step 3): when that secret is set it
+is decoded straight to `config/<flavor>.json`, replacing the three individual
+Supabase/Sentry secrets. Base64 of the whole JSON file:
+
+```bash
+base64 -w0 config/prod.json > config/prod.json.b64
+```
+
+Keep the keystore and its passwords in a password manager, and never paste them
+into an issue, a commit or a chat — losing the upload key means you can no
+longer publish updates under the same application ID.
+
 ---
 
 ## Development

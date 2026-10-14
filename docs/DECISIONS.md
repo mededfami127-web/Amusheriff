@@ -343,6 +343,35 @@ boundary — the real boundary is RLS plus keeping the key out of `config/*.json
 
 ---
 
+### D-025 — The release AAB is signed from a base64 keystore secret, with a debug fallback
+
+**Brief said:** build the Android artifact in CI. An AAB is only useful if it is
+signed with the owner's upload key — Play rejects a debug-signed bundle — and
+the key must not be committed.
+
+Day one of the Flutter template signs the release build with the debug keys
+(`signingConfig = signingConfigs.getByName("debug")`), which produces an
+artifact that looks successful and silently cannot be published. That is now
+replaced by: `android/key.properties` supplies the store file, password, alias
+and key password when it exists, and CI recreates that file from four GitHub
+secrets (`ANDROID_KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`,
+`KEY_PASSWORD`). Base64 is used because a keystore is binary and a secret can
+only hold text.
+
+**Consequence.** Two failure modes are handled explicitly, because both are
+otherwise discovered only at upload time: a missing `ANDROID_KEYSTORE_BASE64`
+emits `::warning::` and continues, so the pipeline still produces artifacts
+(bundles from such a run must not be published); a *present but wrong* secret
+fails the job in the decode step — a truncated base64 or a mistyped store
+password is caught by `keytool -list` before Gradle runs. `android/key.properties`,
+`*.jks` and `*.keystore` stay gitignored.
+
+The same treatment is available for the flavor config via an optional
+`CONFIG_BASE64` secret, which decodes to `config/<flavor>.json` and supersedes
+the three individual Supabase/Sentry secrets.
+
+---
+
 ## E. Open items handed to Part 2
 
 Closed since this list was written:
