@@ -713,6 +713,21 @@ begin
 
   select count(*) into v_read from storage.objects where bucket_id = 'product-media';
   perform test.assert(v_read >= 0, 'anon read of product-media objects is permitted');
+
+  -- The runner records the JSONB mimetype alongside the bytes, so another
+  -- caller (or a sloppy CI step that assumed the string) can read back what
+  -- was actually stored instead of defaulting to a hard-coded token. Those
+  -- tokens are the exact strings the storage policy's bucket allow-list and
+  -- object size guards match against; assert them once here so a future
+  -- change to the bucket configuration fails loudly instead of silently
+  -- accepting a different type everywhere.
+  perform test.assert(
+    (select allowed_mime_types @>
+        array['image/jpeg', 'image/png', 'image/webp', 'video/mp4']::text[]
+     from storage.buckets
+     where id = 'product-media') is true,
+    'product-media allowed_mime_types document the four supported types'
+  );
 end;
 $$;
 reset role;
