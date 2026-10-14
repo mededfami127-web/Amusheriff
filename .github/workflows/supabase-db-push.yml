@@ -1,0 +1,52 @@
+name: supabase db push (dry-run)
+
+# Validates the Supabase migration state on every push/PR without touching the
+# live project. Runs `scripts/apply_migrations.sh --dry-run`, which executes the
+# pending SQL inside a transaction that is rolled back and then asserts the
+# schema is unchanged. Free: no Supabase project URL or credentials are needed,
+# only a local PostgreSQL service.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: supabase-db-push-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  db-push:
+    name: migration dry-run
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install PostgreSQL 16 client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-16
+
+      - name: Confirm psql is on PATH
+        run: |
+          command -v psql
+          psql --version
+
+      - name: Plan / dry-run migrations
+        run: bash scripts/apply_migrations.sh --dry-run
