@@ -47,7 +47,10 @@ dependencies:
   flutter_animate: ^4.5.0
   connectivity_plus: ^6.0.3
   flutter_secure_storage: ^9.2.2
-  sentry_flutter: ^8.6.0
+  # 9.30.1+ dropped the `languageVersion = "1.6"` pin that Kotlin 2.4 rejects,
+  # and 10.x also stops applying its own Kotlin Gradle plugin — without that,
+  # `:sentry_flutter:compileReleaseKotlin` fails and no Android APK can build.
+  sentry_flutter: ^10.1.0
 
 dev_dependencies:
   flutter_test:
