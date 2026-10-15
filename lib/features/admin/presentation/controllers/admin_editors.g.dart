@@ -178,7 +178,7 @@ final class SiteSettingsEditorControllerProvider
 }
 
 String _$siteSettingsEditorControllerHash() =>
-    r'a811e48edcb2d8421afdc69c443ba53741dd7e65';
+    r'd82dc06abc0a33cedca82d7fed5c441760e92839';
 
 /// Edits the singleton `site_settings` row.
 ///

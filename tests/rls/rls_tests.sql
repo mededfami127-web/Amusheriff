@@ -75,6 +75,11 @@ insert into public.contact_links (id, kind, label, value, is_visible) values
   ('d1111111-0000-4000-8000-000000000001', 'whatsapp', 'RLS Visible Channel', '+251900000001', true),
   ('d1111111-0000-4000-8000-000000000002', 'phone',    'RLS Hidden Channel',  '+251900000002', false);
 
+-- One owner-authored string, so the read assertions below have something to
+-- find. The table is otherwise empty, which is the normal shipped state.
+insert into public.text_overrides (text_key, locale, value) values
+  ('tagline', 'en', 'Owner written tagline');
+
 \echo 'ok - catalogue fixtures inserted'
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -199,6 +204,14 @@ begin
   exception when others then v_state := sqlstate;
   end;
   perform test.assert_eq(v_state, '42501', 'anon write on site_settings is denied');
+
+  begin
+    insert into public.text_overrides (text_key, locale, value)
+    values ('tagline', 'en', 'Anon rewrite');
+    v_state := 'ok';
+  exception when others then v_state := sqlstate;
+  end;
+  perform test.assert_eq(v_state, '42501', 'anon INSERT on text_overrides is denied');
 
   begin
     insert into public.audit_log (action, table_name) values ('fake', 'fake');
@@ -390,6 +403,15 @@ begin
   end;
   perform test.assert_eq(v_state, 'ok', 'UPDATE with no matching policy is silent');
 
+  begin
+    insert into public.text_overrides (text_key, locale, value)
+    values ('tagline', 'en', 'Non admin rewrite');
+    v_state := 'ok';
+  exception when others then v_state := sqlstate;
+  end;
+  perform test.assert_eq(v_state, '42501',
+    'a non-admin INSERT on text_overrides is denied');
+
   perform test.assert_eq(
     (select price from public.products where id = 'f0000000-0000-4000-8000-000000000001')::numeric,
     1200::numeric,
@@ -397,6 +419,109 @@ begin
 end;
 $$;
 \echo 'ok 4 - a non-admin authenticated user can never write or self-promote'
+
+reset role;
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- 4b · TEXT OVERRIDES — everyone reads the owner's wording, only the owner writes
+--
+-- The storefront is anonymous and must render whatever the owner typed, so a
+-- plain anon caller has to see the row. Editing it is the owner's job alone.
+-- ═══════════════════════════════════════════════════════════════════════════
+set role anon;
+
+do $$
+begin
+  perform test.assert_eq(
+    (select value from public.text_overrides
+      where text_key = 'tagline' and locale = 'en'),
+    'Owner written tagline',
+    'anon CAN read an owner-authored string');
+end;
+$$;
+
+reset role;
+
+set role authenticated;
+select set_config('request.jwt.claim.sub', 'aaaaaaaa-0000-4000-8000-000000000001', false);
+select set_config('request.jwt.claim.role', 'authenticated', false);
+
+do $$
+declare
+  v_state text;
+begin
+  -- The owner edits, adds a second language, then restores the default by
+  -- deleting the row — the three operations the editor performs.
+  update public.text_overrides set value = 'Owner edited tagline'
+   where text_key = 'tagline' and locale = 'en';
+  perform test.assert_eq(
+    (select value from public.text_overrides
+      where text_key = 'tagline' and locale = 'en'),
+    'Owner edited tagline', 'the admin CAN update an override');
+
+  insert into public.text_overrides (text_key, locale, value)
+  values ('adminDashboard', 'om', 'Daashboordii');
+  perform test.assert_eq(
+    (select count(*) from public.text_overrides where locale = 'om'),
+    1, 'the admin CAN add an override for the new Oromo locale');
+
+  delete from public.text_overrides where text_key = 'adminDashboard';
+  perform test.assert_eq(
+    (select count(*) from public.text_overrides where text_key = 'adminDashboard'),
+    0, 'the admin CAN delete an override to restore the shipped wording');
+
+  -- The key/locale pair is the identity: a duplicate is refused, so the
+  -- editor can upsert without race-conditions deciding who wins.
+  begin
+    insert into public.text_overrides (text_key, locale, value)
+    values ('tagline', 'en', 'duplicate');
+    v_state := 'ok';
+  exception when unique_violation then v_state := sqlstate;
+  end;
+  perform test.assert_eq(v_state, '23505',
+    'a duplicate (key, locale) override is refused');
+
+  -- Only the four shipped locales are storable.
+  begin
+    insert into public.text_overrides (text_key, locale, value)
+    values ('tagline', 'fr', 'bonjour');
+    v_state := 'ok';
+  exception when others then v_state := sqlstate;
+  end;
+  perform test.assert_eq(v_state, '23514',
+    'an unsupported locale is refused by the check constraint');
+end;
+$$;
+\echo 'ok 4b - text overrides: public read, admin-only write, identity by (key, locale)'
+
+reset role;
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- 4c · OROMO — the fourth language is storable end to end
+-- ═══════════════════════════════════════════════════════════════════════════
+set role authenticated;
+select set_config('request.jwt.claim.sub', 'aaaaaaaa-0000-4000-8000-000000000001', false);
+select set_config('request.jwt.claim.role', 'authenticated', false);
+
+do $$
+begin
+  perform test.assert(
+    exists (
+      select 1 from information_schema.columns
+       where table_schema = 'public'
+         and table_name = 'site_settings'
+         and column_name = 'store_name_om'),
+    'site_settings has an Oromo store-name column');
+
+  update public.site_settings set default_language = 'om' where id = 1;
+  perform test.assert_eq(
+    (select default_language from public.site_settings where id = 1),
+    'om', 'the owner CAN set Oromo as the default language');
+
+  update public.site_settings set default_language = 'en' where id = 1;
+end;
+$$;
+\echo 'ok 4c - Oromo is accepted as a store name and default language'
 
 reset role;
 
@@ -842,7 +967,8 @@ begin
   select string_agg(v.table_name, ', ' order by v.table_name)
     into v_missing
     from ( values ('categories'), ('products'), ('product_media'),
-                   ('contact_links'), ('site_settings'), ('inquiries') )
+                   ('contact_links'), ('site_settings'), ('inquiries'),
+                   ('text_overrides') )
            as v (table_name)
    where not exists (
      select 1

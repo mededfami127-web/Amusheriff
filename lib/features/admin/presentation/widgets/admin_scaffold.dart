@@ -3,12 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/l10n/generated/app_localizations.dart';
+import '../../../../core/network/supabase_client_provider.dart';
 import '../../../../core/router/routes.dart';
 import '../../../../core/theme/brand_colors.dart';
 import '../../../../core/theme/gradients.dart';
 import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/live_editable_text.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../text_editor/presentation/providers/text_editor_providers.dart';
+import '../providers/admin_gate_providers.dart';
 import '../providers/admin_ui_providers.dart';
+import 'admin_gate_taps.dart';
 
 /// One destination in the gateway.
 class AdminDestination {
@@ -16,11 +21,15 @@ class AdminDestination {
     required this.label,
     required this.icon,
     required this.route,
+    required this.textKey,
   });
 
   /// Uses an already-localised string rather than a key, because the caller
   /// holds the `AppLocalizations` instance.
   final String label;
+
+  /// The ARB key behind [label], so live edit mode can put a pencil on it.
+  final String textKey;
   final IconData icon;
   final String route;
 }
@@ -29,38 +38,57 @@ List<AdminDestination> _destinations(AppLocalizations l10n) =>
     <AdminDestination>[
       AdminDestination(
         label: l10n.adminDashboard,
+        textKey: 'adminDashboard',
         icon: Icons.dashboard_outlined,
         route: Routes.adminRoot,
       ),
       AdminDestination(
         label: l10n.adminCategories,
+        textKey: 'adminCategories',
         icon: Icons.category_outlined,
         route: Routes.adminCategories,
       ),
       AdminDestination(
         label: l10n.adminProducts,
+        textKey: 'adminProducts',
         icon: Icons.chair_outlined,
         route: Routes.adminProducts,
       ),
       AdminDestination(
         label: l10n.adminContacts,
+        textKey: 'adminContacts',
         icon: Icons.share_outlined,
         route: Routes.adminContacts,
       ),
       AdminDestination(
         label: l10n.adminInquiries,
+        textKey: 'adminInquiries',
         icon: Icons.insights_outlined,
         route: Routes.adminInquiries,
       ),
       AdminDestination(
         label: l10n.adminSiteSettings,
+        textKey: 'adminSiteSettings',
         icon: Icons.tune_outlined,
         route: Routes.adminSiteSettings,
       ),
       AdminDestination(
+        label: l10n.adminTextEditor,
+        textKey: 'adminTextEditor',
+        icon: Icons.translate_rounded,
+        route: Routes.adminTextEditor,
+      ),
+      AdminDestination(
         label: l10n.adminChangePassword,
+        textKey: 'adminChangePassword',
         icon: Icons.password_rounded,
         route: Routes.adminChangePassword,
+      ),
+      AdminDestination(
+        label: l10n.gateChangeTitle,
+        textKey: 'gateChangeTitle',
+        icon: Icons.vpn_key_outlined,
+        route: Routes.adminGatePassword,
       ),
     ];
 
@@ -200,7 +228,9 @@ class AdminBrandHeader extends ConsumerWidget {
     final bool previewing = ref.watch(previewAsCustomerProvider);
     return Material(
       color: Colors.transparent,
-      child: InkWell(
+      // Five taps here open the owner panel, exactly as on the storefront logo.
+      child: AdminGateTaps(
+        child: InkWell(
         onTap: onTap,
         child: Container(
           width: double.infinity,
@@ -243,7 +273,61 @@ class AdminBrandHeader extends ConsumerWidget {
             ],
           ),
         ),
+        ),
       ),
+    );
+  }
+}
+
+/// Offers the sign-in the owner still needs in order to *save* anything.
+///
+/// The five-tap panel opens the gateway on this device, but RLS decides every
+/// write: wording, photos and prices only stick once the owner's Supabase
+/// session exists. Rather than let a save fail with "permission denied" and no
+/// explanation, the gateway says so and links straight to the sign-in page.
+class _SignInToSaveTile extends ConsumerWidget {
+  const _SignInToSaveTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final bool unlocked = ref.watch(adminGateUnlockedProvider);
+    final bool signedIn = ref.watch(currentSessionProvider) != null;
+    if (!unlocked || signedIn) return const SizedBox.shrink();
+
+    return ListTile(
+      dense: true,
+      minTileHeight: 48,
+      leading: const Icon(
+        Icons.login_rounded,
+        size: 20,
+        color: BrandColors.gold,
+      ),
+      title: Text(l10n.adminSignIn, style: BrandTypography.bodyMedium),
+      subtitle: Text(l10n.errorPermission, style: BrandTypography.bodySmall),
+      onTap: () => context.go(Routes.adminLogin),
+    );
+  }
+}
+
+/// Live edit mode switch, shown in both the rail and the drawer.
+class _LiveEditTile extends ConsumerWidget {
+  const _LiveEditTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final bool on = ref.watch(liveEditModeProvider);
+    return SwitchListTile(
+      dense: true,
+      value: on,
+      onChanged: (_) => ref.read(liveEditModeProvider.notifier).toggle(),
+      secondary: Icon(
+        Icons.edit_note_rounded,
+        size: 20,
+        color: on ? BrandColors.gold : BrandColors.goldHairline,
+      ),
+      title: Text(l10n.adminLiveEdit, style: BrandTypography.bodyMedium),
     );
   }
 }
@@ -290,16 +374,22 @@ class _AdminRail extends ConsumerWidget {
             ),
           ),
           const Divider(height: 1, thickness: 1, color: BrandColors.goldHairline),
+          const _SignInToSaveTile(),
+          const _LiveEditTile(),
           _AdminActionTile(
             label: l10n.adminViewStore,
+            textKey: 'adminViewStore',
             icon: Icons.storefront_outlined,
             onTap: () => context.go(Routes.storefront),
           ),
           _AdminActionTile(
             label: l10n.adminSignOut,
+            textKey: 'adminSignOut',
             icon: Icons.logout_rounded,
             onTap: () async {
               await ref.read(adminAuthControllerProvider.notifier).signOut();
+              // Leaving the gateway re-arms the five-tap lock too.
+              await ref.read(adminGateProvider.notifier).lock();
               if (context.mounted) context.go(Routes.storefront);
             },
           ),
@@ -345,8 +435,11 @@ class _AdminDrawer extends ConsumerWidget {
               ),
             ),
             const Divider(height: 1, thickness: 1),
+            const _SignInToSaveTile(),
+            const _LiveEditTile(),
             _AdminActionTile(
               label: l10n.adminViewStore,
+              textKey: 'adminViewStore',
               icon: Icons.storefront_outlined,
               onTap: () {
                 Navigator.of(context).pop();
@@ -355,10 +448,12 @@ class _AdminDrawer extends ConsumerWidget {
             ),
             _AdminActionTile(
               label: l10n.adminSignOut,
+              textKey: 'adminSignOut',
               icon: Icons.logout_rounded,
               onTap: () async {
                 Navigator.of(context).pop();
                 await ref.read(adminAuthControllerProvider.notifier).signOut();
+                await ref.read(adminGateProvider.notifier).lock();
                 if (context.mounted) context.go(Routes.storefront);
               },
             ),
@@ -414,8 +509,10 @@ class _AdminTile extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
-                    destination.label,
+                  child: LiveEditableText(
+                    textKey: destination.textKey,
+                    text: destination.label,
+                    dense: true,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: selected
@@ -439,11 +536,15 @@ class _AdminTile extends StatelessWidget {
 class _AdminActionTile extends StatelessWidget {
   const _AdminActionTile({
     required this.label,
+    required this.textKey,
     required this.icon,
     required this.onTap,
   });
 
   final String label;
+
+  /// ARB key behind [label], so the row is rewritable in place.
+  final String textKey;
   final IconData icon;
   final VoidCallback onTap;
 
@@ -453,7 +554,11 @@ class _AdminActionTile extends StatelessWidget {
       dense: true,
       minTileHeight: 48,
       leading: Icon(icon, size: 20, color: BrandColors.gold),
-      title: Text(label, style: BrandTypography.bodyMedium),
+      title: LiveEditableText(
+        textKey: textKey,
+        text: label,
+        dense: true,
+      ),
       onTap: onTap,
     );
   }

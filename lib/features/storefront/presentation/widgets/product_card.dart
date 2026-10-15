@@ -11,6 +11,7 @@ import '../../../../core/theme/gradients.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../catalog/domain/entities/product.dart';
+import 'favourite_button.dart';
 
 /// A single catalogue tile. Tapping opens the product detail route.
 class ProductCard extends ConsumerWidget {
@@ -90,6 +91,17 @@ class ProductCard extends ConsumerWidget {
                         end: 10,
                         child: _VideoChip(),
                       ),
+                    // Saving a piece is one tap, right where the customer
+                    // decided they liked it.
+                    PositionedDirectional(
+                      top: 6,
+                      end: 6,
+                      child: FavouriteButton(
+                        productId: product.id,
+                        onPhoto: true,
+                        dense: true,
+                      ),
+                    ),
                   ],
                 ),
               ),

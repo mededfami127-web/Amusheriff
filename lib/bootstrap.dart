@@ -10,6 +10,10 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app.dart';
 import 'core/config/env.dart';
 import 'core/config/flavors.dart';
+import 'features/admin/data/admin_gate_store.dart';
+import 'features/admin/presentation/providers/admin_gate_providers.dart';
+import 'features/storefront/data/favourites_store.dart';
+import 'features/storefront/presentation/providers/favourites_providers.dart';
 import 'core/errors/app_failure.dart';
 import 'core/errors/error_mapper.dart';
 import 'core/utils/app_logger.dart';
@@ -52,6 +56,15 @@ Future<void> bootstrap() async {
   );
   await preferences.load(PlatformDispatcher.instance.locale.languageCode);
 
+  // The five-tap owner gate lives in the same encrypted store. Loading it here
+  // lets the router read the unlocked flag synchronously on the first frame.
+  final AdminGateStore adminGate = AdminGateStore(const FlutterSecureStorage());
+  await adminGate.load();
+
+  // The customer's favourites live in the same store, for the same reason.
+  final FavouritesStore favourites = FavouritesStore(const FlutterSecureStorage());
+  await favourites.load();
+
   _installErrorHandlers();
 
   AppLog.info(
@@ -70,20 +83,26 @@ Future<void> bootstrap() async {
           ..attachStacktrace = true
           ..sendDefaultPii = false;
       },
-      appRunner: () => _run(preferences),
+      appRunner: () => _run(preferences, adminGate, favourites),
     );
   } else {
-    _run(preferences);
+    _run(preferences, adminGate, favourites);
   }
 }
 
-void _run(PreferencesStore preferences) {
+void _run(
+  PreferencesStore preferences,
+  AdminGateStore adminGate,
+  FavouritesStore favourites,
+) {
   runApp(
     ProviderScope(
       overrides: [
-        // The store is pre-loaded, so `AppPreferences.build()` can be
-        // synchronous and the first frame already has the right values.
+        // Both stores are pre-loaded, so their providers can be synchronous and
+        // the first frame already has the right locale, theme and gate state.
         preferencesStoreProvider.overrideWithValue(preferences),
+        adminGateStoreProvider.overrideWithValue(adminGate),
+        favouritesStoreProvider.overrideWithValue(favourites),
       ],
       child: const AmuApp(),
     ),

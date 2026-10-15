@@ -420,6 +420,96 @@ failure this project prefers to surface at build time.
 
 ---
 
+### D-028 — Overriding the localization delegate, not the 292 call sites
+
+The owner must be able to rewrite any wording in the app, in any of the four
+languages, without a release.
+
+The obvious implementation is a `tr(key)` helper, which means touching every
+screen: the app resolves strings through `AppLocalizations.of(context)` in 25
+files and 292 keys. Instead, `OverridableLocalizationsDelegate` is registered
+with `MaterialApp` in place of the generated delegate and returns an
+`AppLocalizations` **subclass** that prefers `override ?? shipped` per key.
+
+Consequences: an edit lands everywhere at once, including screens written before
+the feature existed; adding a screen keeps working for free; the one cost is a
+generated subclass (`overridable_localizations.dart`, produced by
+`tool/gen_text_overlay.dart` from the ARB files and the generated abstract
+class), which must be re-generated when an ARB key is added or renamed — the
+generator is committed and idempotent, and `flutter analyze` fails loudly if it
+drifts.
+
+ICU plurals (`searchResultsCount`) deliberately stay with the generated wording:
+a raw string replacement cannot express a plural rule. The editor marks them
+read-only rather than pretending otherwise.
+
+### D-029 — Overrides are rows, not files: `public.text_overrides`
+
+Wording lives in one table keyed by `(text_key, locale)`, the ARB key the app
+already looks up.
+
+* Deleting a row restores the shipped wording, so "restore default" needs no
+  second concept and no stored history.
+* Public `SELECT` is required and deliberate: the storefront is anonymous and
+  must render the owner's wording to every visitor. Writes are admin-only.
+* The pair is the primary key, which is what lets `.stream()` deliver row
+  updates to every open device — the same realtime promise the rest of the
+  storefront makes, and the reason `text_overrides` is listed in the realtime
+  migration's table set and in group 11 of the RLS suite.
+
+### D-030 — The five-tap gateway is convenience, not authorisation
+
+The brief asks for a logo tapped five times opening a username (`admin`) /
+password (`admin123`) panel, changeable inside the app. That is a device-local
+lock, so it is implemented that way and labelled that way:
+
+* `AdminGateStore` keeps a per-device random salt and a SHA-256 digest in the
+  same encrypted store as the session material — never the password itself.
+* `resolveAdminRedirect` accepts the unlocked flag, which is what lets an owner
+  who has never signed in reach the gateway.
+* It grants **no** new database access. RLS still decides every read and write,
+  so a customer who somehow unlocked the panel would still be denied by the
+  database. The README's security section says exactly this, so nobody mistakes
+  the panel for a second factor.
+* The password is held to the Supabase password rule when the owner changes it;
+  only the shipped default is exempt, because the brief fixes it at `admin123`.
+
+### D-031 — Favourites live on the device, as ids
+
+There is no customer account, so a favourite cannot be a row. `FavouritesStore`
+keeps ids in the encrypted keystore, and the favourites screen resolves them
+against the live catalogue stream.
+
+Storing ids rather than copies is the point: a piece the owner repriced,
+re-photographed or unpublished shows the current truth (or disappears) on the
+favourites screen, with no extra query and nothing stale to reconcile.
+
+### D-033 — Oromo is gap-filled for Material and Cupertino
+
+The SDK ships Amharic and Arabic but **no** `om` translations for
+`GlobalMaterialLocalizations`/`GlobalCupertinoLocalizations`. Declaring `om` in
+`supportedLocales` without addressing that makes `MaterialApp` report "this
+application's locale is not supported by all of its localization delegates" and
+leaves Material chrome (tooltips, dialog buttons, pickers) on the widget-layer
+English default anyway.
+
+`FallbackMaterialLocalizationsDelegate` and its Cupertino twin answer for
+precisely those locales the real delegates miss — and only those, so Amharic and
+Arabic keep their proper Material translations. The result: the app's own 292
+strings are Oromo, Material chrome is English rather than missing, and nothing
+warns.
+
+### D-032 — Media deletion removes the files, not just the row
+
+`ProductMediaRepository.delete` removes the catalogue row; on its own that
+leaves the full-size image and its thumbnail in the bucket forever — invisible to
+the storefront, still billed, and available to resurface if a path is re-used.
+The editor therefore deletes the row first, then removes both objects with
+`removeQuietly`, and reports a denied write instead of dropping the future on the
+floor. The confirmation dialog and the snackbar are part of the same fix.
+
+---
+
 ## E. Open items handed to Part 2
 
 Closed since this list was written:
@@ -436,6 +526,14 @@ Closed since this list was written:
 * `test/unit/admin_gateway_test.dart` covers the gateway widgets end to end
   (list, empty state, list → editor seeding, save-through-repository, and
   validation blocking a bad slug) against fake repositories.
+* The owner wording layer (D-028/D-029) and the five-tap gateway (D-030) are
+  covered: `test/unit/text_overrides_test.dart` proves the delegate serves the
+  owner's text through `of(context)` in a real widget tree and that Oromo
+  resolves, `test/unit/admin_gate_store_test.dart` proves the shipped
+  credentials, the salted digest and password changes, and
+  `test/unit/live_edit_and_layout_test.dart` proves live edit mode puts a pencil
+  on the dashboard and that the dashboard, the text editor and the gateway
+  password screen lay out at 320x640 with 1.35x text scaling without overflow.
 
 Still open:
 

@@ -89,6 +89,65 @@ void main() {
     });
   });
 
+  group('the five-tap owner gate', () {
+    test('unlocking admits a visitor with no Supabase session', () {
+      expect(
+        resolveAdminRedirect(
+          location: Routes.adminProducts,
+          isSignedIn: false,
+          adminStatus: notAdmin,
+          gateUnlocked: true,
+        ),
+        isNull,
+      );
+      expect(
+        resolveAdminRedirect(
+          location: Routes.adminTextEditor,
+          isSignedIn: false,
+          adminStatus: notAdmin,
+          gateUnlocked: true,
+        ),
+        isNull,
+      );
+    });
+
+    test('the sign-in page stays reachable, because saving needs a session', () {
+      // Unlocking the panel opens the gateway; it does not sign anyone in, and
+      // every write is still decided by RLS.
+      expect(
+        resolveAdminRedirect(
+          location: Routes.adminLogin,
+          isSignedIn: false,
+          adminStatus: notAdmin,
+          gateUnlocked: true,
+        ),
+        isNull,
+      );
+    });
+
+    test('a locked gate leaves the existing rules untouched', () {
+      final String? target = resolveAdminRedirect(
+        location: Routes.adminRoot,
+        isSignedIn: true,
+        adminStatus: notAdmin,
+        gateUnlocked: false,
+      );
+      expect(Uri.parse(target!).path, Routes.adminLogin);
+    });
+
+    test('the storefront stays public either way', () {
+      expect(
+        resolveAdminRedirect(
+          location: Routes.favourites,
+          isSignedIn: false,
+          adminStatus: notAdmin,
+          gateUnlocked: true,
+        ),
+        isNull,
+      );
+    });
+  });
+
   group('login route', () {
     test('a confirmed admin is sent to the dashboard', () {
       expect(
@@ -129,8 +188,11 @@ void main() {
       expect(Routes.isGuardedAdminPath(Routes.adminRoot), isTrue);
       expect(Routes.isGuardedAdminPath(Routes.adminProducts), isTrue);
       expect(Routes.isGuardedAdminPath(Routes.adminProductEditor('x')), isTrue);
+      expect(Routes.isGuardedAdminPath(Routes.adminTextEditor), isTrue);
+      expect(Routes.isGuardedAdminPath(Routes.adminGatePassword), isTrue);
       expect(Routes.isGuardedAdminPath(Routes.adminLogin), isFalse);
       expect(Routes.isGuardedAdminPath(Routes.storefront), isFalse);
+      expect(Routes.isGuardedAdminPath(Routes.favourites), isFalse);
       expect(Routes.isGuardedAdminPath('/adminish'), isTrue); // prefix match
     });
   });

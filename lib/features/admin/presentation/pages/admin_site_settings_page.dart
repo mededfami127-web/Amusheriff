@@ -73,6 +73,13 @@ class AdminSiteSettingsPage extends ConsumerWidget {
           ),
           const SizedBox(height: 14),
           AdminTextField(
+            label: l10n.adminStoreNameOm,
+            value: state.storeNameOm,
+            textInputAction: TextInputAction.next,
+            onChanged: controller.setStoreNameOm,
+          ),
+          const SizedBox(height: 14),
+          AdminTextField(
             label: l10n.adminTagline,
             value: state.tagline,
             textInputAction: TextInputAction.next,
@@ -169,6 +176,7 @@ class _LanguageAndThemePanel extends ConsumerWidget {
               ButtonSegment<String>(value: 'en', label: Text('English')),
               ButtonSegment<String>(value: 'am', label: Text('አማርኛ')),
               ButtonSegment<String>(value: 'ar', label: Text('عربي')),
+              ButtonSegment<String>(value: 'om', label: Text('Oromoo')),
             ],
             selected: <String>{prefs.language.code},
             showSelectedIcon: false,

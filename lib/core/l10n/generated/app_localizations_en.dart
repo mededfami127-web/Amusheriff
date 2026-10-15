@@ -71,6 +71,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actionEdit => 'Edit';
 
   @override
+  String get actionFavourite => 'Save to favourites';
+
+  @override
   String get actionMove => 'Move';
 
   @override
@@ -90,6 +93,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get actionShare => 'Share';
+
+  @override
+  String get actionUnfavourite => 'Remove from favourites';
 
   @override
   String get actionViewDetails => 'View details';
@@ -277,6 +283,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminKeepEditing => 'Keep editing';
 
   @override
+  String get adminLiveEdit => 'Live edit';
+
+  @override
+  String get adminLiveEditOff => 'Live editing off';
+
+  @override
+  String get adminLiveEditOn =>
+      'Live editing on — tap a pencil to rewrite that text';
+
+  @override
   String get adminLivePreview => 'Customer preview';
 
   @override
@@ -457,6 +473,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminStoreNameAr => 'Store name (Arabic)';
 
   @override
+  String get adminStoreNameOm => 'Store name (Oromo)';
+
+  @override
   String get adminStrength => 'Strength';
 
   @override
@@ -470,6 +489,38 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminTagline => 'Tagline';
+
+  @override
+  String get adminTextEditor => 'Text & language';
+
+  @override
+  String get adminTextEditorAllScreens => 'All screens';
+
+  @override
+  String get adminTextEditorHasVariables => 'Has variables';
+
+  @override
+  String get adminTextEditorHint =>
+      'Every word of the app, in every language. Edit one and it changes everywhere.';
+
+  @override
+  String get adminTextEditorNoResults => 'No text matches your search';
+
+  @override
+  String get adminTextEditorPlaceholderHint =>
+      'Keep the variables in brackets exactly as written.';
+
+  @override
+  String get adminTextEditorReset => 'Restore default';
+
+  @override
+  String get adminTextEditorResetDone => 'Default wording restored';
+
+  @override
+  String get adminTextEditorSaved => 'Text saved';
+
+  @override
+  String get adminTextEditorSearch => 'Search a word';
 
   @override
   String get adminUnpublish => 'Unpublish';
@@ -581,6 +632,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorForeignKey => 'Related data is missing.';
 
   @override
+  String get errorGateLocked => 'Incorrect username or password.';
+
+  @override
   String get errorInvalidCredentials => 'Incorrect email or password.';
 
   @override
@@ -637,6 +691,53 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorValidation => 'Please correct the highlighted fields.';
 
   @override
+  String get favouritesEmptyMessage =>
+      'Tap the heart on a piece to keep it here.';
+
+  @override
+  String get favouritesEmptyTitle => 'No favourites yet';
+
+  @override
+  String get gateChangeTitle => 'Gateway password';
+
+  @override
+  String get gateChangeIntro =>
+      'This password opens the owner panel on this device. Change it whenever you like.';
+
+  @override
+  String get gateChanged => 'Gateway password updated.';
+
+  @override
+  String get gateHint => 'Tip: tap the logo five times to reopen this panel.';
+
+  @override
+  String get gateLocked => 'Incorrect username or password.';
+
+  @override
+  String get gateTitle => 'Owner access';
+
+  @override
+  String get gateUnlock => 'Unlock';
+
+  @override
+  String get gateUnlocked => 'Owner access unlocked.';
+
+  @override
+  String get gateUsername => 'Username';
+
+  @override
+  String get groupCommon => 'Shared words';
+
+  @override
+  String get groupErrors => 'Errors & states';
+
+  @override
+  String get groupStorefront => 'Storefront screens';
+
+  @override
+  String get groupValidation => 'Validation messages';
+
+  @override
   String inquiryMessageTemplate(String price, String product) {
     return 'Hello! I am interested in “$product” ($price).';
   }
@@ -676,6 +777,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navContact => 'Contact';
+
+  @override
+  String get navFavourites => 'Favourites';
 
   @override
   String get navHome => 'Home';

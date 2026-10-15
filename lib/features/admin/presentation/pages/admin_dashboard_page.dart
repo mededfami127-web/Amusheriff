@@ -5,8 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/router/routes.dart';
 import '../../../../core/theme/brand_colors.dart';
-import '../../../../core/theme/gradients.dart';
 import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/live_editable_text.dart';
 import '../../../catalog/domain/entities/category.dart';
 import '../../../catalog/domain/entities/product.dart';
 import '../../../catalog/presentation/providers/catalog_providers.dart';
@@ -48,18 +48,24 @@ class AdminDashboardPage extends ConsumerWidget {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
         children: <Widget>[
-          Text(
-            l10n.adminDashboard,
+          LiveEditableText(
+            textKey: 'adminDashboard',
+            text: l10n.adminDashboard,
             style: BrandTypography.displayMedium,
           ),
           const SizedBox(height: 6),
-          Text(l10n.adminSortOrderHint, style: BrandTypography.bodySmall),
+          LiveEditableText(
+            textKey: 'adminSortOrderHint',
+            text: l10n.adminSortOrderHint,
+            style: BrandTypography.bodySmall,
+          ),
           const SizedBox(height: 20),
           Row(
             children: <Widget>[
               Expanded(
                 child: _StatsCard(
                   label: l10n.adminStatsCategories,
+                  textKey: 'adminStatsCategories',
                   icon: Icons.category_outlined,
                   value: categories.value?.length,
                   loading: categories.isLoading,
@@ -70,6 +76,7 @@ class AdminDashboardPage extends ConsumerWidget {
               Expanded(
                 child: _StatsCard(
                   label: l10n.adminStatsProducts,
+                  textKey: 'adminStatsProducts',
                   icon: Icons.chair_outlined,
                   value: products.value?.length,
                   loading: products.isLoading,
@@ -84,6 +91,7 @@ class AdminDashboardPage extends ConsumerWidget {
               Expanded(
                 child: _StatsCard(
                   label: l10n.adminInquiriesWeek,
+                  textKey: 'adminInquiriesWeek',
                   icon: Icons.insights_outlined,
                   value: inquiriesThisWeek,
                   loading: inquiries.isLoading,
@@ -94,6 +102,7 @@ class AdminDashboardPage extends ConsumerWidget {
               Expanded(
                 child: _StatsCard(
                   label: l10n.adminMostContacted,
+                  textKey: 'adminMostContacted',
                   icon: Icons.favorite_outline_rounded,
                   value: mostContacted.length,
                   loading: inquiries.isLoading,
@@ -103,38 +112,53 @@ class AdminDashboardPage extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 26),
-          _SectionHeader(title: l10n.adminQuickActions),
+          _SectionHeader(title: l10n.adminQuickActions, textKey: 'adminQuickActions'),
           const SizedBox(height: 10),
           _QuickAction(
             label: l10n.adminProducts,
+            textKey: 'adminProducts',
             icon: Icons.chair_outlined,
             route: Routes.adminProducts,
           ),
           _QuickAction(
             label: l10n.adminCategories,
+            textKey: 'adminCategories',
             icon: Icons.category_outlined,
             route: Routes.adminCategories,
           ),
           _QuickAction(
             label: l10n.adminContacts,
+            textKey: 'adminContacts',
             icon: Icons.share_outlined,
             route: Routes.adminContacts,
           ),
           _QuickAction(
             label: l10n.adminInquiries,
+            textKey: 'adminInquiries',
             icon: Icons.insights_outlined,
             route: Routes.adminInquiries,
           ),
           _QuickAction(
             label: l10n.adminSiteSettings,
+            textKey: 'adminSiteSettings',
             icon: Icons.tune_outlined,
             route: Routes.adminSiteSettings,
           ),
+          _QuickAction(
+            label: l10n.adminTextEditor,
+            textKey: 'adminTextEditor',
+            icon: Icons.translate_rounded,
+            route: Routes.adminTextEditor,
+          ),
           const SizedBox(height: 26),
-          _SectionHeader(title: l10n.adminMostContacted),
+          _SectionHeader(title: l10n.adminMostContacted, textKey: 'adminMostContacted'),
           const SizedBox(height: 6),
           if (mostContacted.isEmpty)
-            Text(l10n.adminNoInquiriesYet, style: BrandTypography.bodySmall)
+            LiveEditableText(
+              textKey: 'adminNoInquiriesYet',
+              text: l10n.adminNoInquiriesYet,
+              style: BrandTypography.bodySmall,
+            )
           else
             for (final MapEntry<String, int> entry in mostContacted)
               ListTile(
@@ -160,6 +184,7 @@ class AdminDashboardPage extends ConsumerWidget {
 class _StatsCard extends StatelessWidget {
   const _StatsCard({
     required this.label,
+    required this.textKey,
     required this.icon,
     required this.value,
     required this.loading,
@@ -167,6 +192,7 @@ class _StatsCard extends StatelessWidget {
   });
 
   final String label;
+  final String textKey;
   final IconData icon;
   final int? value;
   final bool loading;
@@ -196,8 +222,10 @@ class _StatsCard extends StatelessWidget {
               Icon(icon, size: 18, color: BrandColors.gold),
               const SizedBox(width: 8),
               Expanded(
-                child: Text(
-                  label,
+                child: LiveEditableText(
+                  textKey: textKey,
+                  text: label,
+                  dense: true,
                   style: BrandTypography.bodySmall,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -217,21 +245,20 @@ class _StatsCard extends StatelessWidget {
 }
 
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title});
+  const _SectionHeader({required this.title, required this.textKey});
 
   final String title;
+  final String textKey;
 
   @override
   Widget build(BuildContext context) {
-    return ShaderMask(
-      shaderCallback: BrandGradients.goldHorizontal.createShader,
-      blendMode: BlendMode.srcIn,
-      child: Text(
-        title,
-        style: BrandTypography.displaySmall.copyWith(
-          fontSize: 18,
-          color: BrandColors.gold,
-        ),
+    return LiveEditableText(
+      textKey: textKey,
+      text: title,
+      dense: true,
+      style: BrandTypography.displaySmall.copyWith(
+        fontSize: 18,
+        color: BrandColors.gold,
       ),
     );
   }
@@ -240,11 +267,13 @@ class _SectionHeader extends StatelessWidget {
 class _QuickAction extends StatelessWidget {
   const _QuickAction({
     required this.label,
+    required this.textKey,
     required this.icon,
     required this.route,
   });
 
   final String label;
+  final String textKey;
   final IconData icon;
   final String route;
 
@@ -255,7 +284,12 @@ class _QuickAction extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: Icon(icon, color: BrandColors.gold),
-        title: Text(label, style: BrandTypography.bodyLarge),
+        title: LiveEditableText(
+          textKey: textKey,
+          text: label,
+          dense: true,
+          style: BrandTypography.bodyLarge,
+        ),
         trailing: Icon(
           Icons.chevron_right_rounded,
           color: dark ? BrandColors.goldLight : BrandColors.charcoal,

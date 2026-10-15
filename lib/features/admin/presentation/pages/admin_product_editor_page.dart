@@ -12,6 +12,7 @@ import '../../../../core/theme/brand_colors.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/inline_failure_banner.dart';
+import '../../../catalog/data/datasources/storage_datasource.dart';
 import '../../../catalog/domain/entities/category.dart';
 import '../../../catalog/domain/entities/media_kind.dart';
 import '../../../catalog/domain/entities/product.dart';
@@ -506,21 +507,84 @@ class _MediaCard extends ConsumerWidget {
                 tooltip: l10n.adminSetCover,
                 onPressed: media.isCover
                     ? null
-                    : () => ref
-                        .read(productMediaRepositoryProvider)
-                        .setCover(productId, media.id),
+                    : () => _setCover(context, ref),
               ),
               IconButton(
                 icon: const Icon(Icons.delete_outline_rounded, size: 18),
                 tooltip: l10n.adminRemoveMedia,
-                onPressed: () => ref
-                    .read(productMediaRepositoryProvider)
-                    .delete(media.id),
+                onPressed: () => _remove(context, ref),
               ),
             ],
           ),
         ],
       ),
     );
+  }
+
+  /// Promotes this item to cover, reporting a denied write instead of letting
+  /// the future's error disappear.
+  Future<void> _setCover(BuildContext context, WidgetRef ref) async {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref
+          .read(productMediaRepositoryProvider)
+          .setCover(productId, media.id);
+      messenger.showSnackBar(SnackBar(content: Text(l10n.adminCover)));
+    } on Object catch (error) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(localizeFailure(l10n, ErrorMapper.map(error)))),
+      );
+    }
+  }
+
+  /// Removes the row **and** the files behind it.
+  ///
+  /// Deleting only the row would leave the full-size image and its thumbnail in
+  /// the bucket forever: the storefront would never show them again, but they
+  /// would keep costing storage and could resurface for a re-used path.
+  Future<void> _remove(BuildContext context, WidgetRef ref) async {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
+
+    final bool confirmed = await showDialog<bool>(
+          context: context,
+          builder: (BuildContext context) => AlertDialog(
+            title: Text(l10n.adminRemoveMedia),
+            content: Text(l10n.adminConfirmDeleteMessage),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(l10n.actionCancel),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text(l10n.actionDelete),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+    if (!confirmed) return;
+
+    final List<String> paths = <String>[
+      media.storagePath,
+      if (media.hasThumbnail) media.thumbnailPath!,
+    ];
+
+
+    try {
+      await ref.read(productMediaRepositoryProvider).delete(media.id);
+      for (final String path in paths) {
+        await ref
+            .read(storageDataSourceProvider)
+            .removeQuietly(StorageDataSource.productMediaBucket, path);
+      }
+      messenger.showSnackBar(SnackBar(content: Text(l10n.adminRemoveMedia)));
+    } on Object catch (error) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(localizeFailure(l10n, ErrorMapper.map(error)))),
+      );
+    }
   }
 }

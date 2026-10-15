@@ -71,6 +71,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get actionEdit => 'تعديل';
 
   @override
+  String get actionFavourite => 'أضف إلى المفضلة';
+
+  @override
   String get actionMove => 'نقل';
 
   @override
@@ -90,6 +93,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get actionShare => 'مشاركة';
+
+  @override
+  String get actionUnfavourite => 'أزل من المفضلة';
 
   @override
   String get actionViewDetails => 'عرض التفاصيل';
@@ -277,6 +283,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get adminKeepEditing => 'متابعة التحرير';
 
   @override
+  String get adminLiveEdit => 'التحرير المباشر';
+
+  @override
+  String get adminLiveEditOff => 'التحرير المباشر مُطفأ';
+
+  @override
+  String get adminLiveEditOn =>
+      'التحرير المباشر مُشغَّل — انقر القلم لتغيير ذلك النص';
+
+  @override
   String get adminLivePreview => 'معاينة الزبون';
 
   @override
@@ -458,6 +474,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get adminStoreNameAr => 'اسم المتجر (عربي)';
 
   @override
+  String get adminStoreNameOm => 'اسم المتجر (الأورومو)';
+
+  @override
   String get adminStrength => 'القوة';
 
   @override
@@ -471,6 +490,38 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get adminTagline => 'الشعار';
+
+  @override
+  String get adminTextEditor => 'النصوص واللغة';
+
+  @override
+  String get adminTextEditorAllScreens => 'كل الشاشات';
+
+  @override
+  String get adminTextEditorHasVariables => 'يحتوي على متغيرات';
+
+  @override
+  String get adminTextEditorHint =>
+      'كل كلمات التطبيق، بجميع اللغات. عدّل كلمة فتتغير في كل مكان.';
+
+  @override
+  String get adminTextEditorNoResults => 'لا يوجد نص يطابق بحثك';
+
+  @override
+  String get adminTextEditorPlaceholderHint =>
+      'اترك المتغيرات بين الأقواس كما هي بالضبط.';
+
+  @override
+  String get adminTextEditorReset => 'استعادة الافتراضي';
+
+  @override
+  String get adminTextEditorResetDone => 'تمت استعادة النص الافتراضي';
+
+  @override
+  String get adminTextEditorSaved => 'تم حفظ النص';
+
+  @override
+  String get adminTextEditorSearch => 'ابحث عن كلمة';
 
   @override
   String get adminUnpublish => 'إلغاء النشر';
@@ -582,6 +633,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get errorForeignKey => 'البيانات المرتبطة مفقودة.';
 
   @override
+  String get errorGateLocked => 'اسم المستخدم أو كلمة المرور غير صحيحة.';
+
+  @override
   String get errorInvalidCredentials =>
       'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
 
@@ -638,6 +692,52 @@ class AppLocalizationsAr extends AppLocalizations {
   String get errorValidation => 'يرجى تصحيح الحقول المحددة.';
 
   @override
+  String get favouritesEmptyMessage => 'انقر على القلب لحفظ القطعة هنا.';
+
+  @override
+  String get favouritesEmptyTitle => 'لا مفضلات بعد';
+
+  @override
+  String get gateChangeTitle => 'كلمة مرور الدخول';
+
+  @override
+  String get gateChangeIntro =>
+      'تفتح كلمة المرور هذه لوحة المالك على هذا الجهاز. غيّرها متى شئت.';
+
+  @override
+  String get gateChanged => 'تم تحديث كلمة مرور الدخول.';
+
+  @override
+  String get gateHint => 'تلميح: انقر الشعار خمس مرات لإعادة فتح هذه اللوحة.';
+
+  @override
+  String get gateLocked => 'اسم المستخدم أو كلمة المرور غير صحيحة.';
+
+  @override
+  String get gateTitle => 'دخول المالك';
+
+  @override
+  String get gateUnlock => 'فتح';
+
+  @override
+  String get gateUnlocked => 'تم فتح دخول المالك.';
+
+  @override
+  String get gateUsername => 'اسم المستخدم';
+
+  @override
+  String get groupCommon => 'كلمات مشتركة';
+
+  @override
+  String get groupErrors => 'الأخطاء والحالات';
+
+  @override
+  String get groupStorefront => 'شاشات المتجر';
+
+  @override
+  String get groupValidation => 'رسائل التحقق';
+
+  @override
   String inquiryMessageTemplate(String price, String product) {
     return 'مرحبًا! أنا مهتم بـ «$product» ($price).';
   }
@@ -677,6 +777,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get navContact => 'اتصل بنا';
+
+  @override
+  String get navFavourites => 'المفضلة';
 
   @override
   String get navHome => 'الرئيسية';

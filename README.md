@@ -28,10 +28,10 @@ CI/CD promotion gates and release Android/iOS builds — is tracked in
 
 | Check | Command | Result |
 | --- | --- | --- |
-| Code generation | `dart run build_runner build --delete-conflicting-outputs` | 0 errors |
+| Code generation | `dart run build_runner build` + `dart run tool/gen_text_overlay.dart` | 0 errors |
 | Static analysis | `flutter analyze` | **No issues found** |
-| Unit + widget tests | `flutter test` | **64 passed** |
-| RLS acceptance suite | `bash scripts/run_rls_tests.sh` | **20/20 checks passed** on PostgreSQL 16.15 |
+| Unit + widget tests | `flutter test` | **101 passed** |
+| RLS acceptance suite | `bash scripts/run_rls_tests.sh` | **22/22 checks passed** on PostgreSQL 16.15 |
 | Migration runner | `bash scripts/apply_migrations.sh --dry-run`, then `--apply` twice | plan, dry run, apply and re-apply all clean on PostgreSQL 16.15 |
 
 Not yet exercised in this environment: release Android/iOS builds (no Android
@@ -48,8 +48,14 @@ SDK or Xcode available) and the Edge Function under the Edge Runtime. See
 flutter --version      # 3.47.x stable, Dart 3.13+
 flutter pub get
 dart run build_runner build --delete-conflicting-outputs
-flutter gen-l10n       # also runs automatically via `generate: true`
+flutter gen-l10n                      # also runs automatically via `generate: true`
+dart run tool/gen_text_overlay.dart   # after any lib/l10n/app_*.arb change
 ```
+
+The last command regenerates `lib/core/l10n/text_catalog.dart` and
+`overridable_localizations.dart`, which is what the owner-facing text editor
+reads. Both are committed, so a checkout builds without running it — but a new
+ARB key is invisible to the editor until it has been re-run.
 
 ### 2. Supabase project
 
@@ -228,6 +234,50 @@ After changing any `@riverpod` provider, freezed entity or JSON model:
 dart run build_runner build --delete-conflicting-outputs
 ```
 
+### Editing the app's wording (owner-facing)
+
+The owner can rewrite any string of the app without a release:
+
+* **In place** — the *Live edit* switch in the gateway sidebar puts a pencil
+  above every editable string on the gateway and storefront screens. Tapping one
+  opens a sheet for that exact key, with a chip per language.
+* **In bulk** — *Text & language* (`/admin/text`) lists every screen with all of
+  its strings, an edit icon for each, a language picker (English, Amharic,
+  Arabic, Oromo) and a search box.
+
+Both write one row per `(ARB key, locale)` to `public.text_overrides`, and the
+storefront re-renders live. Deleting the row — *Restore default* — puts the
+shipped wording back.
+
+Two mechanics make that work and are worth knowing before changing them:
+
+* `AppLocalizations.of(context)` is served by `OverridableLocalizationsDelegate`
+  (`lib/core/l10n/text_localizations.dart`), which returns
+  `OverridableAppLocalizations` — a generated subclass that prefers the owner's
+  wording per key. That is why an edit lands on *every* screen although no call
+  site mentions overrides.
+* `dart run tool/gen_text_overlay.dart` regenerates both that subclass and the
+  catalogue the editor lists. Re-run it whenever you add or rename an ARB key.
+
+### The owner gateway (five taps)
+
+Tapping the logo five times (within three seconds) on the storefront or in the
+gateway header opens a small username/password panel. The shipped credentials
+are `admin` / `admin123`, and *Gateway password* (`/admin/gate-password`) in the
+sidebar changes them. The password is stored as a salted SHA-256 digest in the
+encrypted keystore.
+
+This panel is a **convenience lock, not the security boundary**: it keeps the
+gateway out of a customer's way on a shared device. Everything behind it is
+still governed by Supabase Auth and RLS, exactly as before — the panel grants no
+new database access.
+
+Because of that, the panel opens the *screens* but does not sign anyone in:
+RLS decides writes, so saving wording, photos or prices still needs the owner's
+Supabase session. The sidebar shows a **Sign in** row (with that explanation)
+whenever the panel is unlocked but no session exists, and the sign-in page stays
+reachable in that state rather than redirecting away.
+
 ### Database changes
 
 Add a new timestamped file to `supabase/migrations/`, then run the suite:
@@ -292,3 +342,8 @@ Every deviation from the brief, with its rationale:
 * Public e-mail sign-up is disabled; there is exactly one account.
 * Storage buckets are public-read and admin-write, with per-type size caps and a
   path-prefix check enforced by policy.
+* `text_overrides` is public-read by necessity (the anonymous storefront renders
+  the owner's wording) and admin-only on write, like every other content table.
+* The five-tap gateway is client-side convenience only. It stores a salted hash,
+  never the password, and unlocking it does not widen what any request may read
+  or write — RLS still decides that.

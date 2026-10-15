@@ -14,6 +14,7 @@ import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/gold_divider.dart';
 import '../../../../core/widgets/inline_failure_banner.dart';
+import '../../../../core/widgets/live_editable_text.dart';
 import '../../../../core/widgets/shimmer_card.dart';
 import '../../../catalog/domain/entities/category.dart';
 import '../../../catalog/domain/entities/product.dart';
@@ -49,6 +50,11 @@ class StorefrontHomePage extends ConsumerWidget {
           tooltip: l10n.actionSearch,
         ),
         IconButton(
+          onPressed: () => context.push(Routes.favourites),
+          icon: const Icon(Icons.favorite_border_rounded),
+          tooltip: l10n.navFavourites,
+        ),
+        IconButton(
           onPressed: () => context.push(Routes.settings),
           icon: const Icon(Icons.tune_rounded),
           tooltip: l10n.navSettings,
@@ -71,6 +77,7 @@ class StorefrontHomePage extends ConsumerWidget {
             SliverToBoxAdapter(
               child: _SectionHeader(
                 title: l10n.sectionBrowseCategories,
+                textKey: 'sectionBrowseCategories',
                 onSeeAll: null,
               ),
             ),
@@ -97,7 +104,10 @@ class StorefrontHomePage extends ConsumerWidget {
             ),
             if (featured.value?.isNotEmpty ?? false) ...<Widget>[
               SliverToBoxAdapter(
-                child: _SectionHeader(title: l10n.sectionFeatured),
+                child: _SectionHeader(
+                  title: l10n.sectionFeatured,
+                  textKey: 'sectionFeatured',
+                ),
               ),
               SliverToBoxAdapter(
                 child: featured.when(
@@ -107,7 +117,12 @@ class StorefrontHomePage extends ConsumerWidget {
                 ),
               ),
             ],
-            SliverToBoxAdapter(child: _SectionHeader(title: l10n.sectionAllProducts)),
+            SliverToBoxAdapter(
+              child: _SectionHeader(
+                title: l10n.sectionAllProducts,
+                textKey: 'sectionAllProducts',
+              ),
+            ),
             _ProductGrid(asyncProducts: all),
             const SliverToBoxAdapter(child: _FooterContact()),
             const SliverToBoxAdapter(child: SizedBox(height: 28)),
@@ -177,8 +192,10 @@ class _Hero extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 10),
-            Text(
-              settings.hasTagline ? settings.tagline! : l10n.tagline,
+            LiveEditableText(
+              textKey: 'tagline',
+              text: settings.hasTagline ? settings.tagline! : l10n.tagline,
+              dark: true,
               style: BrandTypography.bodyMedium.copyWith(
                 color: BrandColors.ivory.withValues(alpha: 0.88),
               ),
@@ -192,6 +209,7 @@ class _Hero extends ConsumerWidget {
                   child: _HeroAction(
                     icon: Icons.grid_view_rounded,
                     label: l10n.sectionBrowseCategories,
+                    textKey: 'sectionBrowseCategories',
                     onTap: () => context.push(Routes.search),
                   ),
                 ),
@@ -200,6 +218,7 @@ class _Hero extends ConsumerWidget {
                   child: _HeroAction(
                     icon: Icons.chat_bubble_outline_rounded,
                     label: l10n.actionContactOwner,
+                    textKey: 'actionContactOwner',
                     subtitle: primary,
                     onTap: () => context.push(Routes.about),
                   ),
@@ -217,12 +236,14 @@ class _HeroAction extends StatelessWidget {
   const _HeroAction({
     required this.icon,
     required this.label,
+    required this.textKey,
     required this.onTap,
     this.subtitle,
   });
 
   final IconData icon;
   final String label;
+  final String textKey;
   final String? subtitle;
   final VoidCallback onTap;
 
@@ -241,8 +262,11 @@ class _HeroAction extends StatelessWidget {
             children: <Widget>[
               Icon(icon, size: 20, color: BrandColors.goldLight),
               const SizedBox(height: 8),
-              Text(
-                label,
+              LiveEditableText(
+                textKey: textKey,
+                text: label,
+                dark: true,
+                dense: true,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: BrandTypography.labelLarge.copyWith(
@@ -270,9 +294,14 @@ class _HeroAction extends StatelessWidget {
 }
 
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title, this.onSeeAll});
+  const _SectionHeader({
+    required this.title,
+    required this.textKey,
+    this.onSeeAll,
+  });
 
   final String title;
+  final String textKey;
   final VoidCallback? onSeeAll;
 
   @override
@@ -283,8 +312,10 @@ class _SectionHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(
-            title,
+          LiveEditableText(
+            textKey: textKey,
+            text: title,
+            dense: true,
             style: BrandTypography.displayForLocale(
               Localizations.localeOf(context),
               base: BrandTypography.displaySmall,

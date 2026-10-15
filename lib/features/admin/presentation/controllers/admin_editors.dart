@@ -374,6 +374,7 @@ class SiteSettingsEditorState {
     this.storeNameEn = '',
     this.storeNameAm = '',
     this.storeNameAr = '',
+    this.storeNameOm = '',
     this.tagline = '',
     this.about = '',
     this.logoPath,
@@ -386,6 +387,7 @@ class SiteSettingsEditorState {
   final String storeNameEn;
   final String storeNameAm;
   final String storeNameAr;
+  final String storeNameOm;
   final String tagline;
   final String about;
   final String? logoPath;
@@ -398,6 +400,7 @@ class SiteSettingsEditorState {
     String? storeNameEn,
     String? storeNameAm,
     String? storeNameAr,
+    String? storeNameOm,
     String? tagline,
     String? about,
     String? logoPath,
@@ -410,6 +413,7 @@ class SiteSettingsEditorState {
         storeNameEn: storeNameEn ?? this.storeNameEn,
         storeNameAm: storeNameAm ?? this.storeNameAm,
         storeNameAr: storeNameAr ?? this.storeNameAr,
+        storeNameOm: storeNameOm ?? this.storeNameOm,
         tagline: tagline ?? this.tagline,
         about: about ?? this.about,
         logoPath: logoPath ?? this.logoPath,
@@ -433,6 +437,7 @@ class SiteSettingsEditorController extends _$SiteSettingsEditorController {
       storeNameEn: settings.storeNameEn,
       storeNameAm: settings.storeNameAm,
       storeNameAr: settings.storeNameAr,
+      storeNameOm: settings.storeNameOm,
       tagline: settings.tagline ?? '',
       about: settings.about ?? '',
       logoPath: settings.logoPath,
@@ -444,6 +449,7 @@ class SiteSettingsEditorController extends _$SiteSettingsEditorController {
   void setStoreNameEn(String v) => state = state.copyWith(storeNameEn: v);
   void setStoreNameAm(String v) => state = state.copyWith(storeNameAm: v);
   void setStoreNameAr(String v) => state = state.copyWith(storeNameAr: v);
+  void setStoreNameOm(String v) => state = state.copyWith(storeNameOm: v);
   void setTagline(String v) => state = state.copyWith(tagline: v);
   void setAbout(String v) => state = state.copyWith(about: v);
   void setLogoPath(String? v) => state = state.copyWith(logoPath: v);
@@ -468,6 +474,7 @@ class SiteSettingsEditorController extends _$SiteSettingsEditorController {
               storeNameEn: state.storeNameEn.trim(),
               storeNameAm: state.storeNameAm.trim(),
               storeNameAr: state.storeNameAr.trim(),
+              storeNameOm: state.storeNameOm.trim(),
               tagline: state.tagline.trim(),
               about: state.about.trim(),
               logoPath: state.logoPath,

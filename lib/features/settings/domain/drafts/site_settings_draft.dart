@@ -9,6 +9,7 @@ class SiteSettingsDraft {
     required this.storeNameEn,
     this.storeNameAm,
     this.storeNameAr,
+    this.storeNameOm,
     this.tagline,
     this.about,
     this.logoPath,
@@ -19,6 +20,7 @@ class SiteSettingsDraft {
   final String storeNameEn;
   final String? storeNameAm;
   final String? storeNameAr;
+  final String? storeNameOm;
   final String? tagline;
   final String? about;
   final String? logoPath;
@@ -30,6 +32,7 @@ class SiteSettingsDraft {
         'store_name_en': storeNameEn.trim(),
         'store_name_am': _nullIfBlank(storeNameAm),
         'store_name_ar': _nullIfBlank(storeNameAr),
+        'store_name_om': _nullIfBlank(storeNameOm),
         'tagline': _nullIfBlank(tagline),
         'about': _nullIfBlank(about),
         'logo_path': _nullIfBlank(logoPath),
@@ -42,6 +45,7 @@ class SiteSettingsDraft {
         storeNameEn: settings.storeNameEn,
         storeNameAm: settings.storeNameAm,
         storeNameAr: settings.storeNameAr,
+        storeNameOm: settings.storeNameOm,
         tagline: settings.tagline,
         about: settings.about,
         logoPath: settings.logoPath,

@@ -14,6 +14,7 @@ abstract class SiteSettings with _$SiteSettings {
     @Default('Amu Sharif Arabiyan Majlis') String storeNameEn,
     @Default('አሙ ሸሪፍ አረቢያን መጅሊስ') String storeNameAm,
     @Default('المجلس العربي عمو شريف') String storeNameAr,
+    @Default('Aamu Sharif Arabiyaan Majlis') String storeNameOm,
     String? tagline,
     String? about,
     String? logoPath,
@@ -33,6 +34,7 @@ abstract class SiteSettings with _$SiteSettings {
   String storeNameFor(String languageCode) => switch (languageCode) {
         'am' => _pick(storeNameAm, storeNameEn),
         'ar' => _pick(storeNameAr, storeNameEn),
+        'om' => _pick(storeNameOm, storeNameEn),
         _ => _pick(storeNameEn, storeNameAm),
       };
 
@@ -47,7 +49,8 @@ String _pick(String primary, String fallback) =>
 enum AppLanguage {
   en('en', 'English', 'English'),
   am('am', 'አማርኛ', 'Amharic'),
-  ar('ar', 'العربية', 'Arabic');
+  ar('ar', 'العربية', 'Arabic'),
+  om('om', 'Afaan Oromoo', 'Oromo');
 
   const AppLanguage(this.code, this.nativeName, this.englishName);
 

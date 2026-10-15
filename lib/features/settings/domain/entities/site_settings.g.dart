@@ -13,6 +13,8 @@ _SiteSettings _$SiteSettingsFromJson(Map<String, dynamic> json) =>
           json['store_name_en'] as String? ?? 'Amu Sharif Arabiyan Majlis',
       storeNameAm: json['store_name_am'] as String? ?? 'አሙ ሸሪፍ አረቢያን መጅሊስ',
       storeNameAr: json['store_name_ar'] as String? ?? 'المجلس العربي عمو شريف',
+      storeNameOm:
+          json['store_name_om'] as String? ?? 'Aamu Sharif Arabiyaan Majlis',
       tagline: json['tagline'] as String?,
       about: json['about'] as String?,
       logoPath: json['logo_path'] as String?,
@@ -29,6 +31,7 @@ Map<String, dynamic> _$SiteSettingsToJson(_SiteSettings instance) =>
       'store_name_en': instance.storeNameEn,
       'store_name_am': instance.storeNameAm,
       'store_name_ar': instance.storeNameAr,
+      'store_name_om': instance.storeNameOm,
       'tagline': ?instance.tagline,
       'about': ?instance.about,
       'logo_path': ?instance.logoPath,

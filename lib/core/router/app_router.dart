@@ -6,11 +6,13 @@ import '../../features/admin/presentation/pages/admin_categories_page.dart';
 import '../../features/admin/presentation/pages/admin_change_password_page.dart';
 import '../../features/admin/presentation/pages/admin_contacts_page.dart';
 import '../../features/admin/presentation/pages/admin_dashboard_page.dart';
+import '../../features/admin/presentation/pages/admin_gate_password_page.dart';
 import '../../features/admin/presentation/pages/admin_site_settings_page.dart';
 import '../../features/admin/presentation/pages/admin_inquiries_page.dart';
 import '../../features/admin/presentation/pages/admin_login_page.dart';
 import '../../features/admin/presentation/pages/admin_product_editor_page.dart';
 import '../../features/admin/presentation/pages/admin_products_page.dart';
+import '../../features/admin/presentation/providers/admin_gate_providers.dart';
 import '../../features/auth/presentation/providers/auth_providers.dart';
 import '../../features/settings/presentation/pages/about_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
@@ -18,7 +20,9 @@ import '../../features/storefront/presentation/pages/category_page.dart';
 import '../../features/storefront/presentation/pages/not_found_page.dart';
 import '../../features/storefront/presentation/pages/product_detail_page.dart';
 import '../../features/storefront/presentation/pages/search_page.dart';
+import '../../features/storefront/presentation/pages/favourites_page.dart';
 import '../../features/storefront/presentation/pages/storefront_home_page.dart';
+import '../../features/text_editor/presentation/pages/admin_text_editor_page.dart';
 import '../network/supabase_client_provider.dart';
 import 'guards.dart';
 import 'routes.dart';
@@ -36,6 +40,9 @@ GoRouter appRouter(Ref ref) {
 
   ref.listen(currentSessionProvider, (_, __) => refresher.refresh());
   ref.listen(adminStatusProvider, (_, __) => refresher.refresh());
+  // Unlocking the five-tap panel has to re-run the redirect, or the owner would
+  // land back on the sign-in page they just avoided.
+  ref.listen(adminGateUnlockedProvider, (_, __) => refresher.refresh());
   ref.onDispose(refresher.dispose);
 
   return GoRouter(
@@ -48,6 +55,7 @@ GoRouter appRouter(Ref ref) {
         location: state.matchedLocation,
         isSignedIn: signedIn,
         adminStatus: adminStatus,
+        gateUnlocked: ref.read(adminGateUnlockedProvider),
       );
     },
     routes: <RouteBase>[
@@ -71,6 +79,11 @@ GoRouter appRouter(Ref ref) {
         path: Routes.about,
         name: 'about',
         builder: (_, __) => const AboutPage(),
+      ),
+      GoRoute(
+        path: Routes.favourites,
+        name: 'favourites',
+        builder: (_, __) => const FavouritesPage(),
       ),
       GoRoute(
         path: Routes.categoryPattern,
@@ -147,6 +160,16 @@ GoRouter appRouter(Ref ref) {
             path: 'password',
             name: 'adminChangePassword',
             builder: (_, __) => const AdminChangePasswordPage(),
+          ),
+          GoRoute(
+            path: 'text',
+            name: 'adminTextEditor',
+            builder: (_, __) => const AdminTextEditorPage(),
+          ),
+          GoRoute(
+            path: 'gate-password',
+            name: 'adminGatePassword',
+            builder: (_, __) => const AdminGatePasswordPage(),
           ),
         ],
       ),

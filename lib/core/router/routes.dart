@@ -11,6 +11,9 @@ abstract final class Routes {
   static const String settings = '/settings';
   static const String about = '/about';
 
+  /// Customer favourites (a device-local list).
+  static const String favourites = '/favourites';
+
   static const String categoryPattern = '/category/:slug';
   static String category(String slug) => '/category/$slug';
 
@@ -29,6 +32,13 @@ abstract final class Routes {
   static const String adminSiteSettings = '/admin/settings';
   static const String adminInquiries = '/admin/inquiries';
   static const String adminChangePassword = '/admin/password';
+
+  /// Every word of the app, per screen and per language.
+  static const String adminTextEditor = '/admin/text';
+
+  /// The device-local gateway password (the five-tap panel), as opposed to
+  /// [adminChangePassword], which changes the Supabase account password.
+  static const String adminGatePassword = '/admin/gate-password';
 
   /// Paths that require a session *and* `profiles.is_admin = true`.
   static bool isGuardedAdminPath(String path) =>

@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'core/l10n/generated/app_localizations.dart';
+import 'core/l10n/text_localizations.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/settings/presentation/providers/site_settings_providers.dart';
+import 'features/text_editor/presentation/providers/text_editor_providers.dart';
 
 /// Root widget.
 ///
@@ -21,6 +23,11 @@ class AmuApp extends ConsumerWidget {
     final GoRouter router = ref.watch(appRouterProvider);
     final AppPreferencesState prefs = ref.watch(appPreferencesProvider);
 
+    // The owner's own wording for the language on screen. Empty until the first
+    // event (and whenever the fetch fails), which renders the shipped ARB text.
+    final Map<String, String> overrides =
+        ref.watch(textOverridesValueProvider(prefs.language.code));
+
     return MaterialApp.router(
       onGenerateTitle: (BuildContext context) =>
           AppLocalizations.of(context).appTitle,
@@ -30,7 +37,12 @@ class AmuApp extends ConsumerWidget {
       themeMode: prefs.themeMode,
       locale: prefs.locale,
       supportedLocales: AppLocalizations.supportedLocales,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      // `appLocalizationsDelegates` puts the override-aware delegate in the
+      // generated one's place, so every `AppLocalizations.of(context)` lookup in
+      // the app honours the owner's edits without a call site changing, and
+      // gap-fills Material/Cupertino for a locale the SDK does not translate
+      // (Oromo).
+      localizationsDelegates: appLocalizationsDelegates(overrides: overrides),
       routerConfig: router,
       builder: (BuildContext context, Widget? child) {
         // Clamp text scaling so the luxury layouts never break, while still

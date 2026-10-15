@@ -15,10 +15,17 @@ import 'routes.dart';
 /// * While the admin check is still in flight we allow the route through and
 ///   let the page render a loader, which avoids a login flash on cold start.
 /// * A confirmed admin visiting the login page is sent to the dashboard.
+/// * Unlocking the five-tap owner panel ([gateUnlocked]) opens the gateway
+///   itself; it is a device-local convenience lock, not the authorisation
+///   boundary — RLS still decides what any request may actually read or write.
+///   The sign-in page therefore stays *reachable* even with the panel
+///   unlocked, because saving anything (wording, photos, prices) needs the
+///   owner's Supabase session to satisfy RLS.
 String? resolveAdminRedirect({
   required String location,
   required bool isSignedIn,
   required AsyncValue<bool> adminStatus,
+  bool gateUnlocked = false,
 }) {
   final bool isLoginRoute = location == Routes.adminLogin;
 
@@ -30,6 +37,10 @@ String? resolveAdminRedirect({
   }
 
   if (!Routes.isGuardedAdminPath(location)) return null;
+
+  // The owner opened the panel on this device: let the gateway through without
+  // a Supabase session.
+  if (gateUnlocked) return null;
 
   if (!isSignedIn) {
     return Uri(

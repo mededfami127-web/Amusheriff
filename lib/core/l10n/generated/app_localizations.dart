@@ -8,6 +8,7 @@ import 'package:intl/intl.dart' as intl;
 import 'app_localizations_am.dart';
 import 'app_localizations_ar.dart';
 import 'app_localizations_en.dart';
+import 'app_localizations_om.dart';
 
 // ignore_for_file: type=lint
 
@@ -98,6 +99,7 @@ abstract class AppLocalizations {
     Locale('am'),
     Locale('ar'),
     Locale('en'),
+    Locale('om'),
   ];
 
   /// No description provided for @a11yOpenCategory.
@@ -208,6 +210,12 @@ abstract class AppLocalizations {
   /// **'Edit'**
   String get actionEdit;
 
+  /// No description provided for @actionFavourite.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to favourites'**
+  String get actionFavourite;
+
   /// No description provided for @actionMove.
   ///
   /// In en, this message translates to:
@@ -249,6 +257,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Share'**
   String get actionShare;
+
+  /// No description provided for @actionUnfavourite.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from favourites'**
+  String get actionUnfavourite;
 
   /// No description provided for @actionViewDetails.
   ///
@@ -616,6 +630,24 @@ abstract class AppLocalizations {
   /// **'Keep editing'**
   String get adminKeepEditing;
 
+  /// No description provided for @adminLiveEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Live edit'**
+  String get adminLiveEdit;
+
+  /// No description provided for @adminLiveEditOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Live editing off'**
+  String get adminLiveEditOff;
+
+  /// No description provided for @adminLiveEditOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Live editing on — tap a pencil to rewrite that text'**
+  String get adminLiveEditOn;
+
   /// No description provided for @adminLivePreview.
   ///
   /// In en, this message translates to:
@@ -964,6 +996,12 @@ abstract class AppLocalizations {
   /// **'Store name (Arabic)'**
   String get adminStoreNameAr;
 
+  /// No description provided for @adminStoreNameOm.
+  ///
+  /// In en, this message translates to:
+  /// **'Store name (Oromo)'**
+  String get adminStoreNameOm;
+
   /// No description provided for @adminStrength.
   ///
   /// In en, this message translates to:
@@ -993,6 +1031,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tagline'**
   String get adminTagline;
+
+  /// No description provided for @adminTextEditor.
+  ///
+  /// In en, this message translates to:
+  /// **'Text & language'**
+  String get adminTextEditor;
+
+  /// No description provided for @adminTextEditorAllScreens.
+  ///
+  /// In en, this message translates to:
+  /// **'All screens'**
+  String get adminTextEditorAllScreens;
+
+  /// No description provided for @adminTextEditorHasVariables.
+  ///
+  /// In en, this message translates to:
+  /// **'Has variables'**
+  String get adminTextEditorHasVariables;
+
+  /// No description provided for @adminTextEditorHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Every word of the app, in every language. Edit one and it changes everywhere.'**
+  String get adminTextEditorHint;
+
+  /// No description provided for @adminTextEditorNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No text matches your search'**
+  String get adminTextEditorNoResults;
+
+  /// No description provided for @adminTextEditorPlaceholderHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the variables in brackets exactly as written.'**
+  String get adminTextEditorPlaceholderHint;
+
+  /// No description provided for @adminTextEditorReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore default'**
+  String get adminTextEditorReset;
+
+  /// No description provided for @adminTextEditorResetDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Default wording restored'**
+  String get adminTextEditorResetDone;
+
+  /// No description provided for @adminTextEditorSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Text saved'**
+  String get adminTextEditorSaved;
+
+  /// No description provided for @adminTextEditorSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search a word'**
+  String get adminTextEditorSearch;
 
   /// No description provided for @adminUnpublish.
   ///
@@ -1204,6 +1302,12 @@ abstract class AppLocalizations {
   /// **'Related data is missing.'**
   String get errorForeignKey;
 
+  /// No description provided for @errorGateLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect username or password.'**
+  String get errorGateLocked;
+
   /// No description provided for @errorInvalidCredentials.
   ///
   /// In en, this message translates to:
@@ -1306,6 +1410,96 @@ abstract class AppLocalizations {
   /// **'Please correct the highlighted fields.'**
   String get errorValidation;
 
+  /// No description provided for @favouritesEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the heart on a piece to keep it here.'**
+  String get favouritesEmptyMessage;
+
+  /// No description provided for @favouritesEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No favourites yet'**
+  String get favouritesEmptyTitle;
+
+  /// No description provided for @gateChangeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Gateway password'**
+  String get gateChangeTitle;
+
+  /// No description provided for @gateChangeIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'This password opens the owner panel on this device. Change it whenever you like.'**
+  String get gateChangeIntro;
+
+  /// No description provided for @gateChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Gateway password updated.'**
+  String get gateChanged;
+
+  /// No description provided for @gateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: tap the logo five times to reopen this panel.'**
+  String get gateHint;
+
+  /// No description provided for @gateLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect username or password.'**
+  String get gateLocked;
+
+  /// No description provided for @gateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner access'**
+  String get gateTitle;
+
+  /// No description provided for @gateUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get gateUnlock;
+
+  /// No description provided for @gateUnlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner access unlocked.'**
+  String get gateUnlocked;
+
+  /// No description provided for @gateUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get gateUsername;
+
+  /// No description provided for @groupCommon.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared words'**
+  String get groupCommon;
+
+  /// No description provided for @groupErrors.
+  ///
+  /// In en, this message translates to:
+  /// **'Errors & states'**
+  String get groupErrors;
+
+  /// No description provided for @groupStorefront.
+  ///
+  /// In en, this message translates to:
+  /// **'Storefront screens'**
+  String get groupStorefront;
+
+  /// No description provided for @groupValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'Validation messages'**
+  String get groupValidation;
+
   /// No description provided for @inquiryMessageTemplate.
   ///
   /// In en, this message translates to:
@@ -1371,6 +1565,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Contact'**
   String get navContact;
+
+  /// No description provided for @navFavourites.
+  ///
+  /// In en, this message translates to:
+  /// **'Favourites'**
+  String get navFavourites;
 
   /// No description provided for @navHome.
   ///
@@ -1666,7 +1866,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['am', 'ar', 'en'].contains(locale.languageCode);
+      <String>['am', 'ar', 'en', 'om'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -1681,6 +1881,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       return AppLocalizationsAr();
     case 'en':
       return AppLocalizationsEn();
+    case 'om':
+      return AppLocalizationsOm();
   }
 
   throw FlutterError(

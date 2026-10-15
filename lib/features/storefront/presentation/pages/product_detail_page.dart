@@ -23,6 +23,7 @@ import '../../../contacts/domain/entities/contact_link.dart';
 import '../../../contacts/presentation/providers/contact_providers.dart';
 import '../../../../core/utils/launcher.dart';
 import '../providers/storefront_providers.dart';
+import '../widgets/favourite_button.dart';
 
 /// Full product page. Everything is streamed, so an admin price change or a
 /// newly uploaded photo appears here immediately.
@@ -42,6 +43,8 @@ class ProductDetailPage extends ConsumerWidget {
       showLockup: false,
       title: product.value?.titleFor(language) ?? l10n.stateLoading,
       actions: <Widget>[
+        if (product.value != null)
+          FavouriteButton(productId: productId),
         if (product.value != null)
           IconButton(
             icon: const Icon(Icons.share_outlined),

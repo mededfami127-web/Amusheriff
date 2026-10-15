@@ -112,6 +112,8 @@ tiktok | youtube | website | location | other`.
 | `20260101000200_views_and_rpc.sql` | `v_products_public`, `v_categories_with_counts`, `search_products()`, `reorder_rows()`, `guard_inquiry_rate()` |
 | `20260101000300_rls_policies.sql` | RLS on every table + the full policy set + grants |
 | `20260101000400_storage_buckets.sql` | `product-media` and `brand` buckets + object policies |
+| `20260101000500_realtime_publication.sql` | adds every streamed table to the `supabase_realtime` publication |
+| `20260101000600_text_overrides.sql` | `text_overrides` (owner-authored wording) + `site_settings.store_name_om` + Oromo in the language check |
 
 Migrations are idempotent — `create table if not exists`, `create or replace
 function` / view, `drop trigger if exists` before every `create trigger`, and
@@ -147,6 +149,7 @@ Three independent layers protect it:
 | `product_media` | SELECT when parent publicly visible | same | all rows, full CRUD |
 | `contact_links` | SELECT `is_visible` | SELECT `is_visible` | all rows, full CRUD |
 | `inquiries` | INSERT only | INSERT only | SELECT, DELETE |
+| `text_overrides` | SELECT | SELECT | SELECT, INSERT, UPDATE, DELETE |
 | `audit_log` | — | — | SELECT |
 | `storage.objects` | SELECT public buckets | SELECT public buckets | SELECT + write |
 

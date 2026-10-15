@@ -71,6 +71,9 @@ class AppLocalizationsAm extends AppLocalizations {
   String get actionEdit => 'አስተካክል';
 
   @override
+  String get actionFavourite => 'ወደ ተወዳጆች አስቀምጥ';
+
+  @override
   String get actionMove => 'አስቀይጥ';
 
   @override
@@ -90,6 +93,9 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get actionShare => 'አጋራ';
+
+  @override
+  String get actionUnfavourite => 'ከተወዳጆች አስወግድ';
 
   @override
   String get actionViewDetails => 'ዝርዝር ይመልከቱ';
@@ -277,6 +283,15 @@ class AppLocalizationsAm extends AppLocalizations {
   String get adminKeepEditing => 'ቀጥል';
 
   @override
+  String get adminLiveEdit => 'ቀጥታ አርትዖት';
+
+  @override
+  String get adminLiveEditOff => 'ቀጥታ አርትዖት ጠፍቷል';
+
+  @override
+  String get adminLiveEditOn => 'ቀጥታ አርትዖት በርቷል — ጽሑፉን ለመቀየር እርሳሱን ነካ';
+
+  @override
   String get adminLivePreview => 'የደንበኛ ምልዓት';
 
   @override
@@ -452,6 +467,9 @@ class AppLocalizationsAm extends AppLocalizations {
   String get adminStoreNameAr => 'የሚስጥር ስም (عربي)';
 
   @override
+  String get adminStoreNameOm => 'የመሸጫ ስም (ኦሮምኛ)';
+
+  @override
   String get adminStrength => 'አጥንት';
 
   @override
@@ -465,6 +483,37 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get adminTagline => 'አፈጻጸም';
+
+  @override
+  String get adminTextEditor => 'ጽሑፍና ቋንቋ';
+
+  @override
+  String get adminTextEditorAllScreens => 'ሁሉም ገጾች';
+
+  @override
+  String get adminTextEditorHasVariables => 'ተለዋዋጮች አሉት';
+
+  @override
+  String get adminTextEditorHint =>
+      'የመተግበሪያው ሁሉም ቃላት፣ በሁሉም ቋንቋ። አንዱን ሲቀይሩ በሁሉም ቦታ ይቀየራል።';
+
+  @override
+  String get adminTextEditorNoResults => 'ከፍለጋዎ ጋር የሚመሳሰል ጽሑፍ የለም';
+
+  @override
+  String get adminTextEditorPlaceholderHint => 'በቅንፍ ውስጥ ያሉትን ተለዋዋጮች እንዳሉ ይተዉ።';
+
+  @override
+  String get adminTextEditorReset => 'ነባሪውን መልስ';
+
+  @override
+  String get adminTextEditorResetDone => 'ነባሪው ጽሑፍ ተመልሷል';
+
+  @override
+  String get adminTextEditorSaved => 'ጽሑፉ ተቀምጧል';
+
+  @override
+  String get adminTextEditorSearch => 'ቃል ፈልግ';
 
   @override
   String get adminUnpublish => 'አቁም';
@@ -574,6 +623,9 @@ class AppLocalizationsAm extends AppLocalizations {
   String get errorForeignKey => 'ተዛማጅ መረጃ ጎድሏል።';
 
   @override
+  String get errorGateLocked => 'የመግቢያ ስም ወይም የይለፍ ቃል ትክክል አይደለም።';
+
+  @override
   String get errorInvalidCredentials => 'የተሳሳተ ኢሜይል ወይም የይለፍ ቃል።';
 
   @override
@@ -626,6 +678,52 @@ class AppLocalizationsAm extends AppLocalizations {
   String get errorValidation => 'እባክዎ የተመለከቱትን መስኮች ያስተካክሉ።';
 
   @override
+  String get favouritesEmptyMessage => 'የሚወዱትን እዚህ ለማስቀመጥ በልብ ምልክቱ ላይ ነካ።';
+
+  @override
+  String get favouritesEmptyTitle => 'እስካሁን ተወዳጅ የለም';
+
+  @override
+  String get gateChangeTitle => 'የመግቢያ ይለፍ ቃል';
+
+  @override
+  String get gateChangeIntro =>
+      'ይህ ይለፍ ቃል በዚህ መሣሪያ ላይ የባለቤት ክፍልን ይከፍታል። በፈለጉት ጊዜ ይቀይሩት።';
+
+  @override
+  String get gateChanged => 'የመግቢያ ይለፍ ቃል ተቀይሯል።';
+
+  @override
+  String get gateHint => 'ማጠቃለያ፦ ይህን ክፍል ለመክፈት አርማውን አምስት ጊዜ ነካ።';
+
+  @override
+  String get gateLocked => 'የመግቢያ ስም ወይም የይለፍ ቃል ትክክል አይደለም።';
+
+  @override
+  String get gateTitle => 'የባለቤት መግቢያ';
+
+  @override
+  String get gateUnlock => 'ክፈት';
+
+  @override
+  String get gateUnlocked => 'የባለቤት መግቢያ ተከፍቷል።';
+
+  @override
+  String get gateUsername => 'የመግቢያ ስም';
+
+  @override
+  String get groupCommon => 'የጋራ ቃላት';
+
+  @override
+  String get groupErrors => 'ስህተቶችና ሁኔታዎች';
+
+  @override
+  String get groupStorefront => 'የመሸጫ ገጾች';
+
+  @override
+  String get groupValidation => 'የማረጋገጫ መልዕክቶች';
+
+  @override
   String inquiryMessageTemplate(String price, String product) {
     return 'ሰላም! በ“$product” ($price) ፍላጎት አለኝ።';
   }
@@ -665,6 +763,9 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get navContact => 'አግኙን';
+
+  @override
+  String get navFavourites => 'ተወዳጆች';
 
   @override
   String get navHome => 'መነሻ';
