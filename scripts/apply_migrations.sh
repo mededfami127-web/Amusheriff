@@ -208,13 +208,6 @@ case "$MODE" in
          and table_name = 'schema_migrations';")"
     if [ -z "$COLUMNS" ]; then
       COLUMNS="version,name,statements"
-    else
-      ROWS=()
-      for version in "${PENDING[@]}"; do
-        ROWS+=("('$version', '${version#*_}')")
-      done
-      VALUES="$(printf '%s,' "${ROWS[@]}")"
-      VALUES="${VALUES%,}"
     fi
     INSERT_COLUMNS="$COLUMNS"
     if [[ ",$COLUMNS," != *,version,* ]]; then
@@ -245,6 +238,7 @@ case "$MODE" in
         echo
       done
       echo "create schema if not exists supabase_migrations;"
+      echo "create table if not exists $TRACKING_TABLE (version text primary key, statements text[], name text);"
       echo "insert into $TRACKING_TABLE ($INSERT_COLUMNS) values $VALUES"
       echo "  on conflict (version) do nothing;"
       echo "commit;"
