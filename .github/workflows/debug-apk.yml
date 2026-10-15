@@ -36,10 +36,10 @@ jobs:
       - name: Generate code (riverpod / freezed / json)
         run: dart run build_runner build --delete-conflicting-outputs
 
-      # `bootstrap()` calls Env.assertConfigured() *before* the first frame, so an
-      # APK built without these values cannot start — it dies on a red screen with
-      # a "Missing compile-time configuration" error. Fail the job with the fix
-      # instead of uploading an artifact that is guaranteed not to open.
+      # Same shape and the same validation the release workflow applies, with an
+      # error that names the fix for a first-time setup: `bootstrap()` calls
+      # Env.assertConfigured() *before* the first frame, so an APK built without
+      # a real backend dies on a red screen and is worth nothing to download.
       - name: Write dev flavor config
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -51,21 +51,26 @@ jobs:
           if [ -n "$CONFIG_BASE64" ]; then
             printf '%s' "$CONFIG_BASE64" | base64 --decode > config/dev.json
             echo "Wrote config/dev.json from the CONFIG_BASE64 secret."
-            exit 0
+          else
+            jq -n \
+              --arg FLAVOR "dev" \
+              --arg SUPABASE_URL "$SUPABASE_URL" \
+              --arg SUPABASE_ANON_KEY "$SUPABASE_ANON_KEY" \
+              --arg SENTRY_DSN "$SENTRY_DSN" \
+              --arg LOG_LEVEL "debug" \
+              '{FLAVOR: $FLAVOR, SUPABASE_URL: $SUPABASE_URL, SUPABASE_ANON_KEY: $SUPABASE_ANON_KEY, SENTRY_DSN: $SENTRY_DSN, LOG_LEVEL: $LOG_LEVEL}' \
+              > config/dev.json
           fi
-          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
-            echo "::error::This APK cannot start without a Supabase project. Add the repository secrets SUPABASE_URL and SUPABASE_ANON_KEY (Settings → Secrets and variables → Actions), or set CONFIG_BASE64 to a base64-encoded config/dev.json. See README → First debug run."
+
+          jq -e --arg flavor "dev" '
+            type == "object"
+            and .FLAVOR == $flavor
+            and (.SUPABASE_URL | type == "string" and test("^https://[^[:space:]]+$") and (contains("your-") | not))
+            and (.SUPABASE_ANON_KEY | type == "string" and (test("^eyJ") or test("^sb_publishable_")) and (contains("paste-your-") | not))
+          ' config/dev.json > /dev/null || {
+            echo "::error::config/dev.json is missing, empty or still holds example values. Add the repository secrets SUPABASE_URL and SUPABASE_ANON_KEY (Settings → Secrets and variables → Actions) — or CONFIG_BASE64 with a base64-encoded config/dev.json. See README → First debug run."
             exit 1
-          fi
-          cat > config/dev.json <<JSON
-          {
-            "FLAVOR": "dev",
-            "SUPABASE_URL": "${SUPABASE_URL}",
-            "SUPABASE_ANON_KEY": "${SUPABASE_ANON_KEY}",
-            "SENTRY_DSN": "${SENTRY_DSN}",
-            "LOG_LEVEL": "debug"
           }
-          JSON
 
       # The first run on a fresh runner also downloads the NDK that
       # `ndkVersion = flutter.ndkVersion` pins, so allow a generous timeout.
