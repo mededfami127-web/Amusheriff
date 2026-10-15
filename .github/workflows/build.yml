@@ -17,9 +17,33 @@ permissions:
   contents: read
 
 jobs:
+  verify:
+    name: Verify Flutter app
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate code
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Analyze
+        run: flutter analyze --fatal-infos
+
+      - name: Unit and widget tests
+        run: flutter test
+
   android:
     name: Android APK + AAB
     runs-on: ubuntu-latest
+    needs: verify
     steps:
       - uses: actions/checkout@v4
 
@@ -65,22 +89,31 @@ jobs:
           if [ -n "$CONFIG_BASE64" ]; then
             printf '%s' "$CONFIG_BASE64" | base64 --decode > "config/${FLAVOR}.json"
             echo "Wrote config/${FLAVOR}.json from the CONFIG_BASE64 secret."
-            exit 0
+          else
+            jq -n \
+              --arg FLAVOR "$FLAVOR" \
+              --arg SUPABASE_URL "$SUPABASE_URL" \
+              --arg SUPABASE_ANON_KEY "$SUPABASE_ANON_KEY" \
+              --arg SENTRY_DSN "$SENTRY_DSN" \
+              '{FLAVOR: $FLAVOR, SUPABASE_URL: $SUPABASE_URL, SUPABASE_ANON_KEY: $SUPABASE_ANON_KEY, SENTRY_DSN: $SENTRY_DSN}' \
+              > "config/${FLAVOR}.json"
           fi
-          cat > "config/${FLAVOR}.json" <<JSON
-          {
-            "FLAVOR": "${FLAVOR}",
-            "SUPABASE_URL": "${SUPABASE_URL}",
-            "SUPABASE_ANON_KEY": "${SUPABASE_ANON_KEY}",
-            "SENTRY_DSN": "${SENTRY_DSN}"
+
+          jq -e --arg flavor "$FLAVOR" '
+            type == "object"
+            and .FLAVOR == $flavor
+            and (.SUPABASE_URL | type == "string" and test("^https://[^[:space:]]+$") and (contains("your-") | not))
+            and (.SUPABASE_ANON_KEY | type == "string" and (test("^eyJ") or test("^sb_publishable_")) and (contains("paste-your") | not))
+          ' "config/${FLAVOR}.json" > /dev/null || {
+            echo "::error::Flavor config is invalid or still contains example values."
+            exit 1
           }
-          JSON
 
       # `ANDROID_KEYSTORE_BASE64` is the base64 of the upload keystore (.jks).
       # Decoding it here is what lets the release AAB be signed without ever
       # committing the keystore; `android/key.properties` is gitignored too.
-      # Without the secret the build still runs, but the AAB is debug-signed and
-      # Play will reject it — hence the explicit warning.
+      # A debug-signed AAB cannot be uploaded to Play, so release builds fail
+      # closed when the upload key is unavailable.
       - name: Decode the upload keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -89,8 +122,8 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           if [ -z "$KEYSTORE_BASE64" ]; then
-            echo "::warning::ANDROID_KEYSTORE_BASE64 is not set — the release AAB will be signed with the debug keystore and cannot be uploaded to Play. See README → Release signing."
-            exit 0
+            echo "::error::ANDROID_KEYSTORE_BASE64 is required for a release build. See README → Release signing."
+            exit 1
           fi
 
           for name in KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
@@ -132,7 +165,7 @@ jobs:
       - name: Record which key signed the bundle
         run: |
           AAB=build/app/outputs/bundle/release/app-release.aab
-          keytool -printcert -jarfile "$AAB" | grep -E "Owner|SHA256" || true
+          keytool -printcert -jarfile "$AAB" | grep -E "Owner|SHA256"
 
       - uses: actions/upload-artifact@v4
         with:

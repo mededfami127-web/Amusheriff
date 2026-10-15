@@ -120,8 +120,10 @@ dart run flutter_native_splash:create
 A Play-ready AAB must be signed with **your** upload key. Neither the keystore
 nor `android/key.properties` is ever committed — `android/app/build.gradle.kts`
 reads `android/key.properties` when it exists and otherwise falls back to the
-debug keys (so local `flutter build --release` still works, but such a bundle
-cannot be uploaded to Play).
+debug keys for local smoke builds. The GitHub release workflow is stricter: it
+refuses to build unless the production config is valid and the upload key is
+present, then verifies that the AAB is signed. Only that signed artifact is
+suitable for Play upload.
 
 **Create the upload key once** (needs a JDK, i.e. `keytool`):
 
@@ -152,10 +154,10 @@ variables → Actions → New repository secret*:
 `.github/workflows/build.yml` decodes `ANDROID_KEYSTORE_BASE64` into
 `android/app/upload-keystore.jks`, writes `android/key.properties`, checks the
 decoded file really is a keystore with `keytool -list`, and then builds the APK
-and the AAB — so the bundle is signed with your upload key. If the secret is
-missing the job still runs but prints a loud `::warning::` and ships a
-debug-signed bundle; if a companion secret is missing, or the base64 is not a
-keystore, the job fails instead of producing an unusable artifact.
+and the AAB — so the bundle is signed with your upload key. The job fails if
+the config or any signing secret is missing, if the config still contains
+example values, or if the base64 is not a valid keystore. It also checks the
+finished AAB for a signing certificate before uploading the artifact.
 
 **Optional shortcut** — `CONFIG_BASE64` (see step 3): when that secret is set it
 is decoded straight to `config/<flavor>.json`, replacing the three individual
