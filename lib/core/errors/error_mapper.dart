@@ -3,6 +3,7 @@ import 'dart:io' show SocketException, HttpException;
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../utils/app_logger.dart';
 import 'app_failure.dart';
 
 /// Translates the exceptions thrown by Supabase, `dart:io` and the platform
@@ -94,8 +95,20 @@ abstract final class ErrorMapper {
     return UnknownFailure(debugMessage: error.toString(), cause: error);
   }
 
-  /// Runs [body], converting any thrown error into an [AppFailure] and
-  /// reporting the original to [onError] (the Sentry hook wired in bootstrap).
+  /// Called for every failure that passes through [guard], before it is
+  /// rethrown.
+  ///
+  /// bootstrap() installs the reporting sink here (Sentry, when a DSN is
+  /// configured). No repository ever passed the per-call [guard] hook, so
+  /// before this existed the handled failures — a save denied by RLS, a wrong
+  /// password, a rejected upload — reached neither the device log nor Sentry.
+  static void Function(AppFailure failure, StackTrace stack)? onFailure;
+
+  /// Runs [body], converting any thrown error into an [AppFailure].
+  ///
+  /// The failure is logged, handed to [onFailure] (installed by bootstrap for
+  /// Sentry reporting), then to [onError] if the caller passed one, and finally
+  /// rethrown so the UI can still render its localized message.
   static Future<T> guard<T>(
     Future<T> Function() body, {
     void Function(AppFailure failure, StackTrace stack)? onError,
@@ -104,6 +117,8 @@ abstract final class ErrorMapper {
       return await body();
     } catch (error, stack) {
       final AppFailure failure = map(error, stackTrace: stack);
+      AppLog.error('${failure.runtimeType}: ${failure.debugMessage}', error);
+      onFailure?.call(failure, stack);
       onError?.call(failure, stack);
       throw failure;
     }

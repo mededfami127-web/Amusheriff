@@ -48,8 +48,11 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.amusheriff.amu_sharif_majlis"
+        // Play Store identity. Deliberately different from `namespace` above:
+        // the namespace is the package holding MainActivity and the R class,
+        // while the applicationId is what Play and the device key on. Keeping
+        // them apart avoids relocating the Kotlin source tree for a rename.
+        applicationId = "com.amusheriff.myapp"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         // 26 rather than Flutter's default 24: sentry_flutter 10 declares

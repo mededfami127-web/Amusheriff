@@ -826,5 +826,39 @@ end;
 $$;
 \echo 'ok 10 - RLS is enabled on every public table'
 
+-- ═══════════════════════════════════════════════════════════════════════════
+-- 11 · Realtime publication — a streamed table that is not in it never updates
+--
+-- The app opens `.stream()` subscriptions on exactly these tables. Realtime
+-- only delivers events for tables in `supabase_realtime`, and the failure is
+-- silent: the subscription opens, the query succeeds, changes simply never
+-- arrive. The list below mirrors the `.stream()` calls in lib/ — add a stream,
+-- add its table here and to the migration.
+-- ═══════════════════════════════════════════════════════════════════════════
+do $$
+declare
+  v_missing text;
+begin
+  select string_agg(v.table_name, ', ' order by v.table_name)
+    into v_missing
+    from ( values ('categories'), ('products'), ('product_media'),
+                   ('contact_links'), ('site_settings'), ('inquiries') )
+           as v (table_name)
+   where not exists (
+     select 1
+       from pg_publication_tables pt
+      where pt.pubname = 'supabase_realtime'
+        and pt.schemaname = 'public'
+        and pt.tablename = v.table_name
+   );
+
+  perform test.assert(
+    v_missing is null,
+    'every streamed table is in the supabase_realtime publication (missing: '
+      || coalesce(v_missing, 'none') || ')');
+end;
+$$;
+\echo 'ok 11 - every table the app streams is in the realtime publication'
+
 \echo ''
 \echo '=== ALL RLS TESTS PASSED ==='

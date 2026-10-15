@@ -132,6 +132,18 @@ grant select on storage.buckets to anon, authenticated, service_role;
 grant select, insert, update, delete on storage.objects to anon, authenticated;
 grant all on storage.objects to service_role;
 
+-- ── realtime ───────────────────────────────────────────────────────────────
+-- A hosted project owns this publication, and migration 006 only *adds* to it.
+-- Creating it here is what lets that migration run on a plain PostgreSQL the
+-- same way it runs on a project.
+do $$
+begin
+  if not exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
+    create publication supabase_realtime;
+  end if;
+end;
+$$;
+
 -- ── test helper schema ─────────────────────────────────────────────────────
 create schema if not exists test;
 

@@ -10,6 +10,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app.dart';
 import 'core/config/env.dart';
 import 'core/config/flavors.dart';
+import 'core/errors/app_failure.dart';
+import 'core/errors/error_mapper.dart';
+import 'core/utils/app_logger.dart';
 import 'features/settings/presentation/providers/site_settings_providers.dart';
 
 /// Boots the app in a deterministic order:
@@ -24,7 +27,16 @@ import 'features/settings/presentation/providers/site_settings_providers.dart';
 Future<void> bootstrap() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  AppLog.info('boot: flavour ${AppFlavor.current.name} → ${Env.supabaseUrl}');
+
   Env.assertConfigured();
+
+  // Every repository funnels its failures through ErrorMapper.guard, so this
+  // single hook is what makes a denied write or a failed sign-in visible in
+  // Sentry instead of only in the UI that happened to show it.
+  ErrorMapper.onFailure = (AppFailure failure, StackTrace stack) {
+    if (Env.hasSentry) Sentry.captureException(failure, stackTrace: stack);
+  };
 
   await Supabase.initialize(
     url: Env.supabaseUrl,
@@ -33,6 +45,7 @@ Future<void> bootstrap() async {
     publishableKey: Env.supabaseAnonKey,
     debug: false,
   );
+  AppLog.info('boot: supabase initialised');
 
   final PreferencesStore preferences = PreferencesStore(
     const FlutterSecureStorage(),
@@ -40,6 +53,12 @@ Future<void> bootstrap() async {
   await preferences.load(PlatformDispatcher.instance.locale.languageCode);
 
   _installErrorHandlers();
+
+  AppLog.info(
+    Env.hasSentry
+        ? 'boot: sentry enabled (${AppFlavor.current.name})'
+        : 'boot: no sentry dsn — failures are logged only',
+  );
 
   if (Env.hasSentry) {
     await SentryFlutter.init(
@@ -75,6 +94,7 @@ void _installErrorHandlers() {
   final FlutterExceptionHandler? previous = FlutterError.onError;
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
+    AppLog.error('flutter error', details.exception);
     if (Env.hasSentry) {
       Sentry.captureException(details.exception, stackTrace: details.stack);
     }
@@ -82,6 +102,7 @@ void _installErrorHandlers() {
   };
 
   PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
+    AppLog.error('uncaught platform error', error);
     if (Env.hasSentry) {
       Sentry.captureException(error, stackTrace: stack);
     }

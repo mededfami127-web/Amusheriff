@@ -53,5 +53,15 @@ enabled = true
 enabled = true
 policy = "per_worker"
 
+# The storefront is public: a customer taps WhatsApp before any sign-in exists,
+# so the inquiry logger must accept an anon request. Turning verify_jwt off is
+# safe because the function rate-limits by hashed IP, allow-lists the channel
+# values and writes only what RLS would allow anyway. Without this section the
+# CLI deploys with the platform default and the app gets a 401 — which looks
+# exactly like "nobody ever contacts us".
+[functions.inquiry]
+verify_jwt = false
+entrypoint = "index.ts"
+
 [analytics]
 enabled = false

@@ -31,7 +31,7 @@ CI/CD promotion gates and release Android/iOS builds — is tracked in
 | Code generation | `dart run build_runner build --delete-conflicting-outputs` | 0 errors |
 | Static analysis | `flutter analyze` | **No issues found** |
 | Unit + widget tests | `flutter test` | **64 passed** |
-| RLS acceptance suite | `bash scripts/run_rls_tests.sh` | **19/19 checks passed** on PostgreSQL 16.15 |
+| RLS acceptance suite | `bash scripts/run_rls_tests.sh` | **20/20 checks passed** on PostgreSQL 16.15 |
 | Migration runner | `bash scripts/apply_migrations.sh --dry-run`, then `--apply` twice | plan, dry run, apply and re-apply all clean on PostgreSQL 16.15 |
 
 Not yet exercised in this environment: release Android/iOS builds (no Android
@@ -99,7 +99,7 @@ flutter run --dart-define-from-file=config/dev.json
 | `SUPABASE_URL` | project URL |
 | `SUPABASE_ANON_KEY` | **public** anon key — never the service-role key |
 | `SENTRY_DSN` | optional; error reporting is skipped when empty |
-| `LOG_LEVEL` | `debug` · `info` · `warning` |
+| `LOG_LEVEL` | `debug` · `info` · `warning` · `error` |
 
 `bootstrap()` validates this configuration and fails loudly with an actionable
 message rather than surfacing an opaque network error later.
@@ -125,6 +125,12 @@ debug keys for local smoke builds. The GitHub release workflow is stricter: it
 refuses to build unless the production config is valid and the upload key is
 present, then verifies that the AAB is signed. Only that signed artifact is
 suitable for Play upload.
+
+The package Play sees is the `applicationId`, **`com.amusheriff.myapp`**. The
+Android `namespace` deliberately stays `com.amusheriff.amu_sharif_majlis` — it
+is only the package of `MainActivity` and the generated `R` class — so changing
+the store identity never moves the Kotlin source tree. iOS still carries
+`com.amusheriff.amuSharifMajlis` until an App Store build is configured.
 
 **Create the upload key once** (needs a JDK, i.e. `keytool`):
 

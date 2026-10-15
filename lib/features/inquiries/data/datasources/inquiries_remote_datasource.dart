@@ -1,5 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/utils/app_logger.dart';
+
 /// Raw access to the `inquiries` lead log.
 ///
 /// Reads are admin-only (RLS). Writes happen two ways: the storefront posts to
@@ -49,9 +51,14 @@ class InquiriesRemoteDataSource {
           if (deviceId != null) 'device_id': deviceId,
         },
       );
-    } on Object {
+    } on Object catch (error) {
       // Deliberately swallowed: an unlogged tap costs the owner nothing next
-      // to a customer who saw an error instead of their WhatsApp opening.
+      // to a customer who saw an error instead of their WhatsApp opening. It is
+      // still written to the log — without this line an undeployed or
+      // misconfigured Edge Function looks exactly like a shop where nobody
+      // taps a contact button, which is the one symptom the owner cannot
+      // diagnose from the app.
+      AppLog.warning('inquiry not logged (channel: $channel)', error);
     }
   }
 }
