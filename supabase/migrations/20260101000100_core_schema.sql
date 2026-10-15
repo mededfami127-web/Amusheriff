@@ -23,6 +23,7 @@ create table if not exists public.profiles (
 comment on table public.profiles is
   'Mirror of auth.users plus the is_admin flag. Never writable by clients.';
 
+drop trigger if exists profiles_set_updated_at on public.profiles;
 create trigger profiles_set_updated_at
   before update on public.profiles
   for each row execute function public.set_updated_at();
@@ -95,6 +96,7 @@ begin
 end;
 $$;
 
+drop trigger if exists profiles_guard_is_admin on public.profiles;
 create trigger profiles_guard_is_admin
   before update on public.profiles
   for each row execute function public.guard_profiles_is_admin();
@@ -120,6 +122,7 @@ insert into public.site_settings (id)
 values (1)
 on conflict (id) do nothing;
 
+drop trigger if exists site_settings_set_updated_at on public.site_settings;
 create trigger site_settings_set_updated_at
   before update on public.site_settings
   for each row execute function public.set_updated_at();
@@ -143,6 +146,7 @@ create table if not exists public.categories (
 create index if not exists categories_visible_order_idx
   on public.categories (is_visible, sort_order);
 
+drop trigger if exists categories_set_updated_at on public.categories;
 create trigger categories_set_updated_at
   before update on public.categories
   for each row execute function public.set_updated_at();
@@ -186,6 +190,7 @@ create index if not exists products_title_am_trgm
 create index if not exists products_title_ar_trgm
   on public.products using gin (title_ar gin_trgm_ops);
 
+drop trigger if exists products_set_updated_at on public.products;
 create trigger products_set_updated_at
   before update on public.products
   for each row execute function public.set_updated_at();
@@ -250,6 +255,7 @@ create table if not exists public.contact_links (
 create index if not exists contact_links_visible_order_idx
   on public.contact_links (is_visible, is_primary desc, sort_order);
 
+drop trigger if exists contact_links_set_updated_at on public.contact_links;
 create trigger contact_links_set_updated_at
   before update on public.contact_links
   for each row execute function public.set_updated_at();

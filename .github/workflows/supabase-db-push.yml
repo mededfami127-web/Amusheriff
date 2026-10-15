@@ -4,7 +4,8 @@ name: supabase db push (dry-run)
 # live project. Runs `scripts/apply_migrations.sh --dry-run`, which executes the
 # pending SQL inside a transaction that is rolled back and then asserts the
 # schema is unchanged. Free: no Supabase project URL or credentials are needed,
-# only a local PostgreSQL service.
+# only a local PostgreSQL service plus the platform stand-in from tests/rls/,
+# which is what supplies the auth and storage schemas the migrations extend.
 
 on:
   push:
@@ -20,6 +21,16 @@ jobs:
   db-push:
     name: migration dry-run
     runs-on: ubuntu-latest
+
+    # The dry run talks to the throwaway database created below, not to
+    # `postgres`, so the scratch database is the job-wide default.
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: asm_migration_dryrun
+
     services:
       postgres:
         image: postgres:16
@@ -48,5 +59,20 @@ jobs:
           command -v psql
           psql --version
 
+      - name: Create the throwaway database with the platform stand-in
+        run: |
+          psql -q -d postgres -c 'create database asm_migration_dryrun;'
+          psql -q -v ON_ERROR_STOP=1 -f tests/rls/00_supabase_shim.sql
+
       - name: Plan / dry-run migrations
         run: bash scripts/apply_migrations.sh --dry-run
+
+      # Applying twice — the second time from an empty tracker, so the real SQL
+      # runs again — is what keeps the "migrations are idempotent" claim in
+      # docs/DATABASE.md enforced instead of merely asserted.
+      - name: Apply, then re-apply against a cleared tracker
+        run: |
+          bash scripts/apply_migrations.sh --apply
+          psql -q -v ON_ERROR_STOP=1 \
+            -c 'delete from supabase_migrations.schema_migrations;'
+          bash scripts/apply_migrations.sh --apply

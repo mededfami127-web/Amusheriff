@@ -31,7 +31,8 @@ CI/CD promotion gates and release Android/iOS builds — is tracked in
 | Code generation | `dart run build_runner build --delete-conflicting-outputs` | 0 errors |
 | Static analysis | `flutter analyze` | **No issues found** |
 | Unit + widget tests | `flutter test` | **64 passed** |
-| RLS acceptance suite | `bash scripts/run_rls_tests.sh` | **19/19 groups passed** on PostgreSQL 16.15 |
+| RLS acceptance suite | `bash scripts/run_rls_tests.sh` | **19/19 checks passed** on PostgreSQL 16.15 |
+| Migration runner | `bash scripts/apply_migrations.sh --dry-run`, then `--apply` twice | plan, dry run, apply and re-apply all clean on PostgreSQL 16.15 |
 
 Not yet exercised in this environment: release Android/iOS builds (no Android
 SDK or Xcode available) and the Edge Function under the Edge Runtime. See
@@ -171,6 +172,40 @@ Keep the keystore and its passwords in a password manager, and never paste them
 into an issue, a commit or a chat — losing the upload key means you can no
 longer publish updates under the same application ID.
 
+### 6. First debug run
+
+Both routes to a device need the backend from steps 2–3 first: `bootstrap()`
+calls `Env.assertConfigured()` **before the first frame**, so an app built
+without `SUPABASE_URL` / `SUPABASE_ANON_KEY` shows a red screen (the
+`Missing compile-time configuration …` error) instead of the storefront.
+
+**From CI — nothing to install locally.** Every push to `main` builds a debug
+APK (`.github/workflows/debug-apk.yml`) and uploads it:
+
+> repo → **Actions** → *debug apk* → newest run → **Artifacts** → `asm-dev-debug-apk`
+
+Download it on the phone, or install over USB:
+
+```bash
+adb install -r app-debug.apk
+```
+
+The job reads the repository secrets `SUPABASE_URL` and `SUPABASE_ANON_KEY`
+(*Settings → Secrets and variables → Actions*) and **fails loudly if they are
+missing**, rather than uploading an APK that cannot open. Set `CONFIG_BASE64`
+to the base64 of a complete `config/dev.json` and it takes precedence over the
+individual secrets.
+
+**On your machine — the fast loop:**
+
+```bash
+cp config/dev.json.example config/dev.json   # fill in SUPABASE_URL + SUPABASE_ANON_KEY
+flutter run --dart-define-from-file=config/dev.json
+```
+
+The debug build signs with the debug keystore, needs no Play signing secret, and
+`AppFlavor.current` falls back to `dev` when no `FLAVOR` is passed.
+
 ---
 
 ## Development
@@ -192,13 +227,31 @@ dart run build_runner build --delete-conflicting-outputs
 Add a new timestamped file to `supabase/migrations/`, then run the suite:
 
 ```bash
-PGHOST=127.0.0.1 PGPORT=5432 PGUSER=postgres bash scripts/run_rls_tests.sh
+PGHOST=127.0.0.1 PGPORT=5433 PGUSER=postgres bash scripts/run_rls_tests.sh
 ```
 
 The suite rebuilds a throwaway database, installs a local Supabase shim, applies
 the real migrations and seed, and runs every RLS assertion. It exits non-zero on
 the first failure, so it works unchanged as a CI gate (see
 `.github/workflows/ci.yml`).
+
+`scripts/apply_migrations.sh` is the docker-free equivalent of `supabase db
+push` for applying the same files by hand (set `SUPABASE_DB_URL` for a hosted
+project):
+
+```bash
+scripts/apply_migrations.sh --plan      # read-only: applied vs pending
+scripts/apply_migrations.sh --dry-run   # execute the pending SQL, then ROLLBACK
+scripts/apply_migrations.sh --apply     # execute it and record the versions
+```
+
+It records versions in `supabase_migrations.schema_migrations` the way the CLI
+does, so `supabase migration list` and the dashboard's migration history stay in
+agreement, and the dry run compares a schema fingerprint taken before and after
+the transaction, so "rolled back" is proved instead of assumed.
+`.github/workflows/supabase-db-push.yml` runs the dry run and then applies and
+re-applies the migrations to a throwaway database — the check that keeps the
+idempotency claim in [`docs/DATABASE.md`](docs/DATABASE.md) honest.
 
 ---
 

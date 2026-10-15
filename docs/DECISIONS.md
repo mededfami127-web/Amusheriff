@@ -372,6 +372,39 @@ the three individual Supabase/Sentry secrets.
 
 ---
 
+### D-026 — A docker-free migration runner beside `supabase db push`
+
+**Brief said:** the schema lives in `supabase/migrations/` and reaches the
+project through `supabase db push`. That stays the documented path for a real
+project (see the README → Setup).
+
+**Deviation.** `scripts/apply_migrations.sh` performs the same push with only
+`psql`, which is what this environment and the CI image actually provide:
+`--plan` (read-only), `--dry-run` (execute the pending SQL inside a transaction
+that is rolled back) and `--apply`. The dry run fingerprints every relation,
+column, function, policy and extension before and after the transaction, so
+"rolled back" is proved rather than assumed. Versions are recorded in
+`supabase_migrations.schema_migrations` in whatever column shape that table
+already has — and in the CLI's shape when it does not exist yet — so
+`supabase migration list` and the dashboard's migration history stay in
+agreement with the script.
+
+Both modes now emit the same version-recording SQL. Previously only `--apply`
+did, and it created the `supabase_migrations` *schema* without the
+`schema_migrations` *table*, so a first apply failed on the insert and rolled
+the whole migration set back; a dry run could not see it because it never
+exercised that statement. Verification also surfaced six `create trigger`
+statements with no preceding `drop trigger if exists`, which made re-application
+fail even though `docs/DATABASE.md` promised otherwise. Both are fixed, and
+`.github/workflows/supabase-db-push.yml` now applies *and* re-applies to a
+throwaway database so the idempotency claim is enforced rather than asserted.
+
+**Consequence.** CI needs no Docker and no Supabase credentials: the job stands
+in the platform with `tests/rls/00_supabase_shim.sql` (D-022), which supplies
+the `auth` and `storage` schemas the migrations extend.
+
+---
+
 ## E. Open items handed to Part 2
 
 Closed since this list was written:

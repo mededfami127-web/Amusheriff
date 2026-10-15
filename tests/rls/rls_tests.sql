@@ -689,9 +689,36 @@ begin
   perform test.assert_eq(
     (select count(*) from storage.buckets where id = 'brand' and public),
     1, 'the brand bucket exists and is public');
+
+  -- Bucket *configuration*, not authorisation: this runs as the owner, because
+  -- storage.buckets carries RLS with no select policy (the platform behaves the
+  -- same way), so an anon/authenticated caller legitimately sees zero rows and
+  -- could never assert the configured allow-list from underneath that policy.
+  -- These tokens are the exact strings the product-media policy's allow-list
+  -- matches against, so a future bucket change fails here instead of silently
+  -- accepting a different type everywhere.
+  perform test.assert(
+    (select allowed_mime_types @>
+        array['image/jpeg', 'image/png', 'image/webp', 'video/mp4']::text[]
+     from storage.buckets
+     where id = 'product-media'),
+    'product-media allowed_mime_types document the four supported types');
+  perform test.assert(
+    (select allowed_mime_types @>
+        array['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml']::text[]
+     from storage.buckets
+     where id = 'brand'),
+    'brand allowed_mime_types document the four supported types');
 end;
 $$;
-\echo 'ok 9a - both buckets exist with public read'
+\echo 'ok 9a - both buckets exist, are public and declare their allow-lists'
+
+-- One object for anon to find: it is inserted as the owner (RLS bypassed)
+-- because anon deliberately has no insert policy to use.
+insert into storage.objects (bucket_id, name, metadata)
+values ('product-media',
+        'products/f0000000-0000-4000-8000-000000000001/seed.jpg',
+        '{"size":1024,"mimetype":"image/jpeg"}'::jsonb);
 
 set role anon;
 do $$
@@ -711,23 +738,12 @@ begin
   end;
   perform test.assert_eq(v_state, '42501', 'anon CANNOT upload to product-media');
 
-  select count(*) into v_read from storage.objects where bucket_id = 'product-media';
-  perform test.assert(v_read >= 0, 'anon read of product-media objects is permitted');
-
-  -- The runner records the JSONB mimetype alongside the bytes, so another
-  -- caller (or a sloppy CI step that assumed the string) can read back what
-  -- was actually stored instead of defaulting to a hard-coded token. Those
-  -- tokens are the exact strings the storage policy's bucket allow-list and
-  -- object size guards match against; assert them once here so a future
-  -- change to the bucket configuration fails loudly instead of silently
-  -- accepting a different type everywhere.
-  perform test.assert(
-    (select allowed_mime_types @>
-        array['image/jpeg', 'image/png', 'image/webp', 'video/mp4']::text[]
-     from storage.buckets
-     where id = 'product-media') is true,
-    'product-media allowed_mime_types document the four supported types'
-  );
+  select count(*) into v_read
+    from storage.objects
+   where bucket_id = 'product-media'
+     and name = 'products/f0000000-0000-4000-8000-000000000001/seed.jpg';
+  perform test.assert_eq(
+    v_read, 1, 'anon CAN read the product-media object (public read)');
 end;
 $$;
 reset role;

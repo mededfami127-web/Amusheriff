@@ -29,8 +29,9 @@ enum AppFlavor {
   bool get isProd => this == AppFlavor.prod;
   bool get isDev => this == AppFlavor.dev;
 
-  /// Android application id suffix kept per flavor so dev/staging/prod can be
-  /// installed side by side.
+  /// Android application id suffix reserved for native product flavors. The
+  /// Gradle build does not apply it yet (D-019), so dev/staging/prod currently
+  /// share one application id and cannot be installed side by side.
   String get applicationIdSuffix => switch (this) {
         AppFlavor.dev => '.dev',
         AppFlavor.staging => '.staging',

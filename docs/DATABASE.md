@@ -113,8 +113,12 @@ tiktok | youtube | website | location | other`.
 | `20260101000300_rls_policies.sql` | RLS on every table + the full policy set + grants |
 | `20260101000400_storage_buckets.sql` | `product-media` and `brand` buckets + object policies |
 
-Migrations are idempotent (`create table if not exists`, `drop policy if
-exists`), so they can be re-applied.
+Migrations are idempotent — `create table if not exists`, `create or replace
+function` / view, `drop trigger if exists` before every `create trigger`, and
+`drop policy if exists` before every `create policy` — so re-applying the whole
+set to a database that already holds it is a no-op instead of an error.
+`.github/workflows/supabase-db-push.yml` applies and then re-applies the set to
+a throwaway database, so the claim is enforced rather than asserted.
 
 ---
 

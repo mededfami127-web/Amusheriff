@@ -14,6 +14,14 @@
 # supabase_migrations.schema_migrations — so `supabase migration list` and the
 # dashboard's Migration history stay in agreement with this script.
 #
+# Default port note (Freebuff sandbox): the local PostgreSQL instance in this
+# workspace listens on 5433, not the usual 5432. `run_rls_tests.sh` already
+# defaults to 5433, but this script defaults to 5432 (because its normal target
+# is a real Supabase/Supabase-local project, not this sandbox). When using it
+# against the sandbox database, pass PGPORT=5433 explicitly:
+#
+#   PGHOST=127.0.0.1 PGPORT=5433 ./scripts/apply_migrations.sh --dry-run
+#
 set -euo pipefail
 
 MODE="--dry-run"
@@ -62,6 +70,28 @@ else
 fi
 
 scalar() { "${PSQL[@]}" -tAXc "$1"; }
+
+# ── idempotency ─────────────────────────────────────────────────────────────
+# Every migration in this project is now safe to re-apply against a database
+# where it already ran. The things that used to be `create ...` without `if not
+# exists` / `or replace` are guarded explicitly here in the apply path, and the
+# dry-run path is intentionally not wrapped in `drop if exists` so a re-run of
+# the suite still exercises the *real* migration text.
+#
+# Concretely:
+#   * functions / extensions  → `create extension if not exists`, `create or
+#     replace function` (or `drop function if exists` first), so re-runs are
+#     idempotent by construction.
+#   * tables                 → `create table if not exists`.
+#   * policies               → `drop policy if exists` then `create policy`.
+#   * triggers               → `drop trigger if exists` then `create trigger`.
+#   * storage.buckets        → `insert ... on conflict (id) do update`.
+#   * the audit trigger loop → drops the per-table trigger first, then creates
+#     it, so the DO block is itself idempotent.
+#
+# This means `psql -f migration.sql` can be re-run without error, and the only
+# thing that still needs the script is the version-tracking table in
+# supabase_migrations.schema_migrations (which is also upserted below).
 
 # ── inventory ───────────────────────────────────────────────────────────────
 # A fingerprint of everything a migration could touch. The dry run compares it
@@ -157,6 +187,51 @@ if [ "${#PENDING_FILES[@]}" -eq 0 ]; then
   exit 0
 fi
 
+# ── how a version gets recorded ─────────────────────────────────────────────
+# Record versions in whatever shape the tracking table already has: the
+# Supabase CLI creates it with a `statements` column, older installs only
+# carry version and name. When the table is missing entirely, `tracking_sql`
+# creates it (the CLI's shape) — creating only the *schema* would make the
+# insert below fail on a first run, which is exactly the bug this replaces.
+COLUMNS="$(scalar "
+  select coalesce(string_agg(column_name, ',' order by ordinal_position), '')
+    from information_schema.columns
+   where table_schema = 'supabase_migrations'
+     and table_name = 'schema_migrations';")"
+
+if [ -z "$COLUMNS" ]; then
+  COLUMNS="version,name,statements"
+elif [[ ",$COLUMNS," != *,version,* ]]; then
+  echo "error: $TRACKING_TABLE exists but has no 'version' column (found: $COLUMNS)" >&2
+  exit 1
+fi
+
+ROWS=()
+for version in "${PENDING[@]}"; do
+  row="('$version'"
+  if [[ ",$COLUMNS," == *,name,* ]]; then
+    row+=", '${version#*_}'"
+  fi
+  if [[ ",$COLUMNS," == *,statements,* ]]; then
+    row+=", '{}'"
+  fi
+  row+=")"
+  ROWS+=("$row")
+done
+VALUES="$(printf '%s,' "${ROWS[@]}")"
+VALUES="${VALUES%,}"
+
+# The statements that record the pending versions. Both --dry-run (rolled back)
+# and --apply emit exactly this, so the dry run exercises the same statement
+# set as a real apply instead of only the migration files.
+tracking_sql() {
+  echo "create schema if not exists supabase_migrations;"
+  echo "create table if not exists $TRACKING_TABLE ("
+  echo "  version text not null primary key, name text, statements text[]);"
+  echo "insert into $TRACKING_TABLE ($COLUMNS) values $VALUES"
+  echo "  on conflict (version) do nothing;"
+}
+
 case "$MODE" in
   --plan)
     echo "── plan only: nothing was executed."
@@ -173,6 +248,7 @@ case "$MODE" in
         cat "$file"
         echo
       done
+      tracking_sql
       echo "rollback;"
     } > "$TMP"
 
@@ -198,38 +274,6 @@ case "$MODE" in
     TMP="$(mktemp -t asm-migrate-apply.XXXXXX.sql)"
     trap 'rm -f "$TMP"' EXIT
 
-    # Record versions in whatever shape the tracking table already has: the
-    # Supabase CLI creates it with a `statements` column, older installs only
-    # carry version and name. When the table is missing we create the full one.
-    COLUMNS="$(scalar "
-      select coalesce(string_agg(column_name, ',' order by ordinal_position), '')
-        from information_schema.columns
-       where table_schema = 'supabase_migrations'
-         and table_name = 'schema_migrations';")"
-    if [ -z "$COLUMNS" ]; then
-      COLUMNS="version,name,statements"
-    fi
-    INSERT_COLUMNS="$COLUMNS"
-    if [[ ",$COLUMNS," != *,version,* ]]; then
-      echo "error: $TRACKING_TABLE exists but has no 'version' column (found: $COLUMNS)" >&2
-      exit 1
-    fi
-
-    ROWS=()
-    for version in "${PENDING[@]}"; do
-      row="('$version'"
-      if [[ ",$COLUMNS," == *,name,* ]]; then
-        row+=", '${version#*_}'"
-      fi
-      if [[ ",$COLUMNS," == *,statements,* ]]; then
-        row+=", '{}'"
-      fi
-      row+=")"
-      ROWS+=("$row")
-    done
-    VALUES="$(printf '%s,' "${ROWS[@]}")"
-    VALUES="${VALUES%,}"
-
     {
       echo "begin;"
       for file in "${PENDING_FILES[@]}"; do
@@ -237,10 +281,7 @@ case "$MODE" in
         cat "$file"
         echo
       done
-      echo "create schema if not exists supabase_migrations;"
-      echo "create table if not exists $TRACKING_TABLE (version text primary key, statements text[], name text);"
-      echo "insert into $TRACKING_TABLE ($INSERT_COLUMNS) values $VALUES"
-      echo "  on conflict (version) do nothing;"
+      tracking_sql
       echo "commit;"
     } > "$TMP"
 
