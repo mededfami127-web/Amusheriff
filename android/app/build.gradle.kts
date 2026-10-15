@@ -52,7 +52,11 @@ android {
         applicationId = "com.amusheriff.amu_sharif_majlis"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        // 26 rather than Flutter's default 24: sentry_flutter 10 declares
+        // minSdkVersion 26 and the manifest merger refuses a smaller app value.
+        // That is the price of the built-in-Kotlin migration that unblocked the
+        // Android build; it drops Android 7.x (API 24-25).
+        minSdk = 26
         targetSdk = flutter.targetSdkVersion
         // Uses the version code from pubspec.yaml. When using split APKs, 1000 * ABI_VERSION
         // is added automatically by Flutter. (https://developer.android.com/studio/build/configure-apk-splits#configure-APK-versions)

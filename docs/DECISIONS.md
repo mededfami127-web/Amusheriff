@@ -405,6 +405,21 @@ the `auth` and `storage` schemas the migrations extend.
 
 ---
 
+### D-027 — Android floor raised to API 26
+
+`sentry_flutter` 10 declares `minSdkVersion 26`, and it is the release that
+dropped both the `languageVersion = "1.6"` pin and its bundled Kotlin Gradle
+plugin — the two things that made every Android build fail under Kotlin 2.4.
+The 9.x line still applies KGP 1.8.0, which Gradle 9.3.1 will not run, so the
+floor moves from Flutter's default 24 to **26 (Android 8.0)**, dropping Android
+7.x support. The change lives in `android/app/build.gradle.kts`.
+
+`tools:overrideLibrary` was rejected: it silences the manifest merger for a
+library the app genuinely drives at runtime, which is exactly the kind of
+failure this project prefers to surface at build time.
+
+---
+
 ## E. Open items handed to Part 2
 
 Closed since this list was written:
