@@ -16,10 +16,15 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify:
     name: Verify Flutter app
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -32,7 +37,7 @@ jobs:
         run: flutter pub get
 
       - name: Generate code
-        run: dart run build_runner build --delete-conflicting-outputs
+        run: dart run build_runner build
 
       - name: Analyze
         run: flutter analyze --fatal-infos
@@ -44,6 +49,7 @@ jobs:
     name: Android APK + AAB
     runs-on: ubuntu-latest
     needs: verify
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
 
@@ -70,7 +76,7 @@ jobs:
         run: flutter pub get
 
       - name: Generate code (riverpod / freezed / json)
-        run: dart run build_runner build --delete-conflicting-outputs
+        run: dart run build_runner build
 
       # Values live in repository secrets; nothing secret is committed. Only the
       # public anon key ships to clients — never the service-role key.

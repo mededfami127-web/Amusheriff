@@ -508,6 +508,35 @@ The editor therefore deletes the row first, then removes both objects with
 `removeQuietly`, and reports a denied write instead of dropping the future on the
 floor. The confirmation dialog and the snackbar are part of the same fix.
 
+### D-034 — What each CI gate is for, and the one gate deliberately left out
+
+Auditing `.github/workflows/` against the toolchain it actually runs turned up
+one stale command and two holes:
+
+* `dart run build_runner build --delete-conflicting-outputs` was passed in all
+  three workflows and in the README. build_runner 2.16 removed that option: every
+  run printed "These options have been removed and were ignored". The flag is
+  gone and the command is plain `dart run build_runner build` — verification
+  that a *missing* generated file is still recreated (delete `launcher.g.dart`,
+  build, `git status` clean) is what showed the option is no longer needed
+  rather than merely deprecated.
+* `flutter gen-l10n` treats `app_en.arb` as the template and answers a missing
+  translation with the English wording, so a key added to the template alone
+  compiles, passes the generated-drift check (which compares *output*, not ARB
+  coverage) and ships English to the Amharic, Arabic and Oromo readers.
+  `tool/check_l10n_parity.dart` is now a CI step: it fails with the per-locale
+  missing/unknown key list.
+* Nothing compiled the app on a pull request — `analyze` and the unit tests do
+  not build assets, fonts or a release kernel, and the APK jobs run on `main`.
+  `flutter build bundle --release` is the cheap compile gate: no Android SDK, no
+  signing, and the same asset bundling a device build performs.
+
+**Deliberately not added: a `dart format --set-exit-if-changed` step.** The tree
+predates the tall-style formatter the current stable SDK ships, so the check
+reports 99 of 159 hand-written files as unformatted. A gate would be red on
+arrival, and reformatting every feature file is a separate, reviewable change
+rather than something to smuggle into a CI fix.
+
 ---
 
 ## E. Open items handed to Part 2

@@ -13,10 +13,16 @@ on:
 permissions:
   contents: read
 
+# Two quick pushes to main should leave one APK build standing, not a queue.
+concurrency:
+  group: debug-apk-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   debug-apk:
     name: Android debug APK (dev flavor)
     runs-on: ubuntu-latest
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
 
@@ -34,7 +40,7 @@ jobs:
         run: flutter pub get
 
       - name: Generate code (riverpod / freezed / json)
-        run: dart run build_runner build --delete-conflicting-outputs
+        run: dart run build_runner build
 
       # Same shape and the same validation the release workflow applies, with an
       # error that names the fix for a first-time setup: `bootstrap()` calls

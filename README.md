@@ -31,6 +31,8 @@ CI/CD promotion gates and release Android/iOS builds — is tracked in
 | Code generation | `dart run build_runner build` + `dart run tool/gen_text_overlay.dart` | 0 errors |
 | Static analysis | `flutter analyze` | **No issues found** |
 | Unit + widget tests | `flutter test` | **101 passed** |
+| Release compile | `flutter build bundle --release` | builds clean |
+| Localization key parity | `dart run tool/check_l10n_parity.dart` | **292 message keys in each of en, am, ar, om** |
 | RLS acceptance suite | `bash scripts/run_rls_tests.sh` | **22/22 checks passed** on PostgreSQL 16.15 |
 | Migration runner | `bash scripts/apply_migrations.sh --dry-run`, then `--apply` twice | plan, dry run, apply and re-apply all clean on PostgreSQL 16.15 |
 
@@ -47,9 +49,10 @@ SDK or Xcode available) and the Edge Function under the Edge Runtime. See
 ```bash
 flutter --version      # 3.47.x stable, Dart 3.13+
 flutter pub get
-dart run build_runner build --delete-conflicting-outputs
+dart run build_runner build
 flutter gen-l10n                      # also runs automatically via `generate: true`
 dart run tool/gen_text_overlay.dart   # after any lib/l10n/app_*.arb change
+dart run tool/check_l10n_parity.dart  # every locale carries the same keys
 ```
 
 The last command regenerates `lib/core/l10n/text_catalog.dart` and
@@ -223,16 +226,21 @@ The debug build signs with the debug keystore, needs no Play signing secret, and
 ## Development
 
 ```bash
-flutter analyze                # must stay clean; CI runs --fatal-infos
-flutter test                   # unit tests
+flutter analyze                        # must stay clean; CI runs --fatal-infos
+flutter test                           # unit tests
+dart run tool/check_l10n_parity.dart   # every locale carries the same ARB keys
 flutter run --dart-define-from-file=config/dev.json
 ```
 
 After changing any `@riverpod` provider, freezed entity or JSON model:
 
 ```bash
-dart run build_runner build --delete-conflicting-outputs
+dart run build_runner build
 ```
+
+`--delete-conflicting-outputs` is no longer needed (nor accepted): build_runner
+2.16 removed the option and deletes conflicting output by default — it warns
+that the flag "was removed and ignored" if you pass it anyway.
 
 ### Editing the app's wording (owner-facing)
 
@@ -258,6 +266,11 @@ Two mechanics make that work and are worth knowing before changing them:
   site mentions overrides.
 * `dart run tool/gen_text_overlay.dart` regenerates both that subclass and the
   catalogue the editor lists. Re-run it whenever you add or rename an ARB key.
+
+Adding a key means adding it to **all four** `lib/l10n/app_*.arb` files.
+`flutter gen-l10n` answers a missing translation with the English wording and
+says nothing about it, so `dart run tool/check_l10n_parity.dart` is the gate that
+fails instead (CI runs it).
 
 ### The owner gateway (five taps)
 
@@ -317,10 +330,11 @@ idempotency claim in [`docs/DATABASE.md`](docs/DATABASE.md) honest.
 lib/core/          config · theme · router · errors · network · utils · widgets · l10n
 lib/features/      auth · catalog · storefront · admin · contacts · settings
                    (each: domain/ · data/ · presentation/)
-lib/l10n/          app_en.arb · app_am.arb · app_ar.arb
+lib/l10n/          app_en.arb · app_am.arb · app_ar.arb · app_om.arb
 supabase/          migrations · seed.sql · functions · config.toml
 tests/rls/         local Supabase shim + RLS acceptance suite
-scripts/           run_rls_tests.sh · create_admin.sh
+scripts/           run_rls_tests.sh · apply_migrations.sh · create_admin.sh · add_l10n_keys.py
+tool/              gen_text_overlay.dart · check_l10n_parity.dart
 docs/              ARCHITECTURE.md · DATABASE.md · DECISIONS.md
 ```
 

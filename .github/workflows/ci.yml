@@ -5,6 +5,12 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  # Re-run the whole gate on demand, without pushing an empty commit.
+  workflow_dispatch:
+
+# `contents: read` only: nothing here writes to the repository.
+permissions:
+  contents: read
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -18,6 +24,8 @@ jobs:
   flutter:
     name: analyze & test
     runs-on: ubuntu-latest
+    # A hung `pub get` or generator must not hold a runner for six hours.
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
 
@@ -29,20 +37,67 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      # Two generators produce committed artifacts, and both are checked here.
+      #
+      # `flutter gen-l10n` writes lib/core/l10n/generated from lib/l10n/app_*.arb,
+      # and `tool/gen_text_overlay.dart` restates those ARBs as
+      # lib/core/l10n/text_catalog.dart + lib/core/l10n/overridable_localizations.dart,
+      # which is what the owner-facing wording editor reads. Committing the output
+      # keeps a fresh checkout building without either generator, and this step is
+      # what keeps that snapshot honest: adding an ARB key and forgetting the
+      # overlay generator would otherwise leave the new string invisible to the
+      # owner while CI stayed green.
+      #
+      # `git status` rather than `git diff` so a newly generated file counts as
+      # drift too, not only a modified one.
       - name: Verify generated sources are up to date
+        # Bash explicitly: the path list below is an array.
+        shell: bash
         run: |
-          dart run build_runner build --delete-conflicting-outputs
-          if ! git diff --quiet -- '*.g.dart' '*.freezed.dart' 'lib/core/l10n/generated'; then
-            echo "::error::Generated sources are stale. Run 'dart run build_runner build --delete-conflicting-outputs' and commit the output."
-            git diff --stat -- '*.g.dart' '*.freezed.dart' 'lib/core/l10n/generated'
+          flutter gen-l10n
+          # No `--delete-conflicting-outputs`: build_runner 2.16 removed the
+          # option (it deletes conflicting output by default now) and prints a
+          # "removed and were ignored" warning for it.
+          dart run build_runner build
+          dart run tool/gen_text_overlay.dart
+
+          paths=(
+            '*.g.dart'
+            '*.freezed.dart'
+            'lib/core/l10n/generated'
+            'lib/core/l10n/text_catalog.dart'
+            'lib/core/l10n/overridable_localizations.dart'
+          )
+
+          if [ -n "$(git status --porcelain -- "${paths[@]}")" ]; then
+            echo "::error::Generated sources are stale. Run 'flutter gen-l10n', 'dart run build_runner build' and 'dart run tool/gen_text_overlay.dart', then commit the output."
+            git status --short -- "${paths[@]}"
+            git --no-pager diff --stat -- "${paths[@]}"
             exit 1
           fi
+
+          echo "Generated sources are in sync with lib/l10n/app_*.arb."
+
+      # The drift check above compares the generated output to the ARBs, so it
+      # cannot see a key that is in the template but in none of the
+      # translations: `flutter gen-l10n` answers that case with the English
+      # wording and says nothing. This is the gate for it.
+      - name: Check localization key parity
+        run: dart run tool/check_l10n_parity.dart
 
       - name: Analyze (fatal on infos)
         run: flutter analyze --fatal-infos
 
       - name: Unit tests
         run: flutter test --coverage
+
+      # Analyze and the unit tests never compile the app for release, so a
+      # pubspec asset or font that no longer exists, or code only a release
+      # compile rejects, would reach main unnoticed. This is the cheap compile
+      # gate: no Android SDK, no signing, and the same asset bundling a device
+      # build performs.
+      - name: Compile a release bundle
+        run: flutter build bundle --release
 
       - uses: actions/upload-artifact@v4
         if: always()
@@ -55,6 +110,7 @@ jobs:
   rls:
     name: RLS acceptance suite
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:16

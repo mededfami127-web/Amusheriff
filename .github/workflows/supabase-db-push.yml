@@ -12,6 +12,11 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+
+# `contents: read` only: nothing here writes to the repository.
+permissions:
+  contents: read
 
 concurrency:
   group: supabase-db-push-${{ github.ref }}
@@ -21,6 +26,7 @@ jobs:
   db-push:
     name: migration dry-run
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     # The dry run talks to the throwaway database created below, not to
     # `postgres`, so the scratch database is the job-wide default.
