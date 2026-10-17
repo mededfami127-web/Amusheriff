@@ -10,9 +10,11 @@
 -- still has subcategories — or products inside them — fails loudly instead of
 -- silently removing catalogue rows the owner never asked to lose. The gateway
 -- deletes subcategories first, exactly as it does for products.
+--
+-- No `begin`/`commit` here, matching every other migration: the runner
+-- (scripts/apply_migrations.sh and the Supabase CLI) owns the transaction, and a
+-- nested `commit` would break the dry run's rollback.
 -- ═══════════════════════════════════════════════════════════════════════════
-
-begin;
 
 alter table public.categories
   add column if not exists parent_id uuid
@@ -66,5 +68,3 @@ drop trigger if exists categories_guard_nesting on public.categories;
 create trigger categories_guard_nesting
   before insert or update of parent_id on public.categories
   for each row execute function public.guard_category_nesting();
-
-commit;
