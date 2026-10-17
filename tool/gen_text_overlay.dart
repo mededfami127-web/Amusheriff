@@ -121,10 +121,7 @@ const Map<String, List<String>> _sections = <String, List<String>>{
     'adminNoContacts',
     'adminChannel',
   ],
-  'adminInquiries': <String>[
-    'adminInquir',
-    'adminClearInquiries',
-  ],
+  'adminInquiries': <String>['adminInquir', 'adminClearInquiries'],
   'adminSiteSettings': <String>[
     'adminSiteSettings',
     'adminStoreName',
@@ -136,10 +133,7 @@ const Map<String, List<String>> _sections = <String, List<String>>{
     'adminLogoPreview',
     'adminLivePreview',
   ],
-  'adminTextEditor': <String>[
-    'adminTextEditor',
-    'adminLiveEdit',
-  ],
+  'adminTextEditor': <String>['adminTextEditor', 'adminLiveEdit'],
   'adminAccount': <String>[
     'adminLogin',
     'adminEmailLabel',
@@ -203,11 +197,15 @@ void main() {
   );
   _write(
     _overridesPath,
-    _buildOverrides(
-      declarations: _readDeclarations(),
-      pluralKeys: pluralKeys,
-    ),
+    _buildOverrides(declarations: _readDeclarations(), pluralKeys: pluralKeys),
   );
+
+  // Both files are committed and gated by the `dart format
+  // --set-exit-if-changed` CI step, so the generator hands its own output to
+  // the same formatter instead of trying to match the style by hand: a
+  // regenerated file is then byte-identical to the committed one and the
+  // "generated sources are up to date" check stays green.
+  _format(<String>[_catalogPath, _overridesPath]);
 
   stdout.writeln(
     'text overlay: ${keys.length} keys × ${localeCodes.length} locales '
@@ -215,6 +213,30 @@ void main() {
   );
   stdout.writeln('  wrote $_catalogPath');
   stdout.writeln('  wrote $_overridesPath');
+}
+
+/// Formats [paths] with the SDK that is running this script.
+///
+/// `Platform.resolvedExecutable` is the `dart` VM itself, so the result matches
+/// whatever toolchain invoked the generator — no `PATH` lookup that could find
+/// a different SDK than the one CI's format gate uses.
+void _format(List<String> paths) {
+  final List<String> args = <String>['format', ...paths];
+  final ProcessResult result = Process.runSync(
+    Platform.resolvedExecutable,
+    args,
+  );
+  if (result.exitCode != 0) {
+    stderr
+      ..write(result.stdout)
+      ..write(result.stderr);
+    throw ProcessException(
+      Platform.resolvedExecutable,
+      args,
+      'dart format failed',
+      result.exitCode,
+    );
+  }
 }
 
 // ── Sources ─────────────────────────────────────────────────────────────────
@@ -233,9 +255,9 @@ Map<String, Map<String, String>> _readArbs() {
     final String name = entity.path.split(Platform.pathSeparator).last;
     if (!name.startsWith('app_') || !name.endsWith('.arb')) continue;
 
-    final Map<String, dynamic> json =
-        jsonDecode(File(entity.path).readAsStringSync())
-            as Map<String, dynamic>;
+    final Map<String, dynamic> json = jsonDecode(
+      File(entity.path).readAsStringSync(),
+    ) as Map<String, dynamic>;
     final String locale =
         json['@@locale'] as String? ?? name.substring(4, name.length - 4);
     result[locale] = <String, String>{
@@ -254,8 +276,7 @@ Map<String, Map<String, String>> _readArbs() {
 
 /// Placeholder names declared by the template's `@key` metadata blocks.
 Map<String, List<String>> _readPlaceholders() {
-  final String raw =
-      File('$_arbDir/app_en.arb').readAsStringSync();
+  final String raw = File('$_arbDir/app_en.arb').readAsStringSync();
   final Map<String, dynamic> json = jsonDecode(raw) as Map<String, dynamic>;
   final Map<String, List<String>> result = <String, List<String>>{};
 
@@ -299,7 +320,9 @@ List<_Declaration> _readDeclarations() {
     );
   }
   if (declarations.isEmpty) {
-    stderr.writeln('error: no declarations parsed from $_generatedLocalizations');
+    stderr.writeln(
+      'error: no declarations parsed from $_generatedLocalizations',
+    );
     exit(1);
   }
   return declarations;
@@ -329,7 +352,9 @@ String _buildCatalog({
     ..writeln('//')
     ..writeln('// Run `dart run tool/gen_text_overlay.dart` after changing any')
     ..writeln('// lib/l10n/app_*.arb file. It restates the ARBs as Dart so the')
-    ..writeln('// owner-facing text editor can list and resolve every string by key.')
+    ..writeln(
+      '// owner-facing text editor can list and resolve every string by key.',
+    )
     ..writeln('// ignore_for_file: type=lint')
     ..writeln()
     ..writeln('/// One editable string: its key, its shipped wording in every')
@@ -354,7 +379,9 @@ String _buildCatalog({
     ..writeln('  /// `{name}`-style variables the text must keep.')
     ..writeln('  final List<String> placeholders;')
     ..writeln()
-    ..writeln('  /// ICU plurals cannot be replaced by plain text, so the editor')
+    ..writeln(
+      '  /// ICU plurals cannot be replaced by plain text, so the editor',
+    )
     ..writeln('  /// shows these read-only.')
     ..writeln('  final bool isPlural;')
     ..writeln()
@@ -362,7 +389,9 @@ String _buildCatalog({
     ..writeln()
     ..writeln('  bool get isEditable => !isPlural;')
     ..writeln()
-    ..writeln('  /// The shipped wording for [locale], falling back to English.')
+    ..writeln(
+      '  /// The shipped wording for [locale], falling back to English.',
+    )
     ..writeln('  String defaultFor(String locale) =>')
     ..writeln('      defaults[locale] ?? defaults[\'en\'] ?? key;')
     ..writeln()
@@ -380,8 +409,10 @@ String _buildCatalog({
     ..writeln('];')
     ..writeln()
     ..writeln('/// Locale code → the name shown in the language picker.')
-    ..writeln('const Map<String, String> kAppTextLocaleNames = '
-        '<String, String>{');
+    ..writeln(
+      'const Map<String, String> kAppTextLocaleNames = '
+      '<String, String>{',
+    );
   for (final String code in localeCodes) {
     out.writeln("  '$code': '${_dart(_localeNames[code] ?? code)}',");
   }
@@ -429,8 +460,10 @@ String _buildCatalog({
     ..writeln('];')
     ..writeln()
     ..writeln('/// Lookup by key, for the in-place pencils and the editor.')
-    ..writeln('final Map<String, AppTextEntry> kAppTextByKey = '
-        '<String, AppTextEntry>{')
+    ..writeln(
+      'final Map<String, AppTextEntry> kAppTextByKey = '
+      '<String, AppTextEntry>{',
+    )
     ..writeln('  for (final AppTextEntry entry in kAppTextEntries)')
     ..writeln('    entry.key: entry,')
     ..writeln('};');
@@ -450,11 +483,15 @@ String _buildOverrides({
     ..writeln()
     ..writeln("import 'generated/app_localizations.dart';")
     ..writeln()
-    ..writeln('/// [AppLocalizations] that renders the owner\'s own wording where')
+    ..writeln(
+      '/// [AppLocalizations] that renders the owner\'s own wording where',
+    )
     ..writeln('/// one exists and the shipped ARB wording everywhere else.')
     ..writeln('///')
     ..writeln('/// Every screen already reads its strings through')
-    ..writeln('/// `AppLocalizations.of(context)`, so wrapping that instance is what')
+    ..writeln(
+      '/// `AppLocalizations.of(context)`, so wrapping that instance is what',
+    )
     ..writeln('/// makes an edit appear on all of them at once.')
     ..writeln('class OverridableAppLocalizations extends AppLocalizations {')
     ..writeln('  OverridableAppLocalizations(this._base, this._overrides)')
@@ -471,7 +508,9 @@ String _buildOverrides({
     ..writeln('  String _text(String key, String fallback) =>')
     ..writeln('      _overrides[key] ?? fallback;')
     ..writeln()
-    ..writeln('  /// Applies an override that carries `{variable}` placeholders, so')
+    ..writeln(
+      '  /// Applies an override that carries `{variable}` placeholders, so',
+    )
     ..writeln('  /// a rewritten message still names the product it is about.')
     ..writeln('  String _filled(')
     ..writeln('    String key,')
@@ -504,15 +543,11 @@ String _buildOverrides({
       out.writeln(
         '  String ${declaration.name}(${declaration.paramsSource}) =>',
       );
-      out.writeln(
-        '      _base.${declaration.name}(${declaration.argNames});',
-      );
+      out.writeln('      _base.${declaration.name}(${declaration.argNames});');
       continue;
     }
 
-    out.writeln(
-      '  String ${declaration.name}(${declaration.paramsSource}) =>',
-    );
+    out.writeln('  String ${declaration.name}(${declaration.paramsSource}) =>');
     if (declaration.params.isEmpty) {
       out.writeln(
         '      _text(\'${declaration.name}\', _base.${declaration.name}());',
@@ -535,8 +570,7 @@ String _buildOverrides({
 }
 
 List<String> _orderedSections(Map<String, String> sections) {
-  final List<String> declared = _sections.keys.toList()
-    ..add(_fallbackSection);
+  final List<String> declared = _sections.keys.toList()..add(_fallbackSection);
   return <String>[
     for (final String section in declared)
       if (sections.containsValue(section)) section,

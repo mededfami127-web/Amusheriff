@@ -7,8 +7,10 @@ void main() {
   const AsyncValue<bool> loading = AsyncValue<bool>.loading();
   const AsyncValue<bool> admin = AsyncValue<bool>.data(true);
   const AsyncValue<bool> notAdmin = AsyncValue<bool>.data(false);
-  final AsyncValue<bool> failed =
-      AsyncValue<bool>.error(StateError('boom'), StackTrace.empty);
+  final AsyncValue<bool> failed = AsyncValue<bool>.error(
+    StateError('boom'),
+    StackTrace.empty,
+  );
 
   group('public storefront', () {
     test('is never redirected', () {

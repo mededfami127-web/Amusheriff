@@ -29,8 +29,9 @@ class CatalogRemoteDataSource {
     final SupabaseStreamFilterBuilder base = _client
         .from(categoriesTable)
         .stream(primaryKey: const <String>['id']);
-    final SupabaseStreamBuilder filtered =
-        onlyVisible ? base.eq('is_visible', true) : base;
+    final SupabaseStreamBuilder filtered = onlyVisible
+        ? base.eq('is_visible', true)
+        : base;
     // `order` defaults to descending; the catalogue is always ascending.
     return filtered.order('sort_order', ascending: true);
   }
@@ -38,8 +39,9 @@ class CatalogRemoteDataSource {
   Future<List<Map<String, dynamic>>> fetchCategories({
     required bool onlyVisible,
   }) async {
-    PostgrestFilterBuilder<PostgrestList> query =
-        _client.from(categoriesTable).select();
+    PostgrestFilterBuilder<PostgrestList> query = _client
+        .from(categoriesTable)
+        .select();
     if (onlyVisible) query = query.eq('is_visible', true);
     final List<Map<String, dynamic>> rows = await query
         .order('sort_order', ascending: true)
@@ -47,17 +49,11 @@ class CatalogRemoteDataSource {
     return rows;
   }
 
-  Future<Map<String, dynamic>?> categoryById(String id) => _client
-      .from(categoriesTable)
-      .select()
-      .eq('id', id)
-      .maybeSingle();
+  Future<Map<String, dynamic>?> categoryById(String id) =>
+      _client.from(categoriesTable).select().eq('id', id).maybeSingle();
 
-  Future<Map<String, dynamic>?> categoryBySlug(String slug) => _client
-      .from(categoriesTable)
-      .select()
-      .eq('slug', slug)
-      .maybeSingle();
+  Future<Map<String, dynamic>?> categoryBySlug(String slug) =>
+      _client.from(categoriesTable).select().eq('slug', slug).maybeSingle();
 
   Future<Map<String, dynamic>> insertCategory(Map<String, dynamic> row) async {
     final Map<String, dynamic> created = await _client
@@ -105,8 +101,9 @@ class CatalogRemoteDataSource {
     bool onlyPublished = true,
     bool onlyFeatured = false,
   }) async {
-    PostgrestFilterBuilder<PostgrestList> query =
-        _client.from(productsTable).select(productColumns);
+    PostgrestFilterBuilder<PostgrestList> query = _client
+        .from(productsTable)
+        .select(productColumns);
     if (onlyPublished) query = query.eq('is_published', true);
     if (onlyFeatured) query = query.eq('is_featured', true);
     if (categoryId != null) query = query.eq('category_id', categoryId);
@@ -127,8 +124,9 @@ class CatalogRemoteDataSource {
       .from(productsTable)
       .stream(primaryKey: const <String>['id'])
       .eq('id', id)
-      .map((List<Map<String, dynamic>> rows) =>
-          rows.isEmpty ? null : rows.first);
+      .map(
+        (List<Map<String, dynamic>> rows) => rows.isEmpty ? null : rows.first,
+      );
 
   /// Trigram search via the `search_products` RPC (index-backed, anon-safe).
   Future<List<Map<String, dynamic>>> searchProducts(
@@ -139,14 +137,17 @@ class CatalogRemoteDataSource {
       'search_products',
       params: <String, dynamic>{'q': query, 'p_limit': limit},
     );
-    return (result as List<dynamic>)
-        .cast<Map<String, dynamic>>()
-        .toList(growable: false);
+    return (result as List<dynamic>).cast<Map<String, dynamic>>().toList(
+      growable: false,
+    );
   }
 
   Future<Map<String, dynamic>> insertProduct(Map<String, dynamic> row) async {
-    final Map<String, dynamic> created =
-        await _client.from(productsTable).insert(row).select().single();
+    final Map<String, dynamic> created = await _client
+        .from(productsTable)
+        .insert(row)
+        .select()
+        .single();
     return created;
   }
 
@@ -196,8 +197,11 @@ class CatalogRemoteDataSource {
   }
 
   Future<Map<String, dynamic>> insertMedia(Map<String, dynamic> row) async {
-    final Map<String, dynamic> created =
-        await _client.from(mediaTable).insert(row).select().single();
+    final Map<String, dynamic> created = await _client
+        .from(mediaTable)
+        .insert(row)
+        .select()
+        .single();
     return created;
   }
 
@@ -219,15 +223,15 @@ class CatalogRemoteDataSource {
 
   /// Clears the cover flag for a product. Required before setting a new cover,
   /// because `one_cover_per_product` is a *unique* partial index.
-  Future<void> clearCover(String productId) =>
-      _client.from(mediaTable).update(<String, dynamic>{'is_cover': false}).eq(
-            'product_id',
-            productId,
-          );
+  Future<void> clearCover(String productId) => _client
+      .from(mediaTable)
+      .update(<String, dynamic>{'is_cover': false})
+      .eq('product_id', productId);
 
   Future<void> setCover(String mediaId) => _client
       .from(mediaTable)
-      .update(<String, dynamic>{'is_cover': true}).eq('id', mediaId);
+      .update(<String, dynamic>{'is_cover': true})
+      .eq('id', mediaId);
 
   // ── Ordering ──────────────────────────────────────────────────────────────
 

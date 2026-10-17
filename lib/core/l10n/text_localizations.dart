@@ -18,12 +18,15 @@ import 'overridable_localizations.dart';
 /// failed network fetch — costs nothing.
 class OverridableLocalizationsDelegate
     extends LocalizationsDelegate<AppLocalizations> {
-  const OverridableLocalizationsDelegate({this.overrides = const <String, String>{}});
+  const OverridableLocalizationsDelegate({
+    this.overrides = const <String, String>{},
+  });
 
   final Map<String, String> overrides;
 
   @override
-  bool isSupported(Locale locale) => AppLocalizations.delegate.isSupported(locale);
+  bool isSupported(Locale locale) =>
+      AppLocalizations.delegate.isSupported(locale);
 
   @override
   Future<AppLocalizations> load(Locale locale) async {
@@ -35,9 +38,7 @@ class OverridableLocalizationsDelegate
   /// Reload only when the wording actually differs, so the app does not rebuild
   /// its whole string table on every provider tick.
   @override
-  bool shouldReload(
-    covariant LocalizationsDelegate<AppLocalizations> old,
-  ) =>
+  bool shouldReload(covariant LocalizationsDelegate<AppLocalizations> old) =>
       old is! OverridableLocalizationsDelegate ||
       !mapEquals(old.overrides, overrides);
 }
@@ -69,8 +70,9 @@ class FallbackMaterialLocalizationsDelegate
       GlobalMaterialLocalizations.delegate.load(const Locale('en'));
 
   @override
-  bool shouldReload(covariant LocalizationsDelegate<MaterialLocalizations> old) =>
-      false;
+  bool shouldReload(
+    covariant LocalizationsDelegate<MaterialLocalizations> old,
+  ) => false;
 }
 
 /// The Cupertino twin of [FallbackMaterialLocalizationsDelegate].
@@ -90,8 +92,7 @@ class FallbackCupertinoLocalizationsDelegate
   @override
   bool shouldReload(
     covariant LocalizationsDelegate<CupertinoLocalizations> old,
-  ) =>
-      false;
+  ) => false;
 }
 
 /// Every delegate `MaterialApp` installs, in precedence order.
@@ -100,12 +101,11 @@ class FallbackCupertinoLocalizationsDelegate
 /// including the gap-fill delegates above.
 List<LocalizationsDelegate<dynamic>> appLocalizationsDelegates({
   required Map<String, String> overrides,
-}) =>
-    <LocalizationsDelegate<dynamic>>[
-      OverridableLocalizationsDelegate(overrides: overrides),
-      GlobalMaterialLocalizations.delegate,
-      GlobalCupertinoLocalizations.delegate,
-      GlobalWidgetsLocalizations.delegate,
-      const FallbackMaterialLocalizationsDelegate(),
-      const FallbackCupertinoLocalizationsDelegate(),
-    ];
+}) => <LocalizationsDelegate<dynamic>>[
+  OverridableLocalizationsDelegate(overrides: overrides),
+  GlobalMaterialLocalizations.delegate,
+  GlobalCupertinoLocalizations.delegate,
+  GlobalWidgetsLocalizations.delegate,
+  const FallbackMaterialLocalizationsDelegate(),
+  const FallbackCupertinoLocalizationsDelegate(),
+];

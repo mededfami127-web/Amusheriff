@@ -34,11 +34,8 @@ class TextOverridesRemoteDataSource {
   Future<void> upsert(Map<String, dynamic> row) =>
       _client.from(table).upsert(row);
 
-  Future<void> delete(String textKey, String locale) => _client
-      .from(table)
-      .delete()
-      .eq('text_key', textKey)
-      .eq('locale', locale);
+  Future<void> delete(String textKey, String locale) =>
+      _client.from(table).delete().eq('text_key', textKey).eq('locale', locale);
 
   static Map<String, String> _toMap(List<Map<String, dynamic>> rows) =>
       <String, String>{

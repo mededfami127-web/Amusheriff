@@ -183,7 +183,8 @@ class _CategoryTile extends ConsumerWidget {
     WidgetRef ref,
     AppLocalizations l10n,
   ) async {
-    final bool confirmed = await showDialog<bool>(
+    final bool confirmed =
+        await showDialog<bool>(
           context: context,
           builder: (BuildContext dialogContext) => AlertDialog(
             title: Text(l10n.adminConfirmDeleteCategory),

@@ -49,13 +49,13 @@ ContactLink? primaryContactLink(Ref ref) {
 List<ContactLink> orderChannels(Ref ref) {
   final List<ContactLink> links =
       ref.watch(visibleContactLinksProvider).value ?? const <ContactLink>[];
-  return <ContactLink>[...links]
-    ..sort((ContactLink a, ContactLink b) {
-      final int byPriority =
-          a.kind.actionPriority.compareTo(b.kind.actionPriority);
-      if (byPriority != 0) return byPriority;
-      return a.sortOrder.compareTo(b.sortOrder);
-    });
+  return <ContactLink>[...links]..sort((ContactLink a, ContactLink b) {
+    final int byPriority = a.kind.actionPriority.compareTo(
+      b.kind.actionPriority,
+    );
+    if (byPriority != 0) return byPriority;
+    return a.sortOrder.compareTo(b.sortOrder);
+  });
 }
 
 /// Look-up helper used by the product page's "Buy" sheet.

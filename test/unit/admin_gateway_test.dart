@@ -59,9 +59,8 @@ void main() {
             ),
             GoRoute(
               path: ':id',
-              builder: (_, GoRouterState state) => AdminProductEditorPage(
-                productId: state.pathParameters['id'],
-              ),
+              builder: (_, GoRouterState state) =>
+                  AdminProductEditorPage(productId: state.pathParameters['id']),
             ),
           ],
         ),
@@ -163,9 +162,7 @@ void main() {
   testWidgets('category sheet blocks an invalid slug and saves a valid one', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(
-      harness(location: Routes.adminCategories),
-    );
+    await tester.pumpWidget(harness(location: Routes.adminCategories));
     await settle(tester);
 
     await tester.tap(find.byType(FloatingActionButton));
@@ -240,7 +237,11 @@ class _FakeCategoryRepository implements CategoryRepository {
   @override
   Future<Category> update(String id, CategoryDraft draft) async {
     saved.add(draft);
-    final Category updated = Category(id: id, name: draft.name, slug: draft.slug);
+    final Category updated = Category(
+      id: id,
+      name: draft.name,
+      slug: draft.slug,
+    );
     rows = rows
         .map((Category c) => c.id == id ? updated : c)
         .toList(growable: false);
@@ -291,8 +292,7 @@ class _FakeProductRepository implements ProductRepository {
     String? categoryId,
     bool onlyPublished = true,
     bool onlyFeatured = false,
-  }) async =>
-      rows;
+  }) async => rows;
 
   @override
   Future<Product?> findById(String id) async =>
@@ -337,7 +337,9 @@ class _FakeProductRepository implements ProductRepository {
   @override
   Future<void> setPublished(String id, {required bool isPublished}) async {
     rows = rows
-        .map((Product p) => p.id == id ? p.copyWith(isPublished: isPublished) : p)
+        .map(
+          (Product p) => p.id == id ? p.copyWith(isPublished: isPublished) : p,
+        )
         .toList(growable: false);
   }
 
@@ -351,7 +353,9 @@ class _FakeProductRepository implements ProductRepository {
   @override
   Future<void> setAvailability(String id, {required bool isAvailable}) async {
     rows = rows
-        .map((Product p) => p.id == id ? p.copyWith(isAvailable: isAvailable) : p)
+        .map(
+          (Product p) => p.id == id ? p.copyWith(isAvailable: isAvailable) : p,
+        )
         .toList(growable: false);
   }
 
@@ -402,9 +406,8 @@ class _FakeProductMediaRepository implements ProductMediaRepository {
   }
 
   @override
-  Future<void> delete(String id) async => rows.removeWhere(
-        (ProductMedia m) => m.id == id,
-      );
+  Future<void> delete(String id) async =>
+      rows.removeWhere((ProductMedia m) => m.id == id);
 
   @override
   Future<void> setCover(String productId, String mediaId) async {}

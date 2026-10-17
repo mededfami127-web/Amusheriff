@@ -28,13 +28,13 @@ class AppConfig {
   final bool supportsRealtime;
 
   factory AppConfig.fromEnvironment() => AppConfig(
-        flavor: AppFlavor.current,
-        supabaseUrl: Env.supabaseUrl,
-        supabaseAnonKey: Env.supabaseAnonKey,
-        sentryDsn: Env.sentryDsn,
-        functionsBaseUrl: Env.functionsBaseUrl,
-        supportsRealtime: !(kIsWeb && kDebugMode),
-      );
+    flavor: AppFlavor.current,
+    supabaseUrl: Env.supabaseUrl,
+    supabaseAnonKey: Env.supabaseAnonKey,
+    sentryDsn: Env.sentryDsn,
+    functionsBaseUrl: Env.functionsBaseUrl,
+    supportsRealtime: !(kIsWeb && kDebugMode),
+  );
 
   bool get hasSentry => sentryDsn.isNotEmpty;
 
@@ -60,13 +60,13 @@ class AppConfig {
 
   @override
   int get hashCode => Object.hash(
-        flavor,
-        supabaseUrl,
-        supabaseAnonKey,
-        sentryDsn,
-        functionsBaseUrl,
-        supportsRealtime,
-      );
+    flavor,
+    supabaseUrl,
+    supabaseAnonKey,
+    sentryDsn,
+    functionsBaseUrl,
+    supportsRealtime,
+  );
 }
 
 /// Overridden in `bootstrap()` once the environment has been validated.

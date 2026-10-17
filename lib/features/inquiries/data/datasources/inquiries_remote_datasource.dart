@@ -18,7 +18,9 @@ class InquiriesRemoteDataSource {
   Future<List<Map<String, dynamic>>> fetch({int limit = 500}) async {
     final List<Map<String, dynamic>> rows = await _client
         .from(table)
-        .select('id, product_id, channel, device_id, created_at, products(title)')
+        .select(
+          'id, product_id, channel, device_id, created_at, products(title)',
+        )
         .order('created_at', ascending: false)
         .limit(limit);
     return rows;
@@ -29,8 +31,7 @@ class InquiriesRemoteDataSource {
       .stream(primaryKey: const <String>['id'])
       .order('created_at', ascending: false);
 
-  Future<void> remove(String id) =>
-      _client.from(table).delete().eq('id', id);
+  Future<void> remove(String id) => _client.from(table).delete().eq('id', id);
 
   /// Fire-and-forget lead logging.
   ///

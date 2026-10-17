@@ -23,8 +23,7 @@ class AboutPage extends ConsumerWidget {
     final AppLocalizations l10n = AppLocalizations.of(context);
     final bool dark = Theme.of(context).brightness == Brightness.dark;
     final SiteSettings settings = ref.watch(siteSettingsValueProvider);
-    final List<ContactLink> links =
-        ref.watch(orderChannelsProvider);
+    final List<ContactLink> links = ref.watch(orderChannelsProvider);
 
     return AppScaffold(
       showLockup: false,
@@ -41,13 +40,15 @@ class AboutPage extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 20),
-          Center(child: Text(
-            settings.storeNameEn,
-            textAlign: TextAlign.center,
-            style: BrandTypography.brandTitle.copyWith(
-              color: dark ? BrandColors.goldLight : BrandColors.charcoal,
+          Center(
+            child: Text(
+              settings.storeNameEn,
+              textAlign: TextAlign.center,
+              style: BrandTypography.brandTitle.copyWith(
+                color: dark ? BrandColors.goldLight : BrandColors.charcoal,
+              ),
             ),
-          )),
+          ),
           const SizedBox(height: 8),
           Center(
             child: Text(
@@ -87,12 +88,13 @@ class AboutPage extends ConsumerWidget {
           if (links.isNotEmpty) ...<Widget>[
             Text(
               l10n.actionContactOwner,
-              style: BrandTypography.displayForLocale(
-                Localizations.localeOf(context),
-                base: BrandTypography.displaySmall,
-              ).copyWith(
-                color: dark ? BrandColors.goldLight : BrandColors.charcoal,
-              ),
+              style:
+                  BrandTypography.displayForLocale(
+                    Localizations.localeOf(context),
+                    base: BrandTypography.displaySmall,
+                  ).copyWith(
+                    color: dark ? BrandColors.goldLight : BrandColors.charcoal,
+                  ),
             ),
             const SizedBox(height: 14),
             ...links.map(
@@ -134,9 +136,7 @@ class _ContactTile extends ConsumerWidget {
             height: 42,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: isChat
-                  ? BrandGradients.brand
-                  : BrandGradients.gold,
+              gradient: isChat ? BrandGradients.brand : BrandGradients.gold,
             ),
             child: Icon(link.kind.icon, size: 20, color: BrandColors.ivory),
           ),
@@ -168,16 +168,14 @@ class _ContactTile extends ConsumerWidget {
                 ? BrandGradients.brand
                 : BrandGradients.goldHorizontal,
             foreground: isChat ? BrandColors.ivory : BrandColors.charcoal,
-            onPressed: () => ref
-                .read(contactLauncherProvider)
-                .launch(link)
-                .then((bool ok) {
-              if (!ok && context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(l10n.contactLaunchFailed)),
-                );
-              }
-            }),
+            onPressed: () =>
+                ref.read(contactLauncherProvider).launch(link).then((bool ok) {
+                  if (!ok && context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(l10n.contactLaunchFailed)),
+                    );
+                  }
+                }),
           ),
         ],
       ),

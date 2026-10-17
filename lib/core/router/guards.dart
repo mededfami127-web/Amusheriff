@@ -45,9 +45,7 @@ String? resolveAdminRedirect({
   if (!isSignedIn) {
     return Uri(
       path: Routes.adminLogin,
-      queryParameters: <String, String>{
-        Routes.returnToParam: location,
-      },
+      queryParameters: <String, String>{Routes.returnToParam: location},
     ).toString();
   }
 

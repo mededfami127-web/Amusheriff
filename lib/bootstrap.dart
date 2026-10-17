@@ -62,7 +62,9 @@ Future<void> bootstrap() async {
   await adminGate.load();
 
   // The customer's favourites live in the same store, for the same reason.
-  final FavouritesStore favourites = FavouritesStore(const FlutterSecureStorage());
+  final FavouritesStore favourites = FavouritesStore(
+    const FlutterSecureStorage(),
+  );
   await favourites.load();
 
   _installErrorHandlers();
@@ -74,17 +76,14 @@ Future<void> bootstrap() async {
   );
 
   if (Env.hasSentry) {
-    await SentryFlutter.init(
-      (SentryFlutterOptions options) {
-        options
-          ..dsn = Env.sentryDsn
-          ..environment = AppFlavor.current.name
-          ..tracesSampleRate = AppFlavor.current.isProd ? 0.2 : 1.0
-          ..attachStacktrace = true
-          ..sendDefaultPii = false;
-      },
-      appRunner: () => _run(preferences, adminGate, favourites),
-    );
+    await SentryFlutter.init((SentryFlutterOptions options) {
+      options
+        ..dsn = Env.sentryDsn
+        ..environment = AppFlavor.current.name
+        ..tracesSampleRate = AppFlavor.current.isProd ? 0.2 : 1.0
+        ..attachStacktrace = true
+        ..sendDefaultPii = false;
+    }, appRunner: () => _run(preferences, adminGate, favourites));
   } else {
     _run(preferences, adminGate, favourites);
   }
@@ -130,7 +129,8 @@ void _installErrorHandlers() {
 
   if (kReleaseMode) {
     // Never show the red screen to a customer.
-    ErrorWidget.builder = (FlutterErrorDetails details) => const _BrandedError();
+    ErrorWidget.builder = (FlutterErrorDetails details) =>
+        const _BrandedError();
   }
 }
 

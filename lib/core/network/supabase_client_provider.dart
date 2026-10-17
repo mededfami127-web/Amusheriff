@@ -24,8 +24,7 @@ Session? currentSession(Ref ref) {
 
 /// The current authenticated user, or `null` when signed out.
 @Riverpod(keepAlive: true)
-User? currentUser(Ref ref) =>
-    ref.watch(currentSessionProvider)?.user;
+User? currentUser(Ref ref) => ref.watch(currentSessionProvider)?.user;
 
 /// Stream of the signed-in user id, used by the router guard.
 @Riverpod(keepAlive: true)

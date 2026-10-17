@@ -44,8 +44,9 @@ class _AdminProductsPageState extends ConsumerState<AdminProductsPage> {
   @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
-    final AsyncValue<List<Product>> async =
-        ref.watch(adminProductsProvider(categoryId: _categoryId));
+    final AsyncValue<List<Product>> async = ref.watch(
+      adminProductsProvider(categoryId: _categoryId),
+    );
     final List<Category> categories =
         ref.watch(allCategoriesProvider).value ?? const <Category>[];
 
@@ -106,13 +107,15 @@ class _AdminProductsPageState extends ConsumerState<AdminProductsPage> {
 
   List<Product> _applyFilters(List<Product> products) {
     final String query = _query.trim().toLowerCase();
-    return products.where((Product product) {
-      if (_onlyDrafts && product.isPublished) return false;
-      if (query.isEmpty) return true;
-      return product.title.toLowerCase().contains(query) ||
-          (product.titleAm ?? '').toLowerCase().contains(query) ||
-          (product.titleAr ?? '').toLowerCase().contains(query);
-    }).toList(growable: false);
+    return products
+        .where((Product product) {
+          if (_onlyDrafts && product.isPublished) return false;
+          if (query.isEmpty) return true;
+          return product.title.toLowerCase().contains(query) ||
+              (product.titleAm ?? '').toLowerCase().contains(query) ||
+              (product.titleAr ?? '').toLowerCase().contains(query);
+        })
+        .toList(growable: false);
   }
 
   Widget _filters(AppLocalizations l10n, List<Category> categories) {
@@ -149,7 +152,9 @@ class _AdminProductsPageState extends ConsumerState<AdminProductsPage> {
               DropdownMenuItem<String?>(
                 value: category.id,
                 child: Text(
-                  category.nameFor(Localizations.localeOf(context).languageCode),
+                  category.nameFor(
+                    Localizations.localeOf(context).languageCode,
+                  ),
                 ),
               ),
           ],
@@ -211,10 +216,7 @@ class _ProductTile extends ConsumerWidget {
             child: cover == null
                 ? const ColoredBox(
                     color: BrandColors.deepPlum,
-                    child: Icon(
-                      Icons.chair_outlined,
-                      color: BrandColors.gold,
-                    ),
+                    child: Icon(Icons.chair_outlined, color: BrandColors.gold),
                   )
                 : Image.network(
                     ref.read(storageUrlsProvider).productMediaThumb(cover),
@@ -259,10 +261,7 @@ class _ProductTile extends ConsumerWidget {
         trailing: PopupMenuButton<String>(
           onSelected: (String action) => _run(context, ref, l10n, action),
           itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-            PopupMenuItem<String>(
-              value: 'edit',
-              child: Text(l10n.actionEdit),
-            ),
+            PopupMenuItem<String>(value: 'edit', child: Text(l10n.actionEdit)),
             PopupMenuItem<String>(
               value: 'publish',
               child: Text(
@@ -276,7 +275,9 @@ class _ProductTile extends ConsumerWidget {
             PopupMenuItem<String>(
               value: 'availability',
               child: Text(
-                product.isAvailable ? l10n.labelUnavailable : l10n.labelAvailable,
+                product.isAvailable
+                    ? l10n.labelUnavailable
+                    : l10n.labelAvailable,
               ),
             ),
             PopupMenuItem<String>(
@@ -305,7 +306,10 @@ class _ProductTile extends ConsumerWidget {
           onEdit();
           return;
         case 'publish':
-          await repo.setPublished(product.id, isPublished: !product.isPublished);
+          await repo.setPublished(
+            product.id,
+            isPublished: !product.isPublished,
+          );
         case 'feature':
           await repo.setFeatured(product.id, isFeatured: !product.isFeatured);
         case 'availability':

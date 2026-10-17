@@ -83,8 +83,9 @@ class _AdminTextFieldState extends State<AdminTextField> {
             padding: const EdgeInsets.only(bottom: 8),
             child: Text(
               widget.label,
-              style:
-                  BrandTypography.labelLarge.copyWith(color: BrandColors.goldLight),
+              style: BrandTypography.labelLarge.copyWith(
+                color: BrandColors.goldLight,
+              ),
             ),
           ),
           Container(
@@ -132,8 +133,10 @@ class _AdminTextFieldState extends State<AdminTextField> {
                     onPressed: widget.onSuffixTap,
                     color: BrandColors.gold,
                     padding: EdgeInsets.zero,
-                    constraints:
-                        const BoxConstraints(minWidth: 40, minHeight: 40),
+                    constraints: const BoxConstraints(
+                      minWidth: 40,
+                      minHeight: 40,
+                    ),
                   ),
               ],
             ),
@@ -142,8 +145,9 @@ class _AdminTextFieldState extends State<AdminTextField> {
             const SizedBox(height: 6),
             Text(
               widget.error!,
-              style:
-                  BrandTypography.bodySmall.copyWith(color: BrandColors.danger),
+              style: BrandTypography.bodySmall.copyWith(
+                color: BrandColors.danger,
+              ),
             ),
           ],
         ],

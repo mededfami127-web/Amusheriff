@@ -29,16 +29,16 @@ class SiteSettingsDraft {
 
   /// The row is a singleton, so this doubles as insert and update.
   Map<String, dynamic> toRow() => <String, dynamic>{
-        'store_name_en': storeNameEn.trim(),
-        'store_name_am': _nullIfBlank(storeNameAm),
-        'store_name_ar': _nullIfBlank(storeNameAr),
-        'store_name_om': _nullIfBlank(storeNameOm),
-        'tagline': _nullIfBlank(tagline),
-        'about': _nullIfBlank(about),
-        'logo_path': _nullIfBlank(logoPath),
-        'currency_code': currencyCode.trim().toUpperCase(),
-        'default_language': AppLanguage.fromCode(defaultLanguage).code,
-      };
+    'store_name_en': storeNameEn.trim(),
+    'store_name_am': _nullIfBlank(storeNameAm),
+    'store_name_ar': _nullIfBlank(storeNameAr),
+    'store_name_om': _nullIfBlank(storeNameOm),
+    'tagline': _nullIfBlank(tagline),
+    'about': _nullIfBlank(about),
+    'logo_path': _nullIfBlank(logoPath),
+    'currency_code': currencyCode.trim().toUpperCase(),
+    'default_language': AppLanguage.fromCode(defaultLanguage).code,
+  };
 
   factory SiteSettingsDraft.fromEntity(SiteSettings settings) =>
       SiteSettingsDraft(

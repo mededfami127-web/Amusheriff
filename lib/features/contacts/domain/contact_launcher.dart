@@ -16,16 +16,14 @@ class ContactLauncher {
   Future<bool> launch(ContactLink link, {String? message}) {
     final String value = link.value.trim();
     return switch (link.kind) {
-      ContactKind.whatsapp =>
-        _launcher.openWhatsApp(value, message: message),
-      ContactKind.telegram =>
-        _launcher.openTelegram(value, message: message),
+      ContactKind.whatsapp => _launcher.openWhatsApp(value, message: message),
+      ContactKind.telegram => _launcher.openTelegram(value, message: message),
       ContactKind.phone => _launcher.openPhone(value),
       ContactKind.email => _launcher.openEmail(
-          value,
-          subject: message == null ? null : '',
-          body: message,
-        ),
+        value,
+        subject: message == null ? null : '',
+        body: message,
+      ),
       ContactKind.instagram => _launcher.openInstagram(value),
       ContactKind.facebook => _launcher.openFacebook(value),
       ContactKind.tiktok => _launcher.openTikTok(value),
@@ -46,10 +44,13 @@ class ContactLauncher {
       ContactKind.email => 'mailto:$value',
       ContactKind.instagram =>
         'https://instagram.com/${value.replaceAll('@', '')}',
-      ContactKind.facebook => 'https://facebook.com/${value.replaceAll('@', '')}',
+      ContactKind.facebook =>
+        'https://facebook.com/${value.replaceAll('@', '')}',
       ContactKind.tiktok => 'https://tiktok.com/@${value.replaceAll('@', '')}',
       ContactKind.youtube =>
-        value.startsWith('http') ? value : 'https://youtube.com/@${value.replaceAll('@', '')}',
+        value.startsWith('http')
+            ? value
+            : 'https://youtube.com/@${value.replaceAll('@', '')}',
       ContactKind.location =>
         'https://www.google.com/maps/search/?q=${Uri.encodeComponent(value)}',
       ContactKind.website => _normaliseUrl(value),

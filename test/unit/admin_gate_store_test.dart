@@ -62,31 +62,36 @@ void main() {
       expect(bytes, contains('asm.admin.salt'));
     });
 
-    test('the username is matched case-insensitively, the password is not',
-        () async {
-      await store.load();
+    test(
+      'the username is matched case-insensitively, the password is not',
+      () async {
+        await store.load();
 
-      expect(
-        await store.unlock(
-          username: 'ADMIN',
-          password: AdminGateStore.defaultPassword,
-        ),
-        isTrue,
-      );
-      expect(
-        await store.unlock(
-          username: 'admin',
-          password: AdminGateStore.defaultPassword.toUpperCase(),
-        ),
-        isFalse,
-      );
-    });
+        expect(
+          await store.unlock(
+            username: 'ADMIN',
+            password: AdminGateStore.defaultPassword,
+          ),
+          isTrue,
+        );
+        expect(
+          await store.unlock(
+            username: 'admin',
+            password: AdminGateStore.defaultPassword.toUpperCase(),
+          ),
+          isFalse,
+        );
+      },
+    );
 
     test('a wrong password or username leaves the gate closed', () async {
       await store.load();
 
       expect(await store.unlock(username: 'admin', password: 'nope'), isFalse);
-      expect(await store.unlock(username: 'owner', password: 'admin123'), isFalse);
+      expect(
+        await store.unlock(username: 'owner', password: 'admin123'),
+        isFalse,
+      );
       expect(store.unlocked, isFalse);
       expect(bytes['asm.admin.unlocked'], isNot('true'));
     });
@@ -117,10 +122,7 @@ void main() {
         isFalse,
       );
       expect(
-        await store.changePassword(
-          current: 'admin123',
-          next: 'Str0ngPassw0rd',
-        ),
+        await store.changePassword(current: 'admin123', next: 'Str0ngPassw0rd'),
         isTrue,
       );
 

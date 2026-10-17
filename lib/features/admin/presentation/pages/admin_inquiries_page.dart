@@ -19,8 +19,7 @@ class AdminInquiriesPage extends ConsumerStatefulWidget {
   const AdminInquiriesPage({super.key});
 
   @override
-  ConsumerState<AdminInquiriesPage> createState() =>
-      _AdminInquiriesPageState();
+  ConsumerState<AdminInquiriesPage> createState() => _AdminInquiriesPageState();
 }
 
 class _AdminInquiriesPageState extends ConsumerState<AdminInquiriesPage> {
@@ -29,8 +28,7 @@ class _AdminInquiriesPageState extends ConsumerState<AdminInquiriesPage> {
   @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
-    final AsyncValue<List<Inquiry>> async =
-        ref.watch(adminInquiriesProvider);
+    final AsyncValue<List<Inquiry>> async = ref.watch(adminInquiriesProvider);
 
     final Widget body = async.when<Widget>(
       loading: () => const _InquirySkeleton(),
@@ -42,9 +40,11 @@ class _AdminInquiriesPageState extends ConsumerState<AdminInquiriesPage> {
         final List<Inquiry> rows = _channel == null
             ? all
             : all
-                .where((Inquiry i) =>
-                    i.channel.toLowerCase() == _channel!.name.toLowerCase())
-                .toList(growable: false);
+                  .where(
+                    (Inquiry i) =>
+                        i.channel.toLowerCase() == _channel!.name.toLowerCase(),
+                  )
+                  .toList(growable: false);
 
         if (rows.isEmpty) {
           return EmptyState(
@@ -116,7 +116,9 @@ class _InquiryTile extends StatelessWidget {
     final AppLocalizations l10n = AppLocalizations.of(context);
     final bool dark = Theme.of(context).brightness == Brightness.dark;
     final DateTime when = inquiry.effectiveCreatedAt;
-    final bool recent = when.isAfter(DateTime.now().subtract(const Duration(days: 7)));
+    final bool recent = when.isAfter(
+      DateTime.now().subtract(const Duration(days: 7)),
+    );
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -132,11 +134,7 @@ class _InquiryTile extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Icon(
-            _iconFor(inquiry.channel),
-            color: BrandColors.gold,
-            size: 20,
-          ),
+          Icon(_iconFor(inquiry.channel), color: BrandColors.gold, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -152,7 +150,9 @@ class _InquiryTile extends StatelessWidget {
                 Text(
                   '${inquiry.channel} · ${Formatters.relativeTime(when)}',
                   style: BrandTypography.bodySmall.copyWith(
-                    color: BrandTypography.mutedOn(Theme.of(context).brightness),
+                    color: BrandTypography.mutedOn(
+                      Theme.of(context).brightness,
+                    ),
                   ),
                 ),
               ],

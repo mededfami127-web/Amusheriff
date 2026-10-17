@@ -41,7 +41,10 @@ void main() {
 
   group('Validators.slugify', () {
     test('normalises human input', () {
-      expect(Validators.slugify('Majlis Sofas & Chairs!'), 'majlis-sofas-chairs');
+      expect(
+        Validators.slugify('Majlis Sofas & Chairs!'),
+        'majlis-sofas-chairs',
+      );
       expect(Validators.slugify('  Floor   Seating  '), 'floor-seating');
       expect(Validators.slugify('አረቢያን'), '');
     });
@@ -51,16 +54,28 @@ void main() {
     test('requires 10+ chars with upper, lower and a digit', () {
       expect(Validators.strongPassword('Str0ngPassw'), isNull);
       expect(Validators.strongPassword('short1A'), 'validatePasswordLength');
-      expect(Validators.strongPassword('alllowercase1'), 'validatePasswordStrength');
-      expect(Validators.strongPassword('ALLUPPERCASE1'), 'validatePasswordStrength');
-      expect(Validators.strongPassword('NoDigitsHere'), 'validatePasswordStrength');
+      expect(
+        Validators.strongPassword('alllowercase1'),
+        'validatePasswordStrength',
+      );
+      expect(
+        Validators.strongPassword('ALLUPPERCASE1'),
+        'validatePasswordStrength',
+      );
+      expect(
+        Validators.strongPassword('NoDigitsHere'),
+        'validatePasswordStrength',
+      );
     });
   });
 
   group('Validators.confirmPassword', () {
     test('requires an exact match', () {
       expect(Validators.confirmPassword('secret1234', 'secret1234'), isNull);
-      expect(Validators.confirmPassword('secret1234', 'other'), 'validatePasswordMismatch');
+      expect(
+        Validators.confirmPassword('secret1234', 'other'),
+        'validatePasswordMismatch',
+      );
       expect(Validators.confirmPassword('', 'other'), 'validateRequired');
     });
   });
@@ -84,8 +99,14 @@ void main() {
   group('Validators video limits', () {
     test('matches the storage policy (60 s max)', () {
       expect(Validators.videoDuration(const Duration(seconds: 60)), isNull);
-      expect(Validators.videoDuration(const Duration(seconds: 61)), 'validateVideoTooLong');
-      expect(Validators.videoDuration(Duration.zero), 'validateVideoUnreadable');
+      expect(
+        Validators.videoDuration(const Duration(seconds: 61)),
+        'validateVideoTooLong',
+      );
+      expect(
+        Validators.videoDuration(Duration.zero),
+        'validateVideoUnreadable',
+      );
     });
   });
 

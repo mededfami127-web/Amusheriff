@@ -22,14 +22,10 @@ class StorageDataSource {
   static String productMediaPath({
     required String productId,
     required String extension,
-  }) =>
-      'products/$productId/${_uuid()}${_normaliseExtension(extension)}';
+  }) => 'products/$productId/${_uuid()}${_normaliseExtension(extension)}';
 
   /// `brand/{name}-{uuid}.{ext}` for the logo and category covers.
-  static String brandPath({
-    required String name,
-    required String extension,
-  }) =>
+  static String brandPath({required String name, required String extension}) =>
       'brand/${_safeName(name)}-${_uuid()}${_normaliseExtension(extension)}';
 
   /// Uploads bytes and returns the stored path (bucket-relative), which is
@@ -45,7 +41,9 @@ class StorageDataSource {
     int retryAttempts = 3,
     StorageRetryController? retryController,
   }) async {
-    final String key = await _client.storage.from(bucket).uploadBinary(
+    final String key = await _client.storage
+        .from(bucket)
+        .uploadBinary(
           path,
           bytes,
           fileOptions: FileOptions(

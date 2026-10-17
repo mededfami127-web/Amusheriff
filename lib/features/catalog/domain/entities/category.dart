@@ -41,6 +41,8 @@ abstract class Category with _$Category {
 }
 
 String _firstNonEmpty(List<String?> values) =>
-    values.firstWhere((String? v) => v != null && v.trim().isNotEmpty,
-        orElse: () => '') ??
+    values.firstWhere(
+      (String? v) => v != null && v.trim().isNotEmpty,
+      orElse: () => '',
+    ) ??
     '';

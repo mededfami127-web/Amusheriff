@@ -28,7 +28,8 @@ class AdminTextEditorPage extends ConsumerWidget {
     final TextEditorStatus status = ref.watch(textEditorControllerProvider);
     final List<AppTextEntry> entries = ref.watch(filteredTextEntriesProvider);
     final Map<String, String> overrides =
-        ref.watch(textOverridesProvider(locale)).value ?? const <String, String>{};
+        ref.watch(textOverridesProvider(locale)).value ??
+        const <String, String>{};
 
     return AdminScaffold(
       title: l10n.adminTextEditor,
@@ -41,7 +42,9 @@ class AdminTextEditorPage extends ConsumerWidget {
               padding: const EdgeInsets.only(bottom: 14),
               child: InlineFailureBanner(
                 failure: status.failure!,
-                onDismiss: ref.read(textEditorControllerProvider.notifier).acknowledge,
+                onDismiss: ref
+                    .read(textEditorControllerProvider.notifier)
+                    .acknowledge,
               ),
             ),
           _Intro(l10n: l10n, locale: locale, edits: overrides.length),
@@ -217,8 +220,9 @@ class _SectionChips extends ConsumerWidget {
                   _sectionLabel(l10n, byKey[section] ?? section),
                 ),
                 selected: selected == section,
-                onSelected: (_) =>
-                    ref.read(textEditorSectionProvider.notifier).select(section),
+                onSelected: (_) => ref
+                    .read(textEditorSectionProvider.notifier)
+                    .select(section),
               ),
             ),
         ],
@@ -238,18 +242,18 @@ class _SectionChips extends ConsumerWidget {
   /// The same switch the rest of the app uses for section titles, so each screen
   /// heading reads naturally in the active language.
   static String _byKey(AppLocalizations l10n, String key) => switch (key) {
-        'adminDashboard' => l10n.adminDashboard,
-        'adminProducts' => l10n.adminProducts,
-        'adminCategories' => l10n.adminCategories,
-        'adminContacts' => l10n.adminContacts,
-        'adminInquiries' => l10n.adminInquiries,
-        'adminSiteSettings' => l10n.adminSiteSettings,
-        'adminAccount' => l10n.adminAccount,
-        'adminTextEditor' => l10n.adminTextEditor,
-        'gateTitle' => l10n.gateTitle,
-        'settingsTitle' => l10n.settingsTitle,
-        _ => l10n.groupCommon,
-      };
+    'adminDashboard' => l10n.adminDashboard,
+    'adminProducts' => l10n.adminProducts,
+    'adminCategories' => l10n.adminCategories,
+    'adminContacts' => l10n.adminContacts,
+    'adminInquiries' => l10n.adminInquiries,
+    'adminSiteSettings' => l10n.adminSiteSettings,
+    'adminAccount' => l10n.adminAccount,
+    'adminTextEditor' => l10n.adminTextEditor,
+    'gateTitle' => l10n.gateTitle,
+    'settingsTitle' => l10n.settingsTitle,
+    _ => l10n.groupCommon,
+  };
 }
 
 class _LanguagePicker extends ConsumerWidget {
@@ -260,8 +264,9 @@ class _LanguagePicker extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final TextEditorController controller =
-        ref.read(textEditorControllerProvider.notifier);
+    final TextEditorController controller = ref.read(
+      textEditorControllerProvider.notifier,
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -300,7 +305,11 @@ class _SectionHeading extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(4, 26, 4, 8),
       child: Row(
         children: <Widget>[
-          const Icon(Icons.smartphone_rounded, size: 18, color: BrandColors.gold),
+          const Icon(
+            Icons.smartphone_rounded,
+            size: 18,
+            color: BrandColors.gold,
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -334,7 +343,8 @@ class _TextRow extends ConsumerWidget {
     final AppLocalizations l10n = AppLocalizations.of(context);
     final bool dark = Theme.of(context).brightness == Brightness.dark;
 
-    void open() => showTextEditSheet(context, textKey: entry.key, locale: locale);
+    void open() =>
+        showTextEditSheet(context, textKey: entry.key, locale: locale);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),

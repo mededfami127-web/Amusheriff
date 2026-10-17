@@ -31,32 +31,32 @@ enum ContactKind {
 
   /// ARB key used for the default label.
   String get labelKey => switch (this) {
-        ContactKind.whatsapp => 'contactWhatsApp',
-        ContactKind.telegram => 'contactTelegram',
-        ContactKind.phone => 'contactPhone',
-        ContactKind.email => 'contactEmail',
-        ContactKind.instagram => 'contactInstagram',
-        ContactKind.facebook => 'contactFacebook',
-        ContactKind.tiktok => 'contactTikTok',
-        ContactKind.youtube => 'contactYouTube',
-        ContactKind.website => 'contactWebsite',
-        ContactKind.location => 'contactLocation',
-        ContactKind.other => 'contactOther',
-      };
+    ContactKind.whatsapp => 'contactWhatsApp',
+    ContactKind.telegram => 'contactTelegram',
+    ContactKind.phone => 'contactPhone',
+    ContactKind.email => 'contactEmail',
+    ContactKind.instagram => 'contactInstagram',
+    ContactKind.facebook => 'contactFacebook',
+    ContactKind.tiktok => 'contactTikTok',
+    ContactKind.youtube => 'contactYouTube',
+    ContactKind.website => 'contactWebsite',
+    ContactKind.location => 'contactLocation',
+    ContactKind.other => 'contactOther',
+  };
 
   IconData get icon => switch (this) {
-        ContactKind.whatsapp => Icons.chat_bubble_outline_rounded,
-        ContactKind.telegram => Icons.send_rounded,
-        ContactKind.phone => Icons.call_outlined,
-        ContactKind.email => Icons.mail_outline_rounded,
-        ContactKind.instagram => Icons.photo_camera_outlined,
-        ContactKind.facebook => Icons.facebook_outlined,
-        ContactKind.tiktok => Icons.music_note_outlined,
-        ContactKind.youtube => Icons.play_circle_outline_rounded,
-        ContactKind.website => Icons.language_rounded,
-        ContactKind.location => Icons.location_on_outlined,
-        ContactKind.other => Icons.link_rounded,
-      };
+    ContactKind.whatsapp => Icons.chat_bubble_outline_rounded,
+    ContactKind.telegram => Icons.send_rounded,
+    ContactKind.phone => Icons.call_outlined,
+    ContactKind.email => Icons.mail_outline_rounded,
+    ContactKind.instagram => Icons.photo_camera_outlined,
+    ContactKind.facebook => Icons.facebook_outlined,
+    ContactKind.tiktok => Icons.music_note_outlined,
+    ContactKind.youtube => Icons.play_circle_outline_rounded,
+    ContactKind.website => Icons.language_rounded,
+    ContactKind.location => Icons.location_on_outlined,
+    ContactKind.other => Icons.link_rounded,
+  };
 
   /// Channels a customer can tap straight from a product page.
   bool get isDirectMessageChannel =>
@@ -64,10 +64,10 @@ enum ContactKind {
 
   /// Preferred ordering for the "Buy / contact" action row.
   int get actionPriority => switch (this) {
-        ContactKind.whatsapp => 0,
-        ContactKind.telegram => 1,
-        ContactKind.phone => 2,
-        ContactKind.email => 3,
-        _ => 10,
-      };
+    ContactKind.whatsapp => 0,
+    ContactKind.telegram => 1,
+    ContactKind.phone => 2,
+    ContactKind.email => 3,
+    _ => 10,
+  };
 }

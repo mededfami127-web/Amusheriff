@@ -16,9 +16,10 @@ typedef LaunchUriFn = Future<bool> Function(
 /// Wraps `url_launcher` and `share_plus` with the app's URL-building rules.
 class LinkLauncher {
   LinkLauncher({LaunchUriFn? launch})
-      : _launch = launch ??
-            ((Uri uri, url_launcher.LaunchMode mode) =>
-                url_launcher.launchUrl(uri, mode: mode));
+    : _launch =
+          launch ??
+          ((Uri uri, url_launcher.LaunchMode mode) =>
+              url_launcher.launchUrl(uri, mode: mode));
 
   final LaunchUriFn _launch;
 
@@ -33,15 +34,15 @@ class LinkLauncher {
   Future<bool> openWeb(
     String url, {
     url_launcher.LaunchMode mode = url_launcher.LaunchMode.externalApplication,
-  }) =>
-      _open(Uri.parse(url), mode: mode);
+  }) => _open(Uri.parse(url), mode: mode);
 
   /// `tel:` links strip formatting characters, which break dialers on Android.
   Future<bool> openPhone(String number) => _open(
-        Uri(scheme: 'tel', path: number.replaceAll(RegExp(r'[^0-9+]'), '')),
-      );
+    Uri(scheme: 'tel', path: number.replaceAll(RegExp(r'[^0-9+]'), '')),
+  );
 
-  Future<bool> openEmail(String address, {String? subject, String? body}) => _open(
+  Future<bool> openEmail(String address, {String? subject, String? body}) =>
+      _open(
         Uri(
           scheme: 'mailto',
           path: address,
@@ -52,8 +53,9 @@ class LinkLauncher {
         ),
       );
 
-  Future<bool> openSms(String number) =>
-      _open(Uri(scheme: 'sms', path: number.replaceAll(RegExp(r'[^0-9+]'), '')));
+  Future<bool> openSms(String number) => _open(
+    Uri(scheme: 'sms', path: number.replaceAll(RegExp(r'[^0-9+]'), '')),
+  );
 
   /// `wa.me` requires a digits-only number with country code (no `+`).
   Future<bool> openWhatsApp(String number, {String? message}) {
@@ -79,19 +81,15 @@ class LinkLauncher {
   }
 
   Future<bool> openMaps(String query) => _open(
-        Uri.https('www.google.com', '/maps/search/', <String, String>{'q': query}),
-      );
+    Uri.https('www.google.com', '/maps/search/', <String, String>{'q': query}),
+  );
 
   Future<bool> openInstagram(String handle) => _open(
-        Uri.https(
-          'instagram.com',
-          '/${handle.trim().replaceAll('@', '')}',
-        ),
-      );
+    Uri.https('instagram.com', '/${handle.trim().replaceAll('@', '')}'),
+  );
 
-  Future<bool> openFacebook(String handle) => _open(
-        Uri.https('facebook.com', '/${handle.trim().replaceAll('@', '')}'),
-      );
+  Future<bool> openFacebook(String handle) =>
+      _open(Uri.https('facebook.com', '/${handle.trim().replaceAll('@', '')}'));
 
   Future<bool> openTikTok(String handle) =>
       _open(Uri.https('tiktok.com', '/@${handle.trim().replaceAll('@', '')}'));
@@ -126,12 +124,11 @@ class LinkLauncher {
     required String text,
     String? subject,
     Rect? sharePositionOrigin,
-  }) =>
-      Share.share(
-        text,
-        subject: subject,
-        sharePositionOrigin: sharePositionOrigin,
-      );
+  }) => Share.share(
+    text,
+    subject: subject,
+    sharePositionOrigin: sharePositionOrigin,
+  );
 
   /// Shares a product deep link together with a short message.
   Future<ShareResult> shareProduct({
@@ -139,16 +136,10 @@ class LinkLauncher {
     required String url,
     String? price,
     Rect? sharePositionOrigin,
-  }) =>
-      Share.share(
-        <String>[
-          title,
-          if (price != null) price,
-          '',
-          url,
-        ].join('\n'),
-        sharePositionOrigin: sharePositionOrigin,
-      );
+  }) => Share.share(
+    <String>[title, if (price != null) price, '', url].join('\n'),
+    sharePositionOrigin: sharePositionOrigin,
+  );
 }
 
 /// Overridden in tests with a fake [LinkLauncher].

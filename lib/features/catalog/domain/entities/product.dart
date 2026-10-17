@@ -36,20 +36,21 @@ abstract class Product with _$Product {
 
   const Product._();
 
-  factory Product.fromJson(Map<String, dynamic> json) => _$ProductFromJson(json);
+  factory Product.fromJson(Map<String, dynamic> json) =>
+      _$ProductFromJson(json);
 
   // ── Localized text ────────────────────────────────────────────────────────
   String titleFor(String languageCode) => switch (languageCode) {
-        'am' => _first(<String?>[titleAm, title, titleAr]),
-        'ar' => _first(<String?>[titleAr, title, titleAm]),
-        _ => _first(<String?>[title, titleAm, titleAr]),
-      };
+    'am' => _first(<String?>[titleAm, title, titleAr]),
+    'ar' => _first(<String?>[titleAr, title, titleAm]),
+    _ => _first(<String?>[title, titleAm, titleAr]),
+  };
 
   String descriptionFor(String languageCode) => switch (languageCode) {
-        'am' => _first(<String?>[descriptionAm, description, descriptionAr]),
-        'ar' => _first(<String?>[descriptionAr, description, descriptionAm]),
-        _ => _first(<String?>[description, descriptionAm, descriptionAr]),
-      };
+    'am' => _first(<String?>[descriptionAm, description, descriptionAr]),
+    'ar' => _first(<String?>[descriptionAr, description, descriptionAm]),
+    _ => _first(<String?>[description, descriptionAm, descriptionAr]),
+  };
 
   // ── Pricing ───────────────────────────────────────────────────────────────
   bool get hasDiscount =>

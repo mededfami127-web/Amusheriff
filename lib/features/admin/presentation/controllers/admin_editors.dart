@@ -44,12 +44,11 @@ class AdminFormStatus {
     AppFailure? failure,
     bool? saved,
     bool clearFailure = false,
-  }) =>
-      AdminFormStatus(
-        saving: saving ?? this.saving,
-        failure: clearFailure ? null : failure ?? this.failure,
-        saved: saved ?? this.saved,
-      );
+  }) => AdminFormStatus(
+    saving: saving ?? this.saving,
+    failure: clearFailure ? null : failure ?? this.failure,
+    saved: saved ?? this.saved,
+  );
 }
 
 /// Draft of the category form: every field the sheet can edit, plus the
@@ -96,21 +95,20 @@ class CategoryEditorState {
     bool? slugTouched,
     FieldErrors? fieldErrors,
     AdminFormStatus? status,
-  }) =>
-      CategoryEditorState(
-        id: id ?? this.id,
-        name: name ?? this.name,
-        nameAm: nameAm ?? this.nameAm,
-        nameAr: nameAr ?? this.nameAr,
-        slug: slug ?? this.slug,
-        coverPath: coverPath ?? this.coverPath,
-        isVisible: isVisible ?? this.isVisible,
-        sortOrder: sortOrder ?? this.sortOrder,
-        isNew: isNew ?? this.isNew,
-        slugTouched: slugTouched ?? this.slugTouched,
-        fieldErrors: fieldErrors ?? this.fieldErrors,
-        status: status ?? this.status,
-      );
+  }) => CategoryEditorState(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    nameAm: nameAm ?? this.nameAm,
+    nameAr: nameAr ?? this.nameAr,
+    slug: slug ?? this.slug,
+    coverPath: coverPath ?? this.coverPath,
+    isVisible: isVisible ?? this.isVisible,
+    sortOrder: sortOrder ?? this.sortOrder,
+    isNew: isNew ?? this.isNew,
+    slugTouched: slugTouched ?? this.slugTouched,
+    fieldErrors: fieldErrors ?? this.fieldErrors,
+    status: status ?? this.status,
+  );
 }
 
 /// Create / edit a category.
@@ -144,8 +142,7 @@ class CategoryEditorController extends _$CategoryEditorController {
   void setCoverPath(String? v) => state = state.copyWith(coverPath: v);
   void setVisible(bool v) => state = state.copyWith(isVisible: v);
   void setSortOrder(int v) => state = state.copyWith(sortOrder: v);
-  void toggleSlugTouched() =>
-      state = state.copyWith(slugTouched: true);
+  void toggleSlugTouched() => state = state.copyWith(slugTouched: true);
 
   FieldErrors validate() {
     final FieldErrors errors = <String, String>{};
@@ -175,8 +172,9 @@ class CategoryEditorController extends _$CategoryEditorController {
 
     try {
       final CategoryRepository repo = ref.read(categoryRepositoryProvider);
-      final Category category =
-          state.isNew ? await repo.create(draft) : await repo.update(state.id!, draft);
+      final Category category = state.isNew
+          ? await repo.create(draft)
+          : await repo.update(state.id!, draft);
       state = state.copyWith(
         id: category.id,
         isNew: false,
@@ -188,7 +186,9 @@ class CategoryEditorController extends _$CategoryEditorController {
       return false;
     } on Object catch (error, stack) {
       state = state.copyWith(
-        status: AdminFormStatus(failure: ErrorMapper.map(error, stackTrace: stack)),
+        status: AdminFormStatus(
+          failure: ErrorMapper.map(error, stackTrace: stack),
+        ),
       );
       return false;
     }
@@ -273,20 +273,19 @@ class ContactDraftState {
     bool? labelTouched,
     FieldErrors? fieldErrors,
     AdminFormStatus? status,
-  }) =>
-      ContactDraftState(
-        id: id ?? this.id,
-        kind: kind ?? this.kind,
-        label: label ?? this.label,
-        value: value ?? this.value,
-        isPrimary: isPrimary ?? this.isPrimary,
-        isVisible: isVisible ?? this.isVisible,
-        sortOrder: sortOrder ?? this.sortOrder,
-        isNew: isNew ?? this.isNew,
-        labelTouched: labelTouched ?? this.labelTouched,
-        fieldErrors: fieldErrors ?? this.fieldErrors,
-        status: status ?? this.status,
-      );
+  }) => ContactDraftState(
+    id: id ?? this.id,
+    kind: kind ?? this.kind,
+    label: label ?? this.label,
+    value: value ?? this.value,
+    isPrimary: isPrimary ?? this.isPrimary,
+    isVisible: isVisible ?? this.isVisible,
+    sortOrder: sortOrder ?? this.sortOrder,
+    isNew: isNew ?? this.isNew,
+    labelTouched: labelTouched ?? this.labelTouched,
+    fieldErrors: fieldErrors ?? this.fieldErrors,
+    status: status ?? this.status,
+  );
 }
 
 /// Adds or edits a single contact link.
@@ -316,7 +315,8 @@ class ContactsEditorController extends _$ContactsEditorController {
     }
   }
 
-  void setLabel(String v) => state = state.copyWith(label: v, labelTouched: true);
+  void setLabel(String v) =>
+      state = state.copyWith(label: v, labelTouched: true);
   void setValue(String v) => state = state.copyWith(value: v);
   void setPrimary(bool v) => state = state.copyWith(isPrimary: v);
   void setVisible(bool v) => state = state.copyWith(isVisible: v);
@@ -346,8 +346,9 @@ class ContactsEditorController extends _$ContactsEditorController {
 
     try {
       final ContactRepository repo = ref.read(contactRepositoryProvider);
-      final ContactLink saved =
-          state.isNew ? await repo.create(draft) : await repo.update(state.id!, draft);
+      final ContactLink saved = state.isNew
+          ? await repo.create(draft)
+          : await repo.update(state.id!, draft);
       state = state.copyWith(
         id: saved.id,
         isNew: false,
@@ -359,7 +360,9 @@ class ContactsEditorController extends _$ContactsEditorController {
       return false;
     } on Object catch (error, stack) {
       state = state.copyWith(
-        status: AdminFormStatus(failure: ErrorMapper.map(error, stackTrace: stack)),
+        status: AdminFormStatus(
+          failure: ErrorMapper.map(error, stackTrace: stack),
+        ),
       );
       return false;
     }
@@ -408,20 +411,19 @@ class SiteSettingsEditorState {
     String? defaultLanguage,
     FieldErrors? fieldErrors,
     AdminFormStatus? status,
-  }) =>
-      SiteSettingsEditorState(
-        storeNameEn: storeNameEn ?? this.storeNameEn,
-        storeNameAm: storeNameAm ?? this.storeNameAm,
-        storeNameAr: storeNameAr ?? this.storeNameAr,
-        storeNameOm: storeNameOm ?? this.storeNameOm,
-        tagline: tagline ?? this.tagline,
-        about: about ?? this.about,
-        logoPath: logoPath ?? this.logoPath,
-        currencyCode: currencyCode ?? this.currencyCode,
-        defaultLanguage: defaultLanguage ?? this.defaultLanguage,
-        fieldErrors: fieldErrors ?? this.fieldErrors,
-        status: status ?? this.status,
-      );
+  }) => SiteSettingsEditorState(
+    storeNameEn: storeNameEn ?? this.storeNameEn,
+    storeNameAm: storeNameAm ?? this.storeNameAm,
+    storeNameAr: storeNameAr ?? this.storeNameAr,
+    storeNameOm: storeNameOm ?? this.storeNameOm,
+    tagline: tagline ?? this.tagline,
+    about: about ?? this.about,
+    logoPath: logoPath ?? this.logoPath,
+    currencyCode: currencyCode ?? this.currencyCode,
+    defaultLanguage: defaultLanguage ?? this.defaultLanguage,
+    fieldErrors: fieldErrors ?? this.fieldErrors,
+    status: status ?? this.status,
+  );
 }
 
 /// Edits the singleton `site_settings` row.
@@ -454,7 +456,8 @@ class SiteSettingsEditorController extends _$SiteSettingsEditorController {
   void setAbout(String v) => state = state.copyWith(about: v);
   void setLogoPath(String? v) => state = state.copyWith(logoPath: v);
   void setCurrency(String v) => state = state.copyWith(currencyCode: v);
-  void setDefaultLanguage(String v) => state = state.copyWith(defaultLanguage: v);
+  void setDefaultLanguage(String v) =>
+      state = state.copyWith(defaultLanguage: v);
 
   FieldErrors validate() {
     final FieldErrors errors = <String, String>{};
@@ -469,7 +472,9 @@ class SiteSettingsEditorController extends _$SiteSettingsEditorController {
     state = state.copyWith(status: const AdminFormStatus(saving: true));
 
     try {
-      await ref.read(siteSettingsRepositoryProvider).save(
+      await ref
+          .read(siteSettingsRepositoryProvider)
+          .save(
             SiteSettingsDraft(
               storeNameEn: state.storeNameEn.trim(),
               storeNameAm: state.storeNameAm.trim(),
@@ -490,7 +495,9 @@ class SiteSettingsEditorController extends _$SiteSettingsEditorController {
       return false;
     } on Object catch (error, stack) {
       state = state.copyWith(
-        status: AdminFormStatus(failure: ErrorMapper.map(error, stackTrace: stack)),
+        status: AdminFormStatus(
+          failure: ErrorMapper.map(error, stackTrace: stack),
+        ),
       );
       return false;
     }
@@ -560,27 +567,26 @@ class ProductEditorState {
     bool? isNew,
     FieldErrors? fieldErrors,
     AdminFormStatus? status,
-  }) =>
-      ProductEditorState(
-        id: id ?? this.id,
-        categoryId: categoryId ?? this.categoryId,
-        title: title ?? this.title,
-        titleAm: titleAm ?? this.titleAm,
-        titleAr: titleAr ?? this.titleAr,
-        description: description ?? this.description,
-        descriptionAm: descriptionAm ?? this.descriptionAm,
-        descriptionAr: descriptionAr ?? this.descriptionAr,
-        price: price ?? this.price,
-        compareAtPrice: compareAtPrice ?? this.compareAtPrice,
-        currencyCode: currencyCode ?? this.currencyCode,
-        isAvailable: isAvailable ?? this.isAvailable,
-        isFeatured: isFeatured ?? this.isFeatured,
-        isPublished: isPublished ?? this.isPublished,
-        sortOrder: sortOrder ?? this.sortOrder,
-        isNew: isNew ?? this.isNew,
-        fieldErrors: fieldErrors ?? this.fieldErrors,
-        status: status ?? this.status,
-      );
+  }) => ProductEditorState(
+    id: id ?? this.id,
+    categoryId: categoryId ?? this.categoryId,
+    title: title ?? this.title,
+    titleAm: titleAm ?? this.titleAm,
+    titleAr: titleAr ?? this.titleAr,
+    description: description ?? this.description,
+    descriptionAm: descriptionAm ?? this.descriptionAm,
+    descriptionAr: descriptionAr ?? this.descriptionAr,
+    price: price ?? this.price,
+    compareAtPrice: compareAtPrice ?? this.compareAtPrice,
+    currencyCode: currencyCode ?? this.currencyCode,
+    isAvailable: isAvailable ?? this.isAvailable,
+    isFeatured: isFeatured ?? this.isFeatured,
+    isPublished: isPublished ?? this.isPublished,
+    sortOrder: sortOrder ?? this.sortOrder,
+    isNew: isNew ?? this.isNew,
+    fieldErrors: fieldErrors ?? this.fieldErrors,
+    status: status ?? this.status,
+  );
 }
 
 @riverpod
@@ -670,8 +676,9 @@ class ProductEditorController extends _$ProductEditorController {
       return false;
     } on Object catch (error, stack) {
       state = state.copyWith(
-        status:
-            AdminFormStatus(failure: ErrorMapper.map(error, stackTrace: stack)),
+        status: AdminFormStatus(
+          failure: ErrorMapper.map(error, stackTrace: stack),
+        ),
       );
       return false;
     }

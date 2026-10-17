@@ -21,9 +21,12 @@ class CategoryEditorSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final AppLocalizations l10n = AppLocalizations.of(context);
-    final CategoryEditorState state = ref.watch(categoryEditorControllerProvider);
-    final CategoryEditorController controller =
-        ref.read(categoryEditorControllerProvider.notifier);
+    final CategoryEditorState state = ref.watch(
+      categoryEditorControllerProvider,
+    );
+    final CategoryEditorController controller = ref.read(
+      categoryEditorControllerProvider.notifier,
+    );
     final bool saving = state.status.saving;
 
     return Padding(
@@ -39,7 +42,9 @@ class CategoryEditorSheet extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Text(
-              existing == null ? l10n.adminCreateCategory : l10n.adminEditCategory,
+              existing == null
+                  ? l10n.adminCreateCategory
+                  : l10n.adminEditCategory,
               style: BrandTypography.titleMedium,
             ),
             const SizedBox(height: 18),

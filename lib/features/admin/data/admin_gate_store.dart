@@ -63,8 +63,8 @@ class AdminGateStore {
     required String username,
     required String password,
   }) async {
-    final bool ok = username.trim().toLowerCase() ==
-            _username.toLowerCase() &&
+    final bool ok =
+        username.trim().toLowerCase() == _username.toLowerCase() &&
         matches(password);
     if (!ok) return false;
 
@@ -121,8 +121,6 @@ class AdminGateStore {
   /// way on two devices.
   static String newSalt() {
     final Random random = Random.secure();
-    return base64Url.encode(
-      List<int>.generate(16, (_) => random.nextInt(256)),
-    );
+    return base64Url.encode(List<int>.generate(16, (_) => random.nextInt(256)));
   }
 }

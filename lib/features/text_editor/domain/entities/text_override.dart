@@ -18,18 +18,18 @@ class TextOverride {
   final String value;
 
   factory TextOverride.fromJson(Map<String, dynamic> json) => TextOverride(
-        textKey: json['text_key'] as String? ?? '',
-        locale: json['locale'] as String? ?? 'en',
-        value: json['value'] as String? ?? '',
-      );
+    textKey: json['text_key'] as String? ?? '',
+    locale: json['locale'] as String? ?? 'en',
+    value: json['value'] as String? ?? '',
+  );
 
   /// Row payload for an upsert against `public.text_overrides`.
   Map<String, dynamic> toRow(String? userId) => <String, dynamic>{
-        'text_key': textKey,
-        'locale': locale,
-        'value': value.trim(),
-        if (userId != null) 'updated_by': userId,
-      };
+    'text_key': textKey,
+    'locale': locale,
+    'value': value.trim(),
+    if (userId != null) 'updated_by': userId,
+  };
 
   @override
   bool operator ==(Object other) =>

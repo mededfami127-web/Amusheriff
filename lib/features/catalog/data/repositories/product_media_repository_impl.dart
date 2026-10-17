@@ -21,24 +21,27 @@ class ProductMediaRepositoryImpl implements ProductMediaRepository {
   @override
   Future<List<ProductMedia>> fetchForProduct(String productId) =>
       ErrorMapper.guard(() async {
-        final List<Map<String, dynamic>> rows =
-            await _remote.fetchMediaForProduct(productId);
+        final List<Map<String, dynamic>> rows = await _remote
+            .fetchMediaForProduct(productId);
         return _decodeList(rows);
       });
 
   @override
   Future<ProductMedia> add(ProductMediaDraft draft) =>
       ErrorMapper.guard(() async {
-        final Map<String, dynamic> row =
-            await _remote.insertMedia(draft.toInsert());
+        final Map<String, dynamic> row = await _remote.insertMedia(
+          draft.toInsert(),
+        );
         return ProductMedia.fromJson(row);
       });
 
   @override
   Future<ProductMedia> update(String id, ProductMediaDraft draft) =>
       ErrorMapper.guard(() async {
-        final Map<String, dynamic> row =
-            await _remote.updateMedia(id, draft.toUpdate());
+        final Map<String, dynamic> row = await _remote.updateMedia(
+          id,
+          draft.toUpdate(),
+        );
         return ProductMedia.fromJson(row);
       });
 
@@ -58,11 +61,8 @@ class ProductMediaRepositoryImpl implements ProductMediaRepository {
 
   @override
   Future<void> reorder(List<String> orderedIds) => ErrorMapper.guard(
-        () => _remote.reorderRows(
-          CatalogRemoteDataSource.mediaTable,
-          orderedIds,
-        ),
-      );
+    () => _remote.reorderRows(CatalogRemoteDataSource.mediaTable, orderedIds),
+  );
 
   List<ProductMedia> _decodeList(List<Map<String, dynamic>> rows) =>
       rows.map(ProductMedia.fromJson).toList(growable: false);

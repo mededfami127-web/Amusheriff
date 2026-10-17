@@ -88,16 +88,14 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: Routes.categoryPattern,
         name: 'category',
-        builder: (_, GoRouterState state) => CategoryPage(
-          slug: state.pathParameters['slug'] ?? '',
-        ),
+        builder: (_, GoRouterState state) =>
+            CategoryPage(slug: state.pathParameters['slug'] ?? ''),
       ),
       GoRoute(
         path: Routes.productPattern,
         name: 'product',
-        builder: (_, GoRouterState state) => ProductDetailPage(
-          productId: state.pathParameters['id'] ?? '',
-        ),
+        builder: (_, GoRouterState state) =>
+            ProductDetailPage(productId: state.pathParameters['id'] ?? ''),
       ),
 
       // ── Admin gateway (guarded by `resolveAdminRedirect`) ─────────────────
@@ -106,8 +104,7 @@ GoRouter appRouter(Ref ref) {
         name: 'adminLogin',
         builder: (_, GoRouterState state) => AdminLoginPage(
           returnTo: state.uri.queryParameters[Routes.returnToParam],
-          showNotAuthorised:
-              state.uri.queryParameters['error'] == 'notAdmin',
+          showNotAuthorised: state.uri.queryParameters['error'] == 'notAdmin',
         ),
       ),
       GoRoute(
@@ -174,8 +171,7 @@ GoRouter appRouter(Ref ref) {
         ],
       ),
     ],
-    errorBuilder: (_, GoRouterState state) => NotFoundPage(
-      location: state.uri.toString(),
-    ),
+    errorBuilder: (_, GoRouterState state) =>
+        NotFoundPage(location: state.uri.toString()),
   );
 }

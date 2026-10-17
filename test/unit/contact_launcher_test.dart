@@ -4,12 +4,8 @@ import 'package:amu_sharif_majlis/features/contacts/domain/entities/contact_kind
 import 'package:amu_sharif_majlis/features/contacts/domain/entities/contact_link.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-ContactLink _link(ContactKind kind, String value) => ContactLink(
-      id: 'id',
-      kind: kind,
-      label: kind.name,
-      value: value,
-    );
+ContactLink _link(ContactKind kind, String value) =>
+    ContactLink(id: 'id', kind: kind, label: kind.name, value: value);
 
 void main() {
   // previewUrl is pure, so it can be asserted without a platform channel.
@@ -51,9 +47,7 @@ void main() {
         'https://t.me/amumejlisamusharif',
       );
       expect(
-        launcher.previewUrl(
-          _link(ContactKind.telegram, 'amumejlisamusharif'),
-        ),
+        launcher.previewUrl(_link(ContactKind.telegram, 'amumejlisamusharif')),
         'https://t.me/amumejlisamusharif',
       );
       expect(
@@ -122,8 +116,14 @@ void main() {
 
   group('ContactKind', () {
     test('orders direct-message channels first for the product page', () {
-      expect(ContactKind.whatsapp.actionPriority, lessThan(ContactKind.phone.actionPriority));
-      expect(ContactKind.telegram.actionPriority, lessThan(ContactKind.phone.actionPriority));
+      expect(
+        ContactKind.whatsapp.actionPriority,
+        lessThan(ContactKind.phone.actionPriority),
+      );
+      expect(
+        ContactKind.telegram.actionPriority,
+        lessThan(ContactKind.phone.actionPriority),
+      );
       expect(ContactKind.whatsapp.isDirectMessageChannel, isTrue);
       expect(ContactKind.website.isDirectMessageChannel, isFalse);
     });

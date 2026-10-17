@@ -28,10 +28,8 @@ Future<void> showTextEditSheet(
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
-    builder: (BuildContext context) => _TextEditSheet(
-      textKey: textKey,
-      initialLocale: locale,
-    ),
+    builder: (BuildContext context) =>
+        _TextEditSheet(textKey: textKey, initialLocale: locale),
   );
 }
 
@@ -70,12 +68,14 @@ class _TextEditSheetState extends ConsumerState<_TextEditSheet> {
     final AppTextEntry? entry = _entry;
     if (entry == null) return widget.textKey;
     final Map<String, String> overrides =
-        ref.read(textOverridesProvider(_locale)).value ?? const <String, String>{};
+        ref.read(textOverridesProvider(_locale)).value ??
+        const <String, String>{};
     return overrides[widget.textKey] ?? entry.defaultFor(_locale);
   }
 
   bool _isOverridden(String locale) =>
-      (ref.read(textOverridesProvider(locale)).value ?? const <String, String>{})
+      (ref.read(textOverridesProvider(locale)).value ??
+              const <String, String>{})
           .containsKey(widget.textKey);
 
   void _switchLocale(String locale) {
@@ -92,7 +92,11 @@ class _TextEditSheetState extends ConsumerState<_TextEditSheet> {
 
     final bool ok = await ref
         .read(textEditorControllerProvider.notifier)
-        .save(textKey: widget.textKey, locale: _locale, value: _controller.text);
+        .save(
+          textKey: widget.textKey,
+          locale: _locale,
+          value: _controller.text,
+        );
 
     if (!mounted) return;
     if (ok) {
@@ -142,7 +146,11 @@ class _TextEditSheetState extends ConsumerState<_TextEditSheet> {
           children: <Widget>[
             Row(
               children: <Widget>[
-                const Icon(Icons.edit_outlined, color: BrandColors.gold, size: 20),
+                const Icon(
+                  Icons.edit_outlined,
+                  color: BrandColors.gold,
+                  size: 20,
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(

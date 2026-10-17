@@ -38,8 +38,7 @@ class AdminStatus extends _$AdminStatus {
 
 /// Convenience: `true` only once the admin status is known and positive.
 @riverpod
-bool isConfirmedAdmin(Ref ref) =>
-    ref.watch(adminStatusProvider).value ?? false;
+bool isConfirmedAdmin(Ref ref) => ref.watch(adminStatusProvider).value ?? false;
 
 /// Drives the admin sign-in / sign-out / password screens.
 ///
@@ -53,16 +52,12 @@ class AdminAuthController extends _$AdminAuthController {
   bool get isBusy => state.isLoading;
 
   /// Returns `true` on success. Failures are exposed through `state`.
-  Future<bool> signIn({
-    required String email,
-    required String password,
-  }) async {
+  Future<bool> signIn({required String email, required String password}) async {
     state = const AsyncValue<void>.loading();
     try {
-      await ref.read(authRepositoryProvider).signInWithPassword(
-            email: email,
-            password: password,
-          );
+      await ref
+          .read(authRepositoryProvider)
+          .signInWithPassword(email: email, password: password);
       // The profile row (and therefore is_admin) changed identity.
       await ref.read(adminStatusProvider.notifier).refresh();
       state = const AsyncValue<void>.data(null);
@@ -131,7 +126,7 @@ class AdminAuthController extends _$AdminAuthController {
 
 /// Stream of `true` while an admin is signed in — used by the admin shell.
 @riverpod
-Stream<bool> signedInAsAdmin(Ref ref) =>
-    ref.watch(authRepositoryProvider).authStateChanges.map(
-          (AuthState state) => state.session != null,
-        );
+Stream<bool> signedInAsAdmin(Ref ref) => ref
+    .watch(authRepositoryProvider)
+    .authStateChanges
+    .map((AuthState state) => state.session != null);

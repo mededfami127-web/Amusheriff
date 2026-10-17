@@ -76,20 +76,20 @@ Set<String> overriddenKeys(Ref ref, String locale) =>
 /// screen the moment the generator is re-run.
 @Riverpod(keepAlive: true)
 List<String> textEditorSections(Ref ref) => <String>[
-      for (final String section in kAppTextSections)
-        if (kAppTextEntries.any((AppTextEntry e) => e.sectionKey == section))
-          section,
-    ];
+  for (final String section in kAppTextSections)
+    if (kAppTextEntries.any((AppTextEntry e) => e.sectionKey == section))
+      section,
+];
 
 /// The catalogue entries matching the current search and section filter.
 @riverpod
 List<AppTextEntry> filteredTextEntries(Ref ref) {
-  final String query =
-      ref.watch(textEditorQueryProvider).trim().toLowerCase();
+  final String query = ref.watch(textEditorQueryProvider).trim().toLowerCase();
   final String? section = ref.watch(textEditorSectionProvider);
   final String locale = ref.watch(textEditorLocaleProvider);
   final Map<String, String> overrides =
-      ref.watch(textOverridesProvider(locale)).value ?? const <String, String>{};
+      ref.watch(textOverridesProvider(locale)).value ??
+      const <String, String>{};
 
   return <AppTextEntry>[
     for (final AppTextEntry entry in kAppTextEntries)
@@ -124,7 +124,11 @@ class LiveEditMode extends _$LiveEditMode {
 /// Outcome of the last save/restore, so the editor can report it once.
 @immutable
 class TextEditorStatus {
-  const TextEditorStatus({this.saving = false, this.saved = false, this.failure});
+  const TextEditorStatus({
+    this.saving = false,
+    this.saved = false,
+    this.failure,
+  });
 
   final bool saving;
   final bool saved;
@@ -135,12 +139,11 @@ class TextEditorStatus {
     bool? saved,
     AppFailure? failure,
     bool clearFailure = false,
-  }) =>
-      TextEditorStatus(
-        saving: saving ?? this.saving,
-        saved: saved ?? this.saved,
-        failure: clearFailure ? null : (failure ?? this.failure),
-      );
+  }) => TextEditorStatus(
+    saving: saving ?? this.saving,
+    saved: saved ?? this.saved,
+    failure: clearFailure ? null : (failure ?? this.failure),
+  );
 }
 
 /// Saves and restores the owner's wording.
@@ -153,7 +156,8 @@ class TextEditorController extends _$TextEditorController {
   @override
   TextEditorStatus build() => const TextEditorStatus();
 
-  TextOverridesRepository get _repo => ref.read(textOverridesRepositoryProvider);
+  TextOverridesRepository get _repo =>
+      ref.read(textOverridesRepositoryProvider);
 
   Future<bool> save({
     required String textKey,

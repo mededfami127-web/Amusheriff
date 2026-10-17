@@ -30,10 +30,7 @@ SiteSettings siteSettingsValue(Ref ref) =>
 /// Immutable snapshot of the user's local choices.
 @immutable
 class AppPreferencesState {
-  const AppPreferencesState({
-    required this.language,
-    required this.themeMode,
-  });
+  const AppPreferencesState({required this.language, required this.themeMode});
 
   final AppLanguage language;
   final ThemeMode themeMode;
@@ -119,10 +116,10 @@ class PreferencesStore {
   }
 
   static ThemeMode _themeFromName(String? name) => switch (name) {
-        'light' => ThemeMode.light,
-        'dark' => ThemeMode.dark,
-        _ => ThemeMode.system,
-      };
+    'light' => ThemeMode.light,
+    'dark' => ThemeMode.dark,
+    _ => ThemeMode.system,
+  };
 }
 
 @Riverpod(keepAlive: true)
@@ -133,8 +130,7 @@ PreferencesStore preferencesStore(Ref ref) =>
 @Riverpod(keepAlive: true)
 class AppPreferences extends _$AppPreferences {
   @override
-  AppPreferencesState build() =>
-      ref.watch(preferencesStoreProvider).current;
+  AppPreferencesState build() => ref.watch(preferencesStoreProvider).current;
 
   Future<void> setLanguage(AppLanguage language) async {
     final PreferencesStore store = ref.read(preferencesStoreProvider);
@@ -149,11 +145,9 @@ class AppPreferences extends _$AppPreferences {
   }
 
   /// Cycles system → light → dark → system, used by the settings sheet.
-  Future<void> cycleThemeMode() => setThemeMode(
-        switch (state.themeMode) {
-          ThemeMode.system => ThemeMode.light,
-          ThemeMode.light => ThemeMode.dark,
-          ThemeMode.dark => ThemeMode.system,
-        },
-      );
+  Future<void> cycleThemeMode() => setThemeMode(switch (state.themeMode) {
+    ThemeMode.system => ThemeMode.light,
+    ThemeMode.light => ThemeMode.dark,
+    ThemeMode.dark => ThemeMode.system,
+  });
 }

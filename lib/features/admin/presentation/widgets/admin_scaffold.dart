@@ -142,7 +142,10 @@ class AdminScaffold extends ConsumerWidget {
         }
         return Scaffold(
           floatingActionButton: floatingActionButton,
-          drawer: _AdminDrawer(destinations: destinations, current: selectedRoute),
+          drawer: _AdminDrawer(
+            destinations: destinations,
+            current: selectedRoute,
+          ),
           appBar: _appBar(actions),
           body: SafeArea(top: false, child: child),
         );
@@ -197,11 +200,7 @@ class _AdminTitle extends StatelessWidget {
 
 /// Content area with its own branded app bar (wide layout).
 class _AdminPane extends StatelessWidget {
-  const _AdminPane({
-    required this.title,
-    required this.child,
-    this.actions,
-  });
+  const _AdminPane({required this.title, required this.child, this.actions});
 
   final String title;
   final List<Widget>? actions;
@@ -231,48 +230,50 @@ class AdminBrandHeader extends ConsumerWidget {
       // Five taps here open the owner panel, exactly as on the storefront logo.
       child: AdminGateTaps(
         child: InkWell(
-        onTap: onTap,
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(16, 20, 16, 18),
-          decoration: const BoxDecoration(gradient: BrandGradients.brand),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                l10n.brandMonogram,
-                style: BrandTypography.displayWeighted(700, size: 26).copyWith(
-                  color: BrandColors.goldLight,
-                  letterSpacing: 3,
+          onTap: onTap,
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(16, 20, 16, 18),
+            decoration: const BoxDecoration(gradient: BrandGradients.brand),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  l10n.brandMonogram,
+                  style: BrandTypography.displayWeighted(
+                    700,
+                    size: 26,
+                  ).copyWith(color: BrandColors.goldLight, letterSpacing: 3),
                 ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                l10n.adminGatewayTitle,
-                style: BrandTypography.bodySmall.copyWith(
-                  color: BrandColors.ivory.withValues(alpha: 0.9),
-                ),
-              ),
-              if (previewing) ...<Widget>[
-                const SizedBox(height: 10),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: BrandColors.ivory.withValues(alpha: 0.18),
-                    borderRadius: BorderRadius.circular(999),
+                const SizedBox(height: 2),
+                Text(
+                  l10n.adminGatewayTitle,
+                  style: BrandTypography.bodySmall.copyWith(
+                    color: BrandColors.ivory.withValues(alpha: 0.9),
                   ),
-                  child: Text(
-                    l10n.adminPreviewBadge,
-                    style: BrandTypography.labelSmall.copyWith(
-                      color: BrandColors.ivory,
+                ),
+                if (previewing) ...<Widget>[
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: BrandColors.ivory.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      l10n.adminPreviewBadge,
+                      style: BrandTypography.labelSmall.copyWith(
+                        color: BrandColors.ivory,
+                      ),
                     ),
                   ),
-                ),
+                ],
               ],
-            ],
+            ),
           ),
-        ),
         ),
       ),
     );
@@ -348,9 +349,7 @@ class _AdminRail extends ConsumerWidget {
             ? BrandColors.deepPlum
             : Colors.white,
         border: Border(
-          right: BorderSide(
-            color: BrandColors.gold.withValues(alpha: 0.35),
-          ),
+          right: BorderSide(color: BrandColors.gold.withValues(alpha: 0.35)),
         ),
       ),
       child: Column(
@@ -364,7 +363,7 @@ class _AdminRail extends ConsumerWidget {
                 final AdminDestination d = destinations[index];
                 final bool selected =
                     GoRouterState.of(context).matchedLocation == d.route ||
-                        current == d.route;
+                    current == d.route;
                 return _AdminTile(
                   destination: d,
                   selected: selected,
@@ -373,7 +372,11 @@ class _AdminRail extends ConsumerWidget {
               },
             ),
           ),
-          const Divider(height: 1, thickness: 1, color: BrandColors.goldHairline),
+          const Divider(
+            height: 1,
+            thickness: 1,
+            color: BrandColors.goldHairline,
+          ),
           const _SignInToSaveTile(),
           const _LiveEditTile(),
           _AdminActionTile(
@@ -521,7 +524,9 @@ class _AdminTile extends StatelessWidget {
                                 ? BrandColors.goldLight
                                 : BrandColors.charcoal,
                           )
-                        : BrandTypography.bodyMedium.copyWith(color: foreground),
+                        : BrandTypography.bodyMedium.copyWith(
+                            color: foreground,
+                          ),
                   ),
                 ),
               ],
@@ -554,11 +559,7 @@ class _AdminActionTile extends StatelessWidget {
       dense: true,
       minTileHeight: 48,
       leading: Icon(icon, size: 20, color: BrandColors.gold),
-      title: LiveEditableText(
-        textKey: textKey,
-        text: label,
-        dense: true,
-      ),
+      title: LiveEditableText(textKey: textKey, text: label, dense: true),
       onTap: onTap,
     );
   }

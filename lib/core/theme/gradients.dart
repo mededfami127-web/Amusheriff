@@ -43,8 +43,8 @@ abstract final class BrandGradients {
 
   /// Wraps [child] in a gold shader fill, mimicking the logo wordmark.
   static Widget goldText({required Widget child}) => ShaderMask(
-        shaderCallback: goldHorizontal.createShader,
-        blendMode: BlendMode.srcIn,
-        child: child,
-      );
+    shaderCallback: goldHorizontal.createShader,
+    blendMode: BlendMode.srcIn,
+    child: child,
+  );
 }

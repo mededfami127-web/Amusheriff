@@ -12,34 +12,30 @@ class InquiryRepositoryImpl implements InquiryRepository {
 
   @override
   Future<List<Inquiry>> fetchAll({int limit = 500}) => ErrorMapper.guard(
-        () async {
-          final List<Map<String, dynamic>> rows = await _remote.fetch(
-            limit: limit,
-          );
-          return rows.map(_decode).toList(growable: false);
-        },
-      );
+    () async {
+      final List<Map<String, dynamic>> rows = await _remote.fetch(limit: limit);
+      return rows.map(_decode).toList(growable: false);
+    },
+  );
 
   @override
-  Stream<List<Inquiry>> watchAll() => _remote
-      .watch()
-      .map((List<Map<String, dynamic>> rows) => rows.map(_decode).toList());
+  Stream<List<Inquiry>> watchAll() => _remote.watch().map(
+    (List<Map<String, dynamic>> rows) => rows.map(_decode).toList(),
+  );
 
   @override
-  Future<void> remove(String id) =>
-      ErrorMapper.guard(() => _remote.remove(id));
+  Future<void> remove(String id) => ErrorMapper.guard(() => _remote.remove(id));
 
   @override
   Future<void> log({
     String? productId,
     required String channel,
     String? deviceId,
-  }) =>
-      _remote.logInquiry(
-        productId: productId,
-        channel: channel,
-        deviceId: deviceId,
-      );
+  }) => _remote.logInquiry(
+    productId: productId,
+    channel: channel,
+    deviceId: deviceId,
+  );
 
   static Inquiry _decode(Map<String, dynamic> row) {
     final dynamic nested = row['products'];

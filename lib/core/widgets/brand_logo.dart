@@ -60,10 +60,14 @@ class BrandWordmark extends StatelessWidget {
             textAlign: alignment == CrossAxisAlignment.center
                 ? TextAlign.center
                 : TextAlign.start,
-            style: (compact
-                    ? BrandTypography.displayWeighted(700, size: 17)
-                    : BrandTypography.brandTitle)
-                .copyWith(color: BrandColors.gold, letterSpacing: compact ? 2.4 : 3.2),
+            style:
+                (compact
+                        ? BrandTypography.displayWeighted(700, size: 17)
+                        : BrandTypography.brandTitle)
+                    .copyWith(
+                      color: BrandColors.gold,
+                      letterSpacing: compact ? 2.4 : 3.2,
+                    ),
           ),
         ),
         if (!compact && (amharic != null || arabic != null)) ...<Widget>[

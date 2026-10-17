@@ -59,11 +59,11 @@ class SearchPage extends ConsumerWidget {
             child: switch (results) {
               AsyncLoading() => const ShimmerGrid(itemCount: 4),
               AsyncError(:final Object error) => ErrorStateView(
-                  failure: error is AppFailure
-                      ? error
-                      : UnknownFailure(cause: error),
-                  onRetry: () => ref.invalidate(searchProductsProvider(query)),
-                ),
+                failure: error is AppFailure
+                    ? error
+                    : UnknownFailure(cause: error),
+                onRetry: () => ref.invalidate(searchProductsProvider(query)),
+              ),
               AsyncValue<List<Product>>(:final List<Product>? value) =>
                 (value ?? const <Product>[]).isEmpty
                     ? EmptyState(
@@ -77,8 +77,7 @@ class SearchPage extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Padding(
-                            padding:
-                                const EdgeInsets.fromLTRB(18, 6, 18, 10),
+                            padding: const EdgeInsets.fromLTRB(18, 6, 18, 10),
                             child: Text(
                               l10n.searchResultsCount(value!.length),
                               style: BrandTypography.bodySmall.copyWith(
@@ -90,16 +89,15 @@ class SearchPage extends ConsumerWidget {
                           ),
                           Expanded(
                             child: GridView.builder(
-                              padding:
-                                  const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                              padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
                               itemCount: value.length,
                               gridDelegate:
                                   const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                mainAxisSpacing: 16,
-                                crossAxisSpacing: 16,
-                                childAspectRatio: 0.62,
-                              ),
+                                    crossAxisCount: 2,
+                                    mainAxisSpacing: 16,
+                                    crossAxisSpacing: 16,
+                                    childAspectRatio: 0.62,
+                                  ),
                               itemBuilder: (_, int index) =>
                                   ProductCard(product: value[index]),
                             ),

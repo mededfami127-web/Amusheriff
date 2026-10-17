@@ -36,7 +36,9 @@ abstract final class ErrorMapper {
       // 23xxx = integrity constraint violations (unique, check, FK).
       if (code.startsWith('23')) {
         return ValidationFailure(
-          fieldErrors: const <String, String>{'_row': 'errorConstraintViolation'},
+          fieldErrors: const <String, String>{
+            '_row': 'errorConstraintViolation',
+          },
           messageKey: _constraintKey(code),
           debugMessage: error.message,
           cause: error,
@@ -139,11 +141,11 @@ abstract final class ErrorMapper {
   }
 
   static String _constraintKey(String code) => switch (code) {
-        '23505' => 'errorDuplicate',
-        '23514' => 'errorCheckViolation',
-        '23503' => 'errorForeignKey',
-        _ => 'errorConstraintViolation',
-      };
+    '23505' => 'errorDuplicate',
+    '23514' => 'errorCheckViolation',
+    '23503' => 'errorForeignKey',
+    _ => 'errorConstraintViolation',
+  };
 
   static int? _intOrNull(String? raw) =>
       raw == null ? null : int.tryParse(raw.trim());

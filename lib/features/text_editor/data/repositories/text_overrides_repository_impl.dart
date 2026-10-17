@@ -12,7 +12,7 @@ import '../datasources/text_overrides_remote_datasource.dart';
 /// unhandled `PostgrestException`.
 class TextOverridesRepositoryImpl implements TextOverridesRepository {
   TextOverridesRepositoryImpl(this._client)
-      : _remote = TextOverridesRemoteDataSource(_client);
+    : _remote = TextOverridesRemoteDataSource(_client);
 
   final SupabaseClient _client;
   final TextOverridesRemoteDataSource _remote;
@@ -26,31 +26,27 @@ class TextOverridesRepositoryImpl implements TextOverridesRepository {
 
   @override
   Future<List<TextOverride>> fetchAll() => ErrorMapper.guard(() async {
-        final List<Map<String, dynamic>> rows = await _remote.fetchAll();
-        return rows.map(TextOverride.fromJson).toList(growable: false);
-      });
+    final List<Map<String, dynamic>> rows = await _remote.fetchAll();
+    return rows.map(TextOverride.fromJson).toList(growable: false);
+  });
 
   @override
   Future<void> save({
     required String textKey,
     required String locale,
     required String value,
-  }) =>
-      ErrorMapper.guard(() async {
-        final TextOverride override = TextOverride(
-          textKey: textKey,
-          locale: locale,
-          value: value,
-        );
-        // `updated_by` is an audit column; RLS never reads it, so a missing
-        // session is not an error here.
-        await _remote.upsert(override.toRow(_client.auth.currentUser?.id));
-      });
+  }) => ErrorMapper.guard(() async {
+    final TextOverride override = TextOverride(
+      textKey: textKey,
+      locale: locale,
+      value: value,
+    );
+    // `updated_by` is an audit column; RLS never reads it, so a missing
+    // session is not an error here.
+    await _remote.upsert(override.toRow(_client.auth.currentUser?.id));
+  });
 
   @override
-  Future<void> remove({
-    required String textKey,
-    required String locale,
-  }) =>
+  Future<void> remove({required String textKey, required String locale}) =>
       ErrorMapper.guard(() => _remote.delete(textKey, locale));
 }

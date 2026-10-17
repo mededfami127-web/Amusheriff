@@ -12,13 +12,15 @@ import 'flavors.dart';
 abstract final class Env {
   const Env._();
 
-  static const String _supabaseUrl =
-      String.fromEnvironment('SUPABASE_URL');
-  static const String _supabaseAnonKey =
-      String.fromEnvironment('SUPABASE_ANON_KEY');
+  static const String _supabaseUrl = String.fromEnvironment('SUPABASE_URL');
+  static const String _supabaseAnonKey = String.fromEnvironment(
+    'SUPABASE_ANON_KEY',
+  );
   static const String _sentryDsn = String.fromEnvironment('SENTRY_DSN');
-  static const String _logLevel =
-      String.fromEnvironment('LOG_LEVEL', defaultValue: 'info');
+  static const String _logLevel = String.fromEnvironment(
+    'LOG_LEVEL',
+    defaultValue: 'info',
+  );
   static const String _apiBaseUrl = String.fromEnvironment('API_BASE_URL');
 
   /// Supabase project URL, e.g. `https://abcdefgh.supabase.co`.
@@ -32,8 +34,9 @@ abstract final class Env {
 
   /// Base URL for Supabase Edge Functions (used by the rate-limited inquiry
   /// endpoint in Part 2). Falls back to the project's own `/functions/v1`.
-  static String get functionsBaseUrl =>
-      _apiBaseUrl.trim().isNotEmpty ? _apiBaseUrl.trim() : '$supabaseUrl/functions/v1';
+  static String get functionsBaseUrl => _apiBaseUrl.trim().isNotEmpty
+      ? _apiBaseUrl.trim()
+      : '$supabaseUrl/functions/v1';
 
   static String get logLevel => _logLevel;
 

@@ -44,24 +44,22 @@ class _AdminChangePasswordPageState
 
     final String? email = ref.read(currentUserProvider)?.email;
     if (email == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.errorSessionExpired)),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.errorSessionExpired)));
       return;
     }
 
-    final bool ok =
-        await ref.read(adminAuthControllerProvider.notifier).changePassword(
-              email: email,
-              currentPassword: _current.text,
-              newPassword: _next.text,
-            );
+    final bool ok = await ref
+        .read(adminAuthControllerProvider.notifier)
+        .changePassword(
+          email: email,
+          currentPassword: _current.text,
+          newPassword: _next.text,
+        );
 
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(ok ? l10n.adminPasswordChanged : l10n.errorAuth),
-      ),
+      SnackBar(content: Text(ok ? l10n.adminPasswordChanged : l10n.errorAuth)),
     );
     if (ok) {
       _current.clear();
@@ -93,9 +91,8 @@ class _AdminChangePasswordPageState
                   padding: const EdgeInsets.only(bottom: 16),
                   child: InlineFailureBanner(
                     failure: failure,
-                    onDismiss: () => ref
-                        .read(adminAuthControllerProvider.notifier)
-                        .reset(),
+                    onDismiss: () =>
+                        ref.read(adminAuthControllerProvider.notifier).reset(),
                   ),
                 ),
               TextFormField(
@@ -105,9 +102,8 @@ class _AdminChangePasswordPageState
                   labelText: l10n.adminCurrentPassword,
                   prefixIcon: const Icon(Icons.lock_outline_rounded),
                 ),
-                validator: (String? value) => (value ?? '').isEmpty
-                    ? l10n.validateRequired
-                    : null,
+                validator: (String? value) =>
+                    (value ?? '').isEmpty ? l10n.validateRequired : null,
               ),
               const SizedBox(height: 14),
               TextFormField(
@@ -119,8 +115,8 @@ class _AdminChangePasswordPageState
                 ),
                 validator: (String? value) =>
                     Validators.strongPassword(value) == null
-                        ? null
-                        : l10n.validatePasswordStrength,
+                    ? null
+                    : l10n.validatePasswordStrength,
               ),
               const SizedBox(height: 14),
               TextFormField(
@@ -132,8 +128,8 @@ class _AdminChangePasswordPageState
                 ),
                 validator: (String? value) =>
                     Validators.confirmPassword(value, _next.text) == null
-                        ? null
-                        : l10n.validatePasswordMismatch,
+                    ? null
+                    : l10n.validatePasswordMismatch,
               ),
               const SizedBox(height: 12),
               Text(

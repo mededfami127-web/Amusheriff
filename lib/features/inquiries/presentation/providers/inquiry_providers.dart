@@ -25,8 +25,8 @@ Stream<List<Inquiry>> adminInquiries(Ref ref) =>
 /// Leads recorded in the last seven days.
 @riverpod
 int inquiriesThisWeek(Ref ref) {
-  final List<Inquiry> all = ref.watch(adminInquiriesProvider).value ??
-      const <Inquiry>[];
+  final List<Inquiry> all =
+      ref.watch(adminInquiriesProvider).value ?? const <Inquiry>[];
   final DateTime now = DateTime.now();
   return all
       .where((Inquiry i) => i.isWithinLast(const Duration(days: 7), now: now))
@@ -39,8 +39,8 @@ int inquiriesThisWeek(Ref ref) {
 /// "most contacted" list costs no extra round trip.
 @riverpod
 List<MapEntry<String, int>> mostContactedProducts(Ref ref) {
-  final List<Inquiry> all = ref.watch(adminInquiriesProvider).value ??
-      const <Inquiry>[];
+  final List<Inquiry> all =
+      ref.watch(adminInquiriesProvider).value ?? const <Inquiry>[];
   final DateTime now = DateTime.now();
 
   final Map<String, int> counts = <String, int>{};
@@ -52,8 +52,10 @@ List<MapEntry<String, int>> mostContactedProducts(Ref ref) {
   }
 
   final List<MapEntry<String, int>> entries = counts.entries.toList()
-    ..sort((MapEntry<String, int> a, MapEntry<String, int> b) =>
-        b.value.compareTo(a.value));
+    ..sort(
+      (MapEntry<String, int> a, MapEntry<String, int> b) =>
+          b.value.compareTo(a.value),
+    );
   return entries.take(5).toList(growable: false);
 }
 

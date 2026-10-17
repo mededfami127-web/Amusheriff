@@ -69,7 +69,10 @@ class _AdminProductEditorPageState
 
     if (productId != null) {
       // A deep link may arrive before the list page seeded the draft.
-      ref.listen(productDetailProvider(productId), (_, AsyncValue<Product?> next) {
+      ref.listen(productDetailProvider(productId), (
+        _,
+        AsyncValue<Product?> next,
+      ) {
         final Product? product = next.value;
         if (product == null) {
           if (next.isLoading) return;
@@ -92,10 +95,10 @@ class _AdminProductEditorPageState
       }
     }
 
-    final ProductEditorState state =
-        ref.watch(productEditorControllerProvider);
-    final ProductEditorController controller =
-        ref.read(productEditorControllerProvider.notifier);
+    final ProductEditorState state = ref.watch(productEditorControllerProvider);
+    final ProductEditorController controller = ref.read(
+      productEditorControllerProvider.notifier,
+    );
     final List<Category> categories =
         ref.watch(allCategoriesProvider).value ?? const <Category>[];
 
@@ -151,7 +154,10 @@ class _AdminProductEditorPageState
             initialValue: state.categoryId.isEmpty ? null : state.categoryId,
             decoration: InputDecoration(
               labelText: l10n.adminCategories,
-              errorText: localizeFieldKey(l10n, state.fieldErrors['categoryId']),
+              errorText: localizeFieldKey(
+                l10n,
+                state.fieldErrors['categoryId'],
+              ),
             ),
             items: categories
                 .map(
@@ -312,13 +318,20 @@ class _MediaSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final AppLocalizations l10n = AppLocalizations.of(context);
-    final AsyncValue<Product?> async = ref.watch(productDetailProvider(productId));
-    final List<MediaUploadItem> queue = ref.watch(mediaUploadControllerProvider);
+    final AsyncValue<Product?> async = ref.watch(
+      productDetailProvider(productId),
+    );
+    final List<MediaUploadItem> queue = ref.watch(
+      mediaUploadControllerProvider,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(l10n.adminMedia, style: BrandTypography.displaySmall.copyWith(fontSize: 18)),
+        Text(
+          l10n.adminMedia,
+          style: BrandTypography.displaySmall.copyWith(fontSize: 18),
+        ),
         const SizedBox(height: 10),
         if (queue.isNotEmpty) ...<Widget>[
           Text(l10n.adminUploadQueue, style: BrandTypography.labelLarge),
@@ -344,14 +357,14 @@ class _MediaSection extends ConsumerWidget {
                           .retry(item.id, productId: productId),
                     )
                   : item.isFinished
-                      ? null
-                      : IconButton(
-                          icon: const Icon(Icons.close_rounded),
-                          tooltip: l10n.actionCancel,
-                          onPressed: () => ref
-                              .read(mediaUploadControllerProvider.notifier)
-                              .cancel(item.id),
-                        ),
+                  ? null
+                  : IconButton(
+                      icon: const Icon(Icons.close_rounded),
+                      tooltip: l10n.actionCancel,
+                      onPressed: () => ref
+                          .read(mediaUploadControllerProvider.notifier)
+                          .cancel(item.id),
+                    ),
             ),
           const SizedBox(height: 8),
         ],
@@ -376,8 +389,11 @@ class _MediaSection extends ConsumerWidget {
                 scrollDirection: Axis.horizontal,
                 itemCount: media.length,
                 separatorBuilder: (_, __) => const SizedBox(width: 10),
-                itemBuilder: (BuildContext context, int index) =>
-                    _MediaCard(productId: productId, media: media[index], l10n: l10n),
+                itemBuilder: (BuildContext context, int index) => _MediaCard(
+                  productId: productId,
+                  media: media[index],
+                  l10n: l10n,
+                ),
               ),
             );
           },
@@ -404,20 +420,21 @@ class _MediaSection extends ConsumerWidget {
   }
 
   static IconData _iconFor(UploadPhase phase) => switch (phase) {
-        UploadPhase.queued => Icons.schedule_rounded,
-        UploadPhase.processing => Icons.tune_rounded,
-        UploadPhase.uploading => Icons.cloud_upload_outlined,
-        UploadPhase.done => Icons.check_circle_outline_rounded,
-        UploadPhase.failed => Icons.error_outline_rounded,
-        UploadPhase.cancelled => Icons.cancel_outlined,
-      };
+    UploadPhase.queued => Icons.schedule_rounded,
+    UploadPhase.processing => Icons.tune_rounded,
+    UploadPhase.uploading => Icons.cloud_upload_outlined,
+    UploadPhase.done => Icons.check_circle_outline_rounded,
+    UploadPhase.failed => Icons.error_outline_rounded,
+    UploadPhase.cancelled => Icons.cancel_outlined,
+  };
 
   Future<void> _pick(WidgetRef ref, MediaKind kind) async {
     final ImagePicker picker = ImagePicker();
     final List<XFile> files = kind.isVideo
         ? <XFile>[
             if (await picker.pickVideo(source: ImageSource.gallery)
-                case final XFile file) file,
+                case final XFile file)
+              file,
           ]
         : await picker.pickMultiImage(imageQuality: 92);
 
@@ -505,9 +522,7 @@ class _MediaCard extends ConsumerWidget {
               IconButton(
                 icon: const Icon(Icons.star_outline_rounded, size: 18),
                 tooltip: l10n.adminSetCover,
-                onPressed: media.isCover
-                    ? null
-                    : () => _setCover(context, ref),
+                onPressed: media.isCover ? null : () => _setCover(context, ref),
               ),
               IconButton(
                 icon: const Icon(Icons.delete_outline_rounded, size: 18),
@@ -547,7 +562,8 @@ class _MediaCard extends ConsumerWidget {
     final AppLocalizations l10n = AppLocalizations.of(context);
     final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
 
-    final bool confirmed = await showDialog<bool>(
+    final bool confirmed =
+        await showDialog<bool>(
           context: context,
           builder: (BuildContext context) => AlertDialog(
             title: Text(l10n.adminRemoveMedia),
@@ -571,7 +587,6 @@ class _MediaCard extends ConsumerWidget {
       media.storagePath,
       if (media.hasThumbnail) media.thumbnailPath!,
     ];
-
 
     try {
       await ref.read(productMediaRepositoryProvider).delete(media.id);

@@ -36,8 +36,7 @@ class AppTextEntry {
   bool get isEditable => !isPlural;
 
   /// The shipped wording for [locale], falling back to English.
-  String defaultFor(String locale) =>
-      defaults[locale] ?? defaults['en'] ?? key;
+  String defaultFor(String locale) => defaults[locale] ?? defaults['en'] ?? key;
 
   /// Same, for the first locale that has any wording at all.
   String get anyDefault =>
@@ -45,12 +44,7 @@ class AppTextEntry {
 }
 
 /// Locales the owner can edit, in picker order.
-const List<String> kAppTextLocales = <String>[
-  'en',
-  'am',
-  'ar',
-  'om',
-];
+const List<String> kAppTextLocales = <String>['en', 'am', 'ar', 'om'];
 
 /// Locale code → the name shown in the language picker.
 const Map<String, String> kAppTextLocaleNames = <String, String>{
@@ -89,9 +83,7 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
       'ar': 'افتح فئة {name}',
       'om': 'Ramaddii {name} bani',
     },
-    placeholders: <String>[
-      'name',
-    ],
+    placeholders: <String>['name'],
   ),
   AppTextEntry(
     key: 'a11yProductImage',
@@ -102,9 +94,7 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
       'ar': 'صورة {title}',
       'om': 'Suuraa {title}',
     },
-    placeholders: <String>[
-      'title',
-    ],
+    placeholders: <String>['title'],
   ),
   AppTextEntry(
     key: 'a11yVideoThumbnail',
@@ -115,9 +105,7 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
       'ar': 'تشغيل فيديو {title}',
       'om': 'Viidiyoo {title} taphachiisi',
     },
-    placeholders: <String>[
-      'title',
-    ],
+    placeholders: <String>['title'],
   ),
   AppTextEntry(
     key: 'aboutFallback',
@@ -488,9 +476,7 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
       'ar': 'لا يزال هذا القسم يحتوي على {count} منتج. انقلها إلى قسم آخر أولاً، أو احذف المنتجات.',
       'om': 'Ramaddii kana keessatti oomishni {count} hafa. Dura isaan ramaddii biraatti sochoosi, yookaan oomishaalee sana balleessi.',
     },
-    placeholders: <String>[
-      'count',
-    ],
+    placeholders: <String>['count'],
   ),
   AppTextEntry(
     key: 'adminCategoryHidden',
@@ -1821,10 +1807,7 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
       'ar': '{done} من {total} تم رفعها',
       'om': '{done} / {total} fe\'ame',
     },
-    placeholders: <String>[
-      'done',
-      'total',
-    ],
+    placeholders: <String>['done', 'total'],
   ),
   AppTextEntry(
     key: 'adminViewAll',
@@ -2103,7 +2086,8 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
       'en': 'Incorrect username or password.',
       'am': 'የመግቢያ ስም ወይም የይለፍ ቃል ትክክል አይደለም።',
       'ar': 'اسم المستخدم أو كلمة المرور غير صحيحة.',
-      'om': 'Lakkoofsi iccitii jalqabaa dogoggora. Maaloo irra deebi\'ii yaali.',
+      'om':
+          'Lakkoofsi iccitii jalqabaa dogoggora. Maaloo irra deebi\'ii yaali.',
     },
   ),
   AppTextEntry(
@@ -2435,10 +2419,7 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
       'ar': 'مرحبًا! أنا مهتم بـ «{product}» ({price}).',
       'om': 'Akkam! “{product}” ({price}) xiyyeeffannaa qaba.',
     },
-    placeholders: <String>[
-      'price',
-      'product',
-    ],
+    placeholders: <String>['price', 'product'],
   ),
   AppTextEntry(
     key: 'labelAvailable',
@@ -2459,9 +2440,7 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
       'ar': 'وفّر {percent}%',
       'om': '{percent}% qusadhu',
     },
-    placeholders: <String>[
-      'percent',
-    ],
+    placeholders: <String>['percent'],
   ),
   AppTextEntry(
     key: 'labelDuration',
@@ -2472,10 +2451,7 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
       'ar': '{minutes}د {seconds}ث',
       'om': '{minutes}m {seconds}s',
     },
-    placeholders: <String>[
-      'minutes',
-      'seconds',
-    ],
+    placeholders: <String>['minutes', 'seconds'],
   ),
   AppTextEntry(
     key: 'labelFrom',
@@ -2486,9 +2462,7 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
       'ar': 'تبدأ من {price}',
       'om': '{price} irraa',
     },
-    placeholders: <String>[
-      'price',
-    ],
+    placeholders: <String>['price'],
   ),
   AppTextEntry(
     key: 'labelPrice',
@@ -2599,22 +2573,19 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
       'ar': 'لا توجد منتجات تطابق «{query}»',
       'om': '“{query}” wajjin walsimu hin jiru',
     },
-    placeholders: <String>[
-      'query',
-    ],
+    placeholders: <String>['query'],
   ),
   AppTextEntry(
     key: 'searchResultsCount',
     sectionKey: 'groupStorefront',
     defaults: <String, String>{
-      'en': '{count, plural, =0{No results} =1{1 result} other{{count} results}}',
+      'en':
+          '{count, plural, =0{No results} =1{1 result} other{{count} results}}',
       'am': '{count, plural, =0{ውጤት የለም} =1{1 ውጤት} other{{count} ውጤቶች}}',
       'ar': '{count, plural, =0{لا توجد نتائج} =1{نتيجة واحدة} =2{نتيجتان} few{{count} نتائج} many{{count} نتيجة} other{{count} نتيجة}}',
       'om': '{count, plural, =0{Bu\'aan hin jiru} =1{Bu\'aa 1} other{Bu\'aawwan {count}}}',
     },
-    placeholders: <String>[
-      'count',
-    ],
+    placeholders: <String>['count'],
     isPlural: true,
   ),
   AppTextEntry(
@@ -3041,6 +3012,5 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
 
 /// Lookup by key, for the in-place pencils and the editor.
 final Map<String, AppTextEntry> kAppTextByKey = <String, AppTextEntry>{
-  for (final AppTextEntry entry in kAppTextEntries)
-    entry.key: entry,
+  for (final AppTextEntry entry in kAppTextEntries) entry.key: entry,
 };

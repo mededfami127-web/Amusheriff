@@ -20,8 +20,7 @@ AdminGateStore adminGateStore(Ref ref) =>
 /// Supabase session, which is what makes the five-tap entry usable on a device
 /// that has never signed in.
 @riverpod
-bool adminGateUnlocked(Ref ref) =>
-    ref.watch(adminGateProvider).unlocked;
+bool adminGateUnlocked(Ref ref) => ref.watch(adminGateProvider).unlocked;
 
 /// Session state of the owner gateway.
 @immutable
@@ -47,22 +46,20 @@ class AdminGateState {
     bool? wrongPassword,
     AppFailure? failure,
     bool clearFailure = false,
-  }) =>
-      AdminGateState(
-        unlocked: unlocked ?? this.unlocked,
-        busy: busy ?? this.busy,
-        wrongPassword: wrongPassword ?? this.wrongPassword,
-        failure: clearFailure ? null : (failure ?? this.failure),
-      );
+  }) => AdminGateState(
+    unlocked: unlocked ?? this.unlocked,
+    busy: busy ?? this.busy,
+    wrongPassword: wrongPassword ?? this.wrongPassword,
+    failure: clearFailure ? null : (failure ?? this.failure),
+  );
 }
 
 /// Drives the five-tap panel and the gateway-password screen.
 @Riverpod(keepAlive: true)
 class AdminGate extends _$AdminGate {
   @override
-  AdminGateState build() => AdminGateState(
-        unlocked: ref.watch(adminGateStoreProvider).unlocked,
-      );
+  AdminGateState build() =>
+      AdminGateState(unlocked: ref.watch(adminGateStoreProvider).unlocked);
 
   AdminGateStore get _store => ref.read(adminGateStoreProvider);
 
@@ -71,7 +68,11 @@ class AdminGate extends _$AdminGate {
     required String username,
     required String password,
   }) async {
-    state = state.copyWith(busy: true, clearFailure: true, wrongPassword: false);
+    state = state.copyWith(
+      busy: true,
+      clearFailure: true,
+      wrongPassword: false,
+    );
     try {
       final bool ok = await _store.unlock(
         username: username,
@@ -105,7 +106,11 @@ class AdminGate extends _$AdminGate {
     required String current,
     required String next,
   }) async {
-    state = state.copyWith(busy: true, clearFailure: true, wrongPassword: false);
+    state = state.copyWith(
+      busy: true,
+      clearFailure: true,
+      wrongPassword: false,
+    );
     try {
       final bool ok = await _store.changePassword(current: current, next: next);
       state = AdminGateState(unlocked: state.unlocked, wrongPassword: !ok);
@@ -119,6 +124,5 @@ class AdminGate extends _$AdminGate {
     }
   }
 
-  void acknowledge() =>
-      state = AdminGateState(unlocked: state.unlocked);
+  void acknowledge() => state = AdminGateState(unlocked: state.unlocked);
 }

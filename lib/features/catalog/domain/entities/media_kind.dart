@@ -13,9 +13,9 @@ enum MediaKind {
   /// Storage bucket mime allow-list, per the storage policy.
   static const Map<MediaKind, List<String>> allowedMimeTypes =
       <MediaKind, List<String>>{
-    MediaKind.image: <String>['image/jpeg', 'image/png', 'image/webp'],
-    MediaKind.video: <String>['video/mp4'],
-  };
+        MediaKind.image: <String>['image/jpeg', 'image/png', 'image/webp'],
+        MediaKind.video: <String>['video/mp4'],
+      };
 
   /// Hard size caps enforced client-side before upload and server-side by the
   /// bucket policy.

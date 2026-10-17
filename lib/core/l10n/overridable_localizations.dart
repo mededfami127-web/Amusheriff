@@ -14,7 +14,7 @@ import 'generated/app_localizations.dart';
 /// makes an edit appear on all of them at once.
 class OverridableAppLocalizations extends AppLocalizations {
   OverridableAppLocalizations(this._base, this._overrides)
-      : super(_base.localeName);
+    : super(_base.localeName);
 
   final AppLocalizations _base;
 
@@ -24,16 +24,11 @@ class OverridableAppLocalizations extends AppLocalizations {
   /// Whether the owner has rewritten [key] for this locale.
   bool owns(String key) => _overrides.containsKey(key);
 
-  String _text(String key, String fallback) =>
-      _overrides[key] ?? fallback;
+  String _text(String key, String fallback) => _overrides[key] ?? fallback;
 
   /// Applies an override that carries `{variable}` placeholders, so
   /// a rewritten message still names the product it is about.
-  String _filled(
-    String key,
-    String fallback,
-    Map<String, String> params,
-  ) {
+  String _filled(String key, String fallback, Map<String, String> params) {
     final String? override = _overrides[key];
     if (override == null) return fallback;
     String result = override;
@@ -44,34 +39,25 @@ class OverridableAppLocalizations extends AppLocalizations {
   }
 
   @override
-  String a11yOpenCategory(String name) =>
-      _filled(
-        'a11yOpenCategory',
-        _base.a11yOpenCategory(name),
-        <String, String>{
-          'name': '${name}',
-        },
-      );
+  String a11yOpenCategory(String name) => _filled(
+    'a11yOpenCategory',
+    _base.a11yOpenCategory(name),
+    <String, String>{'name': '${name}'},
+  );
 
   @override
-  String a11yProductImage(String title) =>
-      _filled(
-        'a11yProductImage',
-        _base.a11yProductImage(title),
-        <String, String>{
-          'title': '${title}',
-        },
-      );
+  String a11yProductImage(String title) => _filled(
+    'a11yProductImage',
+    _base.a11yProductImage(title),
+    <String, String>{'title': '${title}'},
+  );
 
   @override
-  String a11yVideoThumbnail(String title) =>
-      _filled(
-        'a11yVideoThumbnail',
-        _base.a11yVideoThumbnail(title),
-        <String, String>{
-          'title': '${title}',
-        },
-      );
+  String a11yVideoThumbnail(String title) => _filled(
+    'a11yVideoThumbnail',
+    _base.a11yVideoThumbnail(title),
+    <String, String>{'title': '${title}'},
+  );
 
   @override
   String get aboutFallback => _text('aboutFallback', _base.aboutFallback);
@@ -95,7 +81,8 @@ class OverridableAppLocalizations extends AppLocalizations {
   String get actionConfirm => _text('actionConfirm', _base.actionConfirm);
 
   @override
-  String get actionContactOwner => _text('actionContactOwner', _base.actionContactOwner);
+  String get actionContactOwner =>
+      _text('actionContactOwner', _base.actionContactOwner);
 
   @override
   String get actionContinue => _text('actionContinue', _base.actionContinue);
@@ -104,7 +91,8 @@ class OverridableAppLocalizations extends AppLocalizations {
   String get actionCopyLink => _text('actionCopyLink', _base.actionCopyLink);
 
   @override
-  String get actionCopySuccess => _text('actionCopySuccess', _base.actionCopySuccess);
+  String get actionCopySuccess =>
+      _text('actionCopySuccess', _base.actionCopySuccess);
 
   @override
   String get actionCreate => _text('actionCreate', _base.actionCreate);
@@ -113,7 +101,8 @@ class OverridableAppLocalizations extends AppLocalizations {
   String get actionDelete => _text('actionDelete', _base.actionDelete);
 
   @override
-  String get actionDiscardAll => _text('actionDiscardAll', _base.actionDiscardAll);
+  String get actionDiscardAll =>
+      _text('actionDiscardAll', _base.actionDiscardAll);
 
   @override
   String get actionEdit => _text('actionEdit', _base.actionEdit);
@@ -137,16 +126,19 @@ class OverridableAppLocalizations extends AppLocalizations {
   String get actionSearch => _text('actionSearch', _base.actionSearch);
 
   @override
-  String get actionSelectImage => _text('actionSelectImage', _base.actionSelectImage);
+  String get actionSelectImage =>
+      _text('actionSelectImage', _base.actionSelectImage);
 
   @override
   String get actionShare => _text('actionShare', _base.actionShare);
 
   @override
-  String get actionUnfavourite => _text('actionUnfavourite', _base.actionUnfavourite);
+  String get actionUnfavourite =>
+      _text('actionUnfavourite', _base.actionUnfavourite);
 
   @override
-  String get actionViewDetails => _text('actionViewDetails', _base.actionViewDetails);
+  String get actionViewDetails =>
+      _text('actionViewDetails', _base.actionViewDetails);
 
   @override
   String get adminAbout => _text('adminAbout', _base.adminAbout);
@@ -170,80 +162,97 @@ class OverridableAppLocalizations extends AppLocalizations {
   String get adminAnonymous => _text('adminAnonymous', _base.adminAnonymous);
 
   @override
-  String get adminBackToGateway => _text('adminBackToGateway', _base.adminBackToGateway);
+  String get adminBackToGateway =>
+      _text('adminBackToGateway', _base.adminBackToGateway);
 
   @override
   String get adminCategories => _text('adminCategories', _base.adminCategories);
 
   @override
-  String get adminCategoryCreated => _text('adminCategoryCreated', _base.adminCategoryCreated);
+  String get adminCategoryCreated =>
+      _text('adminCategoryCreated', _base.adminCategoryCreated);
 
   @override
-  String get adminCategoryDeleted => _text('adminCategoryDeleted', _base.adminCategoryDeleted);
+  String get adminCategoryDeleted =>
+      _text('adminCategoryDeleted', _base.adminCategoryDeleted);
 
   @override
-  String adminCategoryHasProducts(int count) =>
-      _filled(
-        'adminCategoryHasProducts',
-        _base.adminCategoryHasProducts(count),
-        <String, String>{
-          'count': '${count}',
-        },
-      );
+  String adminCategoryHasProducts(int count) => _filled(
+    'adminCategoryHasProducts',
+    _base.adminCategoryHasProducts(count),
+    <String, String>{'count': '${count}'},
+  );
 
   @override
-  String get adminCategoryHidden => _text('adminCategoryHidden', _base.adminCategoryHidden);
+  String get adminCategoryHidden =>
+      _text('adminCategoryHidden', _base.adminCategoryHidden);
 
   @override
-  String get adminCategoryName => _text('adminCategoryName', _base.adminCategoryName);
+  String get adminCategoryName =>
+      _text('adminCategoryName', _base.adminCategoryName);
 
   @override
-  String get adminCategoryNameAm => _text('adminCategoryNameAm', _base.adminCategoryNameAm);
+  String get adminCategoryNameAm =>
+      _text('adminCategoryNameAm', _base.adminCategoryNameAm);
 
   @override
-  String get adminCategoryNameAr => _text('adminCategoryNameAr', _base.adminCategoryNameAr);
+  String get adminCategoryNameAr =>
+      _text('adminCategoryNameAr', _base.adminCategoryNameAr);
 
   @override
-  String get adminCategoryUpdated => _text('adminCategoryUpdated', _base.adminCategoryUpdated);
+  String get adminCategoryUpdated =>
+      _text('adminCategoryUpdated', _base.adminCategoryUpdated);
 
   @override
-  String get adminChangePassword => _text('adminChangePassword', _base.adminChangePassword);
+  String get adminChangePassword =>
+      _text('adminChangePassword', _base.adminChangePassword);
 
   @override
   String get adminChannel => _text('adminChannel', _base.adminChannel);
 
   @override
-  String get adminClearInquiries => _text('adminClearInquiries', _base.adminClearInquiries);
+  String get adminClearInquiries =>
+      _text('adminClearInquiries', _base.adminClearInquiries);
 
   @override
-  String get adminCompareAtPrice => _text('adminCompareAtPrice', _base.adminCompareAtPrice);
+  String get adminCompareAtPrice =>
+      _text('adminCompareAtPrice', _base.adminCompareAtPrice);
 
   @override
-  String get adminConfirmDeleteCategory => _text('adminConfirmDeleteCategory', _base.adminConfirmDeleteCategory);
+  String get adminConfirmDeleteCategory =>
+      _text('adminConfirmDeleteCategory', _base.adminConfirmDeleteCategory);
 
   @override
-  String get adminConfirmDeleteContact => _text('adminConfirmDeleteContact', _base.adminConfirmDeleteContact);
+  String get adminConfirmDeleteContact =>
+      _text('adminConfirmDeleteContact', _base.adminConfirmDeleteContact);
 
   @override
-  String get adminConfirmDeleteMessage => _text('adminConfirmDeleteMessage', _base.adminConfirmDeleteMessage);
+  String get adminConfirmDeleteMessage =>
+      _text('adminConfirmDeleteMessage', _base.adminConfirmDeleteMessage);
 
   @override
-  String get adminConfirmDeleteProduct => _text('adminConfirmDeleteProduct', _base.adminConfirmDeleteProduct);
+  String get adminConfirmDeleteProduct =>
+      _text('adminConfirmDeleteProduct', _base.adminConfirmDeleteProduct);
 
   @override
-  String get adminConfirmPassword => _text('adminConfirmPassword', _base.adminConfirmPassword);
+  String get adminConfirmPassword =>
+      _text('adminConfirmPassword', _base.adminConfirmPassword);
 
   @override
-  String get adminContactDeleted => _text('adminContactDeleted', _base.adminContactDeleted);
+  String get adminContactDeleted =>
+      _text('adminContactDeleted', _base.adminContactDeleted);
 
   @override
-  String get adminContactLabel => _text('adminContactLabel', _base.adminContactLabel);
+  String get adminContactLabel =>
+      _text('adminContactLabel', _base.adminContactLabel);
 
   @override
-  String get adminContactSaved => _text('adminContactSaved', _base.adminContactSaved);
+  String get adminContactSaved =>
+      _text('adminContactSaved', _base.adminContactSaved);
 
   @override
-  String get adminContactValue => _text('adminContactValue', _base.adminContactValue);
+  String get adminContactValue =>
+      _text('adminContactValue', _base.adminContactValue);
 
   @override
   String get adminContacts => _text('adminContacts', _base.adminContacts);
@@ -255,67 +264,82 @@ class OverridableAppLocalizations extends AppLocalizations {
   String get adminCoverImage => _text('adminCoverImage', _base.adminCoverImage);
 
   @override
-  String get adminCreateCategory => _text('adminCreateCategory', _base.adminCreateCategory);
+  String get adminCreateCategory =>
+      _text('adminCreateCategory', _base.adminCreateCategory);
 
   @override
   String get adminCurrency => _text('adminCurrency', _base.adminCurrency);
 
   @override
-  String get adminCurrentPassword => _text('adminCurrentPassword', _base.adminCurrentPassword);
+  String get adminCurrentPassword =>
+      _text('adminCurrentPassword', _base.adminCurrentPassword);
 
   @override
   String get adminDashboard => _text('adminDashboard', _base.adminDashboard);
 
   @override
-  String get adminDefaultLanguage => _text('adminDefaultLanguage', _base.adminDefaultLanguage);
+  String get adminDefaultLanguage =>
+      _text('adminDefaultLanguage', _base.adminDefaultLanguage);
 
   @override
   String get adminDiscard => _text('adminDiscard', _base.adminDiscard);
 
   @override
-  String get adminDragToReorder => _text('adminDragToReorder', _base.adminDragToReorder);
+  String get adminDragToReorder =>
+      _text('adminDragToReorder', _base.adminDragToReorder);
 
   @override
   String get adminDuplicate => _text('adminDuplicate', _base.adminDuplicate);
 
   @override
-  String get adminDuplicateCreated => _text('adminDuplicateCreated', _base.adminDuplicateCreated);
+  String get adminDuplicateCreated =>
+      _text('adminDuplicateCreated', _base.adminDuplicateCreated);
 
   @override
-  String get adminEditCategory => _text('adminEditCategory', _base.adminEditCategory);
+  String get adminEditCategory =>
+      _text('adminEditCategory', _base.adminEditCategory);
 
   @override
-  String get adminEditContact => _text('adminEditContact', _base.adminEditContact);
+  String get adminEditContact =>
+      _text('adminEditContact', _base.adminEditContact);
 
   @override
-  String get adminEditProduct => _text('adminEditProduct', _base.adminEditProduct);
+  String get adminEditProduct =>
+      _text('adminEditProduct', _base.adminEditProduct);
 
   @override
   String get adminEmailLabel => _text('adminEmailLabel', _base.adminEmailLabel);
 
   @override
-  String get adminExitPreview => _text('adminExitPreview', _base.adminExitPreview);
+  String get adminExitPreview =>
+      _text('adminExitPreview', _base.adminExitPreview);
 
   @override
   String get adminFeatured => _text('adminFeatured', _base.adminFeatured);
 
   @override
-  String get adminFilterAllCategories => _text('adminFilterAllCategories', _base.adminFilterAllCategories);
+  String get adminFilterAllCategories =>
+      _text('adminFilterAllCategories', _base.adminFilterAllCategories);
 
   @override
-  String get adminFilterAllStatus => _text('adminFilterAllStatus', _base.adminFilterAllStatus);
+  String get adminFilterAllStatus =>
+      _text('adminFilterAllStatus', _base.adminFilterAllStatus);
 
   @override
-  String get adminFilterDraft => _text('adminFilterDraft', _base.adminFilterDraft);
+  String get adminFilterDraft =>
+      _text('adminFilterDraft', _base.adminFilterDraft);
 
   @override
-  String get adminFilterPublished => _text('adminFilterPublished', _base.adminFilterPublished);
+  String get adminFilterPublished =>
+      _text('adminFilterPublished', _base.adminFilterPublished);
 
   @override
-  String get adminForgotPassword => _text('adminForgotPassword', _base.adminForgotPassword);
+  String get adminForgotPassword =>
+      _text('adminForgotPassword', _base.adminForgotPassword);
 
   @override
-  String get adminGatewayTitle => _text('adminGatewayTitle', _base.adminGatewayTitle);
+  String get adminGatewayTitle =>
+      _text('adminGatewayTitle', _base.adminGatewayTitle);
 
   @override
   String get adminHide => _text('adminHide', _base.adminHide);
@@ -324,64 +348,78 @@ class OverridableAppLocalizations extends AppLocalizations {
   String get adminInquiries => _text('adminInquiries', _base.adminInquiries);
 
   @override
-  String get adminInquiriesWeek => _text('adminInquiriesWeek', _base.adminInquiriesWeek);
+  String get adminInquiriesWeek =>
+      _text('adminInquiriesWeek', _base.adminInquiriesWeek);
 
   @override
-  String get adminInquiryDeleted => _text('adminInquiryDeleted', _base.adminInquiryDeleted);
+  String get adminInquiryDeleted =>
+      _text('adminInquiryDeleted', _base.adminInquiryDeleted);
 
   @override
   String get adminJustNow => _text('adminJustNow', _base.adminJustNow);
 
   @override
-  String get adminKeepEditing => _text('adminKeepEditing', _base.adminKeepEditing);
+  String get adminKeepEditing =>
+      _text('adminKeepEditing', _base.adminKeepEditing);
 
   @override
   String get adminLiveEdit => _text('adminLiveEdit', _base.adminLiveEdit);
 
   @override
-  String get adminLiveEditOff => _text('adminLiveEditOff', _base.adminLiveEditOff);
+  String get adminLiveEditOff =>
+      _text('adminLiveEditOff', _base.adminLiveEditOff);
 
   @override
   String get adminLiveEditOn => _text('adminLiveEditOn', _base.adminLiveEditOn);
 
   @override
-  String get adminLivePreview => _text('adminLivePreview', _base.adminLivePreview);
+  String get adminLivePreview =>
+      _text('adminLivePreview', _base.adminLivePreview);
 
   @override
-  String get adminLoginSubtitle => _text('adminLoginSubtitle', _base.adminLoginSubtitle);
+  String get adminLoginSubtitle =>
+      _text('adminLoginSubtitle', _base.adminLoginSubtitle);
 
   @override
   String get adminLoginTitle => _text('adminLoginTitle', _base.adminLoginTitle);
 
   @override
-  String get adminLogoPreview => _text('adminLogoPreview', _base.adminLogoPreview);
+  String get adminLogoPreview =>
+      _text('adminLogoPreview', _base.adminLogoPreview);
 
   @override
-  String get adminMarkPrimary => _text('adminMarkPrimary', _base.adminMarkPrimary);
+  String get adminMarkPrimary =>
+      _text('adminMarkPrimary', _base.adminMarkPrimary);
 
   @override
   String get adminMedia => _text('adminMedia', _base.adminMedia);
 
   @override
-  String get adminMostContacted => _text('adminMostContacted', _base.adminMostContacted);
+  String get adminMostContacted =>
+      _text('adminMostContacted', _base.adminMostContacted);
 
   @override
-  String get adminMoveProductsTo => _text('adminMoveProductsTo', _base.adminMoveProductsTo);
+  String get adminMoveProductsTo =>
+      _text('adminMoveProductsTo', _base.adminMoveProductsTo);
 
   @override
-  String get adminNewPassword => _text('adminNewPassword', _base.adminNewPassword);
+  String get adminNewPassword =>
+      _text('adminNewPassword', _base.adminNewPassword);
 
   @override
-  String get adminNoCategories => _text('adminNoCategories', _base.adminNoCategories);
+  String get adminNoCategories =>
+      _text('adminNoCategories', _base.adminNoCategories);
 
   @override
   String get adminNoContacts => _text('adminNoContacts', _base.adminNoContacts);
 
   @override
-  String get adminNoInquiries => _text('adminNoInquiries', _base.adminNoInquiries);
+  String get adminNoInquiries =>
+      _text('adminNoInquiries', _base.adminNoInquiries);
 
   @override
-  String get adminNoInquiriesYet => _text('adminNoInquiriesYet', _base.adminNoInquiriesYet);
+  String get adminNoInquiriesYet =>
+      _text('adminNoInquiriesYet', _base.adminNoInquiriesYet);
 
   @override
   String get adminNoMedia => _text('adminNoMedia', _base.adminNoMedia);
@@ -390,58 +428,75 @@ class OverridableAppLocalizations extends AppLocalizations {
   String get adminNoProducts => _text('adminNoProducts', _base.adminNoProducts);
 
   @override
-  String get adminNoProductsMatch => _text('adminNoProductsMatch', _base.adminNoProductsMatch);
+  String get adminNoProductsMatch =>
+      _text('adminNoProductsMatch', _base.adminNoProductsMatch);
 
   @override
-  String get adminNotAuthorised => _text('adminNotAuthorised', _base.adminNotAuthorised);
+  String get adminNotAuthorised =>
+      _text('adminNotAuthorised', _base.adminNotAuthorised);
 
   @override
-  String get adminOtherSessionsSignedOut => _text('adminOtherSessionsSignedOut', _base.adminOtherSessionsSignedOut);
+  String get adminOtherSessionsSignedOut =>
+      _text('adminOtherSessionsSignedOut', _base.adminOtherSessionsSignedOut);
 
   @override
-  String get adminPasswordChanged => _text('adminPasswordChanged', _base.adminPasswordChanged);
+  String get adminPasswordChanged =>
+      _text('adminPasswordChanged', _base.adminPasswordChanged);
 
   @override
-  String get adminPasswordLabel => _text('adminPasswordLabel', _base.adminPasswordLabel);
+  String get adminPasswordLabel =>
+      _text('adminPasswordLabel', _base.adminPasswordLabel);
 
   @override
-  String get adminPreviewAsCustomer => _text('adminPreviewAsCustomer', _base.adminPreviewAsCustomer);
+  String get adminPreviewAsCustomer =>
+      _text('adminPreviewAsCustomer', _base.adminPreviewAsCustomer);
 
   @override
-  String get adminPreviewBadge => _text('adminPreviewBadge', _base.adminPreviewBadge);
+  String get adminPreviewBadge =>
+      _text('adminPreviewBadge', _base.adminPreviewBadge);
 
   @override
   String get adminPrice => _text('adminPrice', _base.adminPrice);
 
   @override
-  String get adminPrimaryBadge => _text('adminPrimaryBadge', _base.adminPrimaryBadge);
+  String get adminPrimaryBadge =>
+      _text('adminPrimaryBadge', _base.adminPrimaryBadge);
 
   @override
-  String get adminProductColumn => _text('adminProductColumn', _base.adminProductColumn);
+  String get adminProductColumn =>
+      _text('adminProductColumn', _base.adminProductColumn);
 
   @override
-  String get adminProductDeleted => _text('adminProductDeleted', _base.adminProductDeleted);
+  String get adminProductDeleted =>
+      _text('adminProductDeleted', _base.adminProductDeleted);
 
   @override
-  String get adminProductDescriptionAr => _text('adminProductDescriptionAr', _base.adminProductDescriptionAr);
+  String get adminProductDescriptionAr =>
+      _text('adminProductDescriptionAr', _base.adminProductDescriptionAr);
 
   @override
-  String get adminProductDescriptionAm => _text('adminProductDescriptionAm', _base.adminProductDescriptionAm);
+  String get adminProductDescriptionAm =>
+      _text('adminProductDescriptionAm', _base.adminProductDescriptionAm);
 
   @override
-  String get adminProductDescription => _text('adminProductDescription', _base.adminProductDescription);
+  String get adminProductDescription =>
+      _text('adminProductDescription', _base.adminProductDescription);
 
   @override
-  String get adminProductSaved => _text('adminProductSaved', _base.adminProductSaved);
+  String get adminProductSaved =>
+      _text('adminProductSaved', _base.adminProductSaved);
 
   @override
-  String get adminProductTitleAr => _text('adminProductTitleAr', _base.adminProductTitleAr);
+  String get adminProductTitleAr =>
+      _text('adminProductTitleAr', _base.adminProductTitleAr);
 
   @override
-  String get adminProductTitleAm => _text('adminProductTitleAm', _base.adminProductTitleAm);
+  String get adminProductTitleAm =>
+      _text('adminProductTitleAm', _base.adminProductTitleAm);
 
   @override
-  String get adminProductTitle => _text('adminProductTitle', _base.adminProductTitle);
+  String get adminProductTitle =>
+      _text('adminProductTitle', _base.adminProductTitle);
 
   @override
   String get adminProducts => _text('adminProducts', _base.adminProducts);
@@ -450,28 +505,34 @@ class OverridableAppLocalizations extends AppLocalizations {
   String get adminPublish => _text('adminPublish', _base.adminPublish);
 
   @override
-  String get adminQuickActions => _text('adminQuickActions', _base.adminQuickActions);
+  String get adminQuickActions =>
+      _text('adminQuickActions', _base.adminQuickActions);
 
   @override
-  String get adminReauthPrompt => _text('adminReauthPrompt', _base.adminReauthPrompt);
+  String get adminReauthPrompt =>
+      _text('adminReauthPrompt', _base.adminReauthPrompt);
 
   @override
-  String get adminRemoveMedia => _text('adminRemoveMedia', _base.adminRemoveMedia);
+  String get adminRemoveMedia =>
+      _text('adminRemoveMedia', _base.adminRemoveMedia);
 
   @override
   String get adminResetSent => _text('adminResetSent', _base.adminResetSent);
 
   @override
-  String get adminSaveAndPublish => _text('adminSaveAndPublish', _base.adminSaveAndPublish);
+  String get adminSaveAndPublish =>
+      _text('adminSaveAndPublish', _base.adminSaveAndPublish);
 
   @override
   String get adminSaveDraft => _text('adminSaveDraft', _base.adminSaveDraft);
 
   @override
-  String get adminSearchProducts => _text('adminSearchProducts', _base.adminSearchProducts);
+  String get adminSearchProducts =>
+      _text('adminSearchProducts', _base.adminSearchProducts);
 
   @override
-  String get adminSectionSoon => _text('adminSectionSoon', _base.adminSectionSoon);
+  String get adminSectionSoon =>
+      _text('adminSectionSoon', _base.adminSectionSoon);
 
   @override
   String get adminSetCover => _text('adminSetCover', _base.adminSetCover);
@@ -486,13 +547,16 @@ class OverridableAppLocalizations extends AppLocalizations {
   String get adminSignOut => _text('adminSignOut', _base.adminSignOut);
 
   @override
-  String get adminSignOutOthers => _text('adminSignOutOthers', _base.adminSignOutOthers);
+  String get adminSignOutOthers =>
+      _text('adminSignOutOthers', _base.adminSignOutOthers);
 
   @override
-  String get adminSiteSettings => _text('adminSiteSettings', _base.adminSiteSettings);
+  String get adminSiteSettings =>
+      _text('adminSiteSettings', _base.adminSiteSettings);
 
   @override
-  String get adminSiteSettingsSaved => _text('adminSiteSettingsSaved', _base.adminSiteSettingsSaved);
+  String get adminSiteSettingsSaved =>
+      _text('adminSiteSettingsSaved', _base.adminSiteSettingsSaved);
 
   @override
   String get adminSlug => _text('adminSlug', _base.adminSlug);
@@ -501,37 +565,46 @@ class OverridableAppLocalizations extends AppLocalizations {
   String get adminSlugAuto => _text('adminSlugAuto', _base.adminSlugAuto);
 
   @override
-  String get adminSortOrderHint => _text('adminSortOrderHint', _base.adminSortOrderHint);
+  String get adminSortOrderHint =>
+      _text('adminSortOrderHint', _base.adminSortOrderHint);
 
   @override
-  String get adminStatsCategories => _text('adminStatsCategories', _base.adminStatsCategories);
+  String get adminStatsCategories =>
+      _text('adminStatsCategories', _base.adminStatsCategories);
 
   @override
-  String get adminStatsProducts => _text('adminStatsProducts', _base.adminStatsProducts);
+  String get adminStatsProducts =>
+      _text('adminStatsProducts', _base.adminStatsProducts);
 
   @override
   String get adminStoreName => _text('adminStoreName', _base.adminStoreName);
 
   @override
-  String get adminStoreNameAm => _text('adminStoreNameAm', _base.adminStoreNameAm);
+  String get adminStoreNameAm =>
+      _text('adminStoreNameAm', _base.adminStoreNameAm);
 
   @override
-  String get adminStoreNameAr => _text('adminStoreNameAr', _base.adminStoreNameAr);
+  String get adminStoreNameAr =>
+      _text('adminStoreNameAr', _base.adminStoreNameAr);
 
   @override
-  String get adminStoreNameOm => _text('adminStoreNameOm', _base.adminStoreNameOm);
+  String get adminStoreNameOm =>
+      _text('adminStoreNameOm', _base.adminStoreNameOm);
 
   @override
   String get adminStrength => _text('adminStrength', _base.adminStrength);
 
   @override
-  String get adminStrengthFair => _text('adminStrengthFair', _base.adminStrengthFair);
+  String get adminStrengthFair =>
+      _text('adminStrengthFair', _base.adminStrengthFair);
 
   @override
-  String get adminStrengthStrong => _text('adminStrengthStrong', _base.adminStrengthStrong);
+  String get adminStrengthStrong =>
+      _text('adminStrengthStrong', _base.adminStrengthStrong);
 
   @override
-  String get adminStrengthWeak => _text('adminStrengthWeak', _base.adminStrengthWeak);
+  String get adminStrengthWeak =>
+      _text('adminStrengthWeak', _base.adminStrengthWeak);
 
   @override
   String get adminTagline => _text('adminTagline', _base.adminTagline);
@@ -540,63 +613,75 @@ class OverridableAppLocalizations extends AppLocalizations {
   String get adminTextEditor => _text('adminTextEditor', _base.adminTextEditor);
 
   @override
-  String get adminTextEditorAllScreens => _text('adminTextEditorAllScreens', _base.adminTextEditorAllScreens);
+  String get adminTextEditorAllScreens =>
+      _text('adminTextEditorAllScreens', _base.adminTextEditorAllScreens);
 
   @override
-  String get adminTextEditorHasVariables => _text('adminTextEditorHasVariables', _base.adminTextEditorHasVariables);
+  String get adminTextEditorHasVariables =>
+      _text('adminTextEditorHasVariables', _base.adminTextEditorHasVariables);
 
   @override
-  String get adminTextEditorHint => _text('adminTextEditorHint', _base.adminTextEditorHint);
+  String get adminTextEditorHint =>
+      _text('adminTextEditorHint', _base.adminTextEditorHint);
 
   @override
-  String get adminTextEditorNoResults => _text('adminTextEditorNoResults', _base.adminTextEditorNoResults);
+  String get adminTextEditorNoResults =>
+      _text('adminTextEditorNoResults', _base.adminTextEditorNoResults);
 
   @override
-  String get adminTextEditorPlaceholderHint => _text('adminTextEditorPlaceholderHint', _base.adminTextEditorPlaceholderHint);
+  String get adminTextEditorPlaceholderHint => _text(
+    'adminTextEditorPlaceholderHint',
+    _base.adminTextEditorPlaceholderHint,
+  );
 
   @override
-  String get adminTextEditorReset => _text('adminTextEditorReset', _base.adminTextEditorReset);
+  String get adminTextEditorReset =>
+      _text('adminTextEditorReset', _base.adminTextEditorReset);
 
   @override
-  String get adminTextEditorResetDone => _text('adminTextEditorResetDone', _base.adminTextEditorResetDone);
+  String get adminTextEditorResetDone =>
+      _text('adminTextEditorResetDone', _base.adminTextEditorResetDone);
 
   @override
-  String get adminTextEditorSaved => _text('adminTextEditorSaved', _base.adminTextEditorSaved);
+  String get adminTextEditorSaved =>
+      _text('adminTextEditorSaved', _base.adminTextEditorSaved);
 
   @override
-  String get adminTextEditorSearch => _text('adminTextEditorSearch', _base.adminTextEditorSearch);
+  String get adminTextEditorSearch =>
+      _text('adminTextEditorSearch', _base.adminTextEditorSearch);
 
   @override
   String get adminUnpublish => _text('adminUnpublish', _base.adminUnpublish);
 
   @override
-  String get adminUnpublished => _text('adminUnpublished', _base.adminUnpublished);
+  String get adminUnpublished =>
+      _text('adminUnpublished', _base.adminUnpublished);
 
   @override
-  String get adminUnsavedMessage => _text('adminUnsavedMessage', _base.adminUnsavedMessage);
+  String get adminUnsavedMessage =>
+      _text('adminUnsavedMessage', _base.adminUnsavedMessage);
 
   @override
-  String get adminUnsavedTitle => _text('adminUnsavedTitle', _base.adminUnsavedTitle);
+  String get adminUnsavedTitle =>
+      _text('adminUnsavedTitle', _base.adminUnsavedTitle);
 
   @override
   String get adminUploadLogo => _text('adminUploadLogo', _base.adminUploadLogo);
 
   @override
-  String get adminUploadQueue => _text('adminUploadQueue', _base.adminUploadQueue);
+  String get adminUploadQueue =>
+      _text('adminUploadQueue', _base.adminUploadQueue);
 
   @override
-  String get adminUploadRetrying => _text('adminUploadRetrying', _base.adminUploadRetrying);
+  String get adminUploadRetrying =>
+      _text('adminUploadRetrying', _base.adminUploadRetrying);
 
   @override
-  String adminUploadingCount(int done, int total) =>
-      _filled(
-        'adminUploadingCount',
-        _base.adminUploadingCount(done, total),
-        <String, String>{
-          'done': '${done}',
-          'total': '${total}',
-        },
-      );
+  String adminUploadingCount(int done, int total) => _filled(
+    'adminUploadingCount',
+    _base.adminUploadingCount(done, total),
+    <String, String>{'done': '${done}', 'total': '${total}'},
+  );
 
   @override
   String get adminViewAll => _text('adminViewAll', _base.adminViewAll);
@@ -605,7 +690,8 @@ class OverridableAppLocalizations extends AppLocalizations {
   String get adminViewStore => _text('adminViewStore', _base.adminViewStore);
 
   @override
-  String get adminVisibleInStore => _text('adminVisibleInStore', _base.adminVisibleInStore);
+  String get adminVisibleInStore =>
+      _text('adminVisibleInStore', _base.adminVisibleInStore);
 
   @override
   String get adminWhen => _text('adminWhen', _base.adminWhen);
@@ -632,10 +718,12 @@ class OverridableAppLocalizations extends AppLocalizations {
   String get contactFacebook => _text('contactFacebook', _base.contactFacebook);
 
   @override
-  String get contactInstagram => _text('contactInstagram', _base.contactInstagram);
+  String get contactInstagram =>
+      _text('contactInstagram', _base.contactInstagram);
 
   @override
-  String get contactLaunchFailed => _text('contactLaunchFailed', _base.contactLaunchFailed);
+  String get contactLaunchFailed =>
+      _text('contactLaunchFailed', _base.contactLaunchFailed);
 
   @override
   String get contactLocation => _text('contactLocation', _base.contactLocation);
@@ -665,16 +753,19 @@ class OverridableAppLocalizations extends AppLocalizations {
   String get errorAuth => _text('errorAuth', _base.errorAuth);
 
   @override
-  String get errorCheckViolation => _text('errorCheckViolation', _base.errorCheckViolation);
+  String get errorCheckViolation =>
+      _text('errorCheckViolation', _base.errorCheckViolation);
 
   @override
-  String get errorConstraintViolation => _text('errorConstraintViolation', _base.errorConstraintViolation);
+  String get errorConstraintViolation =>
+      _text('errorConstraintViolation', _base.errorConstraintViolation);
 
   @override
   String get errorDuplicate => _text('errorDuplicate', _base.errorDuplicate);
 
   @override
-  String get errorEmailNotConfirmed => _text('errorEmailNotConfirmed', _base.errorEmailNotConfirmed);
+  String get errorEmailNotConfirmed =>
+      _text('errorEmailNotConfirmed', _base.errorEmailNotConfirmed);
 
   @override
   String get errorForeignKey => _text('errorForeignKey', _base.errorForeignKey);
@@ -683,25 +774,31 @@ class OverridableAppLocalizations extends AppLocalizations {
   String get errorGateLocked => _text('errorGateLocked', _base.errorGateLocked);
 
   @override
-  String get errorInvalidCredentials => _text('errorInvalidCredentials', _base.errorInvalidCredentials);
+  String get errorInvalidCredentials =>
+      _text('errorInvalidCredentials', _base.errorInvalidCredentials);
 
   @override
-  String get errorInvalidFormat => _text('errorInvalidFormat', _base.errorInvalidFormat);
+  String get errorInvalidFormat =>
+      _text('errorInvalidFormat', _base.errorInvalidFormat);
 
   @override
   String get errorMedia => _text('errorMedia', _base.errorMedia);
 
   @override
-  String get errorMediaImageTooLarge => _text('errorMediaImageTooLarge', _base.errorMediaImageTooLarge);
+  String get errorMediaImageTooLarge =>
+      _text('errorMediaImageTooLarge', _base.errorMediaImageTooLarge);
 
   @override
-  String get errorMediaUnsupportedImage => _text('errorMediaUnsupportedImage', _base.errorMediaUnsupportedImage);
+  String get errorMediaUnsupportedImage =>
+      _text('errorMediaUnsupportedImage', _base.errorMediaUnsupportedImage);
 
   @override
-  String get errorMediaUnsupportedVideo => _text('errorMediaUnsupportedVideo', _base.errorMediaUnsupportedVideo);
+  String get errorMediaUnsupportedVideo =>
+      _text('errorMediaUnsupportedVideo', _base.errorMediaUnsupportedVideo);
 
   @override
-  String get errorMediaVideoTooLarge => _text('errorMediaVideoTooLarge', _base.errorMediaVideoTooLarge);
+  String get errorMediaVideoTooLarge =>
+      _text('errorMediaVideoTooLarge', _base.errorMediaVideoTooLarge);
 
   @override
   String get errorNetwork => _text('errorNetwork', _base.errorNetwork);
@@ -716,7 +813,8 @@ class OverridableAppLocalizations extends AppLocalizations {
   String get errorServer => _text('errorServer', _base.errorServer);
 
   @override
-  String get errorSessionExpired => _text('errorSessionExpired', _base.errorSessionExpired);
+  String get errorSessionExpired =>
+      _text('errorSessionExpired', _base.errorSessionExpired);
 
   @override
   String get errorStorage => _text('errorStorage', _base.errorStorage);
@@ -725,7 +823,8 @@ class OverridableAppLocalizations extends AppLocalizations {
   String get errorTimeout => _text('errorTimeout', _base.errorTimeout);
 
   @override
-  String get errorTooManyAttempts => _text('errorTooManyAttempts', _base.errorTooManyAttempts);
+  String get errorTooManyAttempts =>
+      _text('errorTooManyAttempts', _base.errorTooManyAttempts);
 
   @override
   String get errorUnknown => _text('errorUnknown', _base.errorUnknown);
@@ -734,10 +833,12 @@ class OverridableAppLocalizations extends AppLocalizations {
   String get errorValidation => _text('errorValidation', _base.errorValidation);
 
   @override
-  String get favouritesEmptyMessage => _text('favouritesEmptyMessage', _base.favouritesEmptyMessage);
+  String get favouritesEmptyMessage =>
+      _text('favouritesEmptyMessage', _base.favouritesEmptyMessage);
 
   @override
-  String get favouritesEmptyTitle => _text('favouritesEmptyTitle', _base.favouritesEmptyTitle);
+  String get favouritesEmptyTitle =>
+      _text('favouritesEmptyTitle', _base.favouritesEmptyTitle);
 
   @override
   String get gateChangeTitle => _text('gateChangeTitle', _base.gateChangeTitle);
@@ -779,55 +880,42 @@ class OverridableAppLocalizations extends AppLocalizations {
   String get groupValidation => _text('groupValidation', _base.groupValidation);
 
   @override
-  String inquiryMessageTemplate(String price, String product) =>
-      _filled(
-        'inquiryMessageTemplate',
-        _base.inquiryMessageTemplate(price, product),
-        <String, String>{
-          'price': '${price}',
-          'product': '${product}',
-        },
-      );
+  String inquiryMessageTemplate(String price, String product) => _filled(
+    'inquiryMessageTemplate',
+    _base.inquiryMessageTemplate(price, product),
+    <String, String>{'price': '${price}', 'product': '${product}'},
+  );
 
   @override
   String get labelAvailable => _text('labelAvailable', _base.labelAvailable);
 
   @override
-  String labelDiscount(int percent) =>
-      _filled(
-        'labelDiscount',
-        _base.labelDiscount(percent),
-        <String, String>{
-          'percent': '${percent}',
-        },
-      );
+  String labelDiscount(int percent) => _filled(
+    'labelDiscount',
+    _base.labelDiscount(percent),
+    <String, String>{'percent': '${percent}'},
+  );
 
   @override
-  String labelDuration(int minutes, int seconds) =>
-      _filled(
-        'labelDuration',
-        _base.labelDuration(minutes, seconds),
-        <String, String>{
-          'minutes': '${minutes}',
-          'seconds': '${seconds}',
-        },
-      );
+  String labelDuration(int minutes, int seconds) => _filled(
+    'labelDuration',
+    _base.labelDuration(minutes, seconds),
+    <String, String>{'minutes': '${minutes}', 'seconds': '${seconds}'},
+  );
 
   @override
-  String labelFrom(String price) =>
-      _filled(
-        'labelFrom',
-        _base.labelFrom(price),
-        <String, String>{
-          'price': '${price}',
-        },
-      );
+  String labelFrom(String price) => _filled(
+    'labelFrom',
+    _base.labelFrom(price),
+    <String, String>{'price': '${price}'},
+  );
 
   @override
   String get labelPrice => _text('labelPrice', _base.labelPrice);
 
   @override
-  String get labelUnavailable => _text('labelUnavailable', _base.labelUnavailable);
+  String get labelUnavailable =>
+      _text('labelUnavailable', _base.labelUnavailable);
 
   @override
   String get navAbout => _text('navAbout', _base.navAbout);
@@ -854,54 +942,59 @@ class OverridableAppLocalizations extends AppLocalizations {
   String get searchHint => _text('searchHint', _base.searchHint);
 
   @override
-  String searchNoResults(String query) =>
-      _filled(
-        'searchNoResults',
-        _base.searchNoResults(query),
-        <String, String>{
-          'query': '${query}',
-        },
-      );
+  String searchNoResults(String query) => _filled(
+    'searchNoResults',
+    _base.searchNoResults(query),
+    <String, String>{'query': '${query}'},
+  );
 
   @override
-  String searchResultsCount(int count) =>
-      _base.searchResultsCount(count);
+  String searchResultsCount(int count) => _base.searchResultsCount(count);
 
   @override
-  String get sectionAllProducts => _text('sectionAllProducts', _base.sectionAllProducts);
+  String get sectionAllProducts =>
+      _text('sectionAllProducts', _base.sectionAllProducts);
 
   @override
-  String get sectionBrowseCategories => _text('sectionBrowseCategories', _base.sectionBrowseCategories);
+  String get sectionBrowseCategories =>
+      _text('sectionBrowseCategories', _base.sectionBrowseCategories);
 
   @override
   String get sectionFeatured => _text('sectionFeatured', _base.sectionFeatured);
 
   @override
-  String get sectionNewArrivals => _text('sectionNewArrivals', _base.sectionNewArrivals);
+  String get sectionNewArrivals =>
+      _text('sectionNewArrivals', _base.sectionNewArrivals);
 
   @override
   String get settingsAbout => _text('settingsAbout', _base.settingsAbout);
 
   @override
-  String get settingsAdminEntry => _text('settingsAdminEntry', _base.settingsAdminEntry);
+  String get settingsAdminEntry =>
+      _text('settingsAdminEntry', _base.settingsAdminEntry);
 
   @override
-  String get settingsAdminHint => _text('settingsAdminHint', _base.settingsAdminHint);
+  String get settingsAdminHint =>
+      _text('settingsAdminHint', _base.settingsAdminHint);
 
   @override
-  String get settingsLanguage => _text('settingsLanguage', _base.settingsLanguage);
+  String get settingsLanguage =>
+      _text('settingsLanguage', _base.settingsLanguage);
 
   @override
   String get settingsTheme => _text('settingsTheme', _base.settingsTheme);
 
   @override
-  String get settingsThemeDark => _text('settingsThemeDark', _base.settingsThemeDark);
+  String get settingsThemeDark =>
+      _text('settingsThemeDark', _base.settingsThemeDark);
 
   @override
-  String get settingsThemeLight => _text('settingsThemeLight', _base.settingsThemeLight);
+  String get settingsThemeLight =>
+      _text('settingsThemeLight', _base.settingsThemeLight);
 
   @override
-  String get settingsThemeSystem => _text('settingsThemeSystem', _base.settingsThemeSystem);
+  String get settingsThemeSystem =>
+      _text('settingsThemeSystem', _base.settingsThemeSystem);
 
   @override
   String get settingsTitle => _text('settingsTitle', _base.settingsTitle);
@@ -910,7 +1003,8 @@ class OverridableAppLocalizations extends AppLocalizations {
   String get settingsVersion => _text('settingsVersion', _base.settingsVersion);
 
   @override
-  String get stateEmptyMessage => _text('stateEmptyMessage', _base.stateEmptyMessage);
+  String get stateEmptyMessage =>
+      _text('stateEmptyMessage', _base.stateEmptyMessage);
 
   @override
   String get stateEmptyTitle => _text('stateEmptyTitle', _base.stateEmptyTitle);
@@ -925,10 +1019,12 @@ class OverridableAppLocalizations extends AppLocalizations {
   String get stateNoResults => _text('stateNoResults', _base.stateNoResults);
 
   @override
-  String get stateNotFoundMessage => _text('stateNotFoundMessage', _base.stateNotFoundMessage);
+  String get stateNotFoundMessage =>
+      _text('stateNotFoundMessage', _base.stateNotFoundMessage);
 
   @override
-  String get stateNotFoundTitle => _text('stateNotFoundTitle', _base.stateNotFoundTitle);
+  String get stateNotFoundTitle =>
+      _text('stateNotFoundTitle', _base.stateNotFoundTitle);
 
   @override
   String get stateOffline => _text('stateOffline', _base.stateOffline);
@@ -943,53 +1039,64 @@ class OverridableAppLocalizations extends AppLocalizations {
   String get tagline => _text('tagline', _base.tagline);
 
   @override
-  String get validateCompareAtPrice => _text('validateCompareAtPrice', _base.validateCompareAtPrice);
+  String get validateCompareAtPrice =>
+      _text('validateCompareAtPrice', _base.validateCompareAtPrice);
 
   @override
   String get validateEmail => _text('validateEmail', _base.validateEmail);
 
   @override
-  String get validateNegative => _text('validateNegative', _base.validateNegative);
+  String get validateNegative =>
+      _text('validateNegative', _base.validateNegative);
 
   @override
   String get validateNumber => _text('validateNumber', _base.validateNumber);
 
   @override
-  String get validatePasswordLength => _text('validatePasswordLength', _base.validatePasswordLength);
+  String get validatePasswordLength =>
+      _text('validatePasswordLength', _base.validatePasswordLength);
 
   @override
-  String get validatePasswordMismatch => _text('validatePasswordMismatch', _base.validatePasswordMismatch);
+  String get validatePasswordMismatch =>
+      _text('validatePasswordMismatch', _base.validatePasswordMismatch);
 
   @override
-  String get validatePasswordStrength => _text('validatePasswordStrength', _base.validatePasswordStrength);
+  String get validatePasswordStrength =>
+      _text('validatePasswordStrength', _base.validatePasswordStrength);
 
   @override
   String get validatePhone => _text('validatePhone', _base.validatePhone);
 
   @override
-  String get validatePositive => _text('validatePositive', _base.validatePositive);
+  String get validatePositive =>
+      _text('validatePositive', _base.validatePositive);
 
   @override
-  String get validateRequired => _text('validateRequired', _base.validateRequired);
+  String get validateRequired =>
+      _text('validateRequired', _base.validateRequired);
 
   @override
   String get validateSlug => _text('validateSlug', _base.validateSlug);
 
   @override
-  String get validateTelegramHandle => _text('validateTelegramHandle', _base.validateTelegramHandle);
+  String get validateTelegramHandle =>
+      _text('validateTelegramHandle', _base.validateTelegramHandle);
 
   @override
   String get validateTooLong => _text('validateTooLong', _base.validateTooLong);
 
   @override
-  String get validateTooShort => _text('validateTooShort', _base.validateTooShort);
+  String get validateTooShort =>
+      _text('validateTooShort', _base.validateTooShort);
 
   @override
   String get validateUrl => _text('validateUrl', _base.validateUrl);
 
   @override
-  String get validateVideoTooLong => _text('validateVideoTooLong', _base.validateVideoTooLong);
+  String get validateVideoTooLong =>
+      _text('validateVideoTooLong', _base.validateVideoTooLong);
 
   @override
-  String get validateVideoUnreadable => _text('validateVideoUnreadable', _base.validateVideoUnreadable);
+  String get validateVideoUnreadable =>
+      _text('validateVideoUnreadable', _base.validateVideoUnreadable);
 }

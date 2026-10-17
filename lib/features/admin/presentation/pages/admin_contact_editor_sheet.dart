@@ -22,8 +22,9 @@ class ContactsEditorSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final AppLocalizations l10n = AppLocalizations.of(context);
     final ContactDraftState state = ref.watch(contactsEditorControllerProvider);
-    final ContactsEditorController controller =
-        ref.read(contactsEditorControllerProvider.notifier);
+    final ContactsEditorController controller = ref.read(
+      contactsEditorControllerProvider.notifier,
+    );
     final bool saving = state.status.saving;
 
     return Padding(
@@ -94,7 +95,8 @@ class ContactsEditorSheet extends ConsumerWidget {
                 contentPadding: EdgeInsets.zero,
                 value: state.isPrimary,
                 title: Text(l10n.adminMarkPrimary),
-                onChanged: (bool? value) => controller.setPrimary(value ?? false),
+                onChanged: (bool? value) =>
+                    controller.setPrimary(value ?? false),
               ),
             ),
             const SizedBox(height: 14),

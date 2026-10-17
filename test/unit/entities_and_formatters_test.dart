@@ -41,12 +41,12 @@ void main() {
 
   group('Product pricing', () {
     Product product({double price = 100, double? compareAt}) => Product(
-          id: 'p1',
-          categoryId: 'c1',
-          title: 'Royal Majlis Sofa',
-          price: price,
-          compareAtPrice: compareAt,
-        );
+      id: 'p1',
+      categoryId: 'c1',
+      title: 'Royal Majlis Sofa',
+      price: price,
+      compareAtPrice: compareAt,
+    );
 
     test('discount is only reported when compare-at is strictly higher', () {
       expect(product().hasDiscount, isFalse);
@@ -64,15 +64,19 @@ void main() {
   });
 
   group('Product media resolution', () {
-    ProductMedia media(String id, MediaKind kind, {bool cover = false, int order = 0}) =>
-        ProductMedia(
-          id: id,
-          productId: 'p1',
-          kind: kind,
-          storagePath: 'products/p1/$id',
-          isCover: cover,
-          sortOrder: order,
-        );
+    ProductMedia media(
+      String id,
+      MediaKind kind, {
+      bool cover = false,
+      int order = 0,
+    }) => ProductMedia(
+      id: id,
+      productId: 'p1',
+      kind: kind,
+      storagePath: 'products/p1/$id',
+      isCover: cover,
+      sortOrder: order,
+    );
 
     test('coverMedia prefers the flagged cover, then any image', () {
       final Product noCover = Product(
@@ -101,8 +105,10 @@ void main() {
 
     test('toImage/aspect helpers expose durations', () {
       expect(media('v1', MediaKind.video, order: 0).duration, isNull);
-      final ProductMedia withDuration =
-          media('v1', MediaKind.video).copyWith(durationSeconds: 42);
+      final ProductMedia withDuration = media(
+        'v1',
+        MediaKind.video,
+      ).copyWith(durationSeconds: 42);
       expect(withDuration.duration, const Duration(seconds: 42));
       expect(withDuration.isVideo, isTrue);
     });
@@ -146,7 +152,10 @@ void main() {
 
     test('duration renders mm:ss and hh:mm:ss', () {
       expect(Formatters.duration(const Duration(seconds: 59)), '00:59');
-      expect(Formatters.duration(const Duration(minutes: 2, seconds: 5)), '02:05');
+      expect(
+        Formatters.duration(const Duration(minutes: 2, seconds: 5)),
+        '02:05',
+      );
       expect(
         Formatters.duration(const Duration(hours: 1, minutes: 2, seconds: 5)),
         '01:02:05',

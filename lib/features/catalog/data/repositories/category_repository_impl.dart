@@ -14,9 +14,8 @@ class CategoryRepositoryImpl implements CategoryRepository {
   final CatalogRemoteDataSource _remote;
 
   @override
-  Stream<List<Category>> watchVisible() => _remote
-      .watchCategories(onlyVisible: true)
-      .map(_decodeList);
+  Stream<List<Category>> watchVisible() =>
+      _remote.watchCategories(onlyVisible: true).map(_decodeList);
 
   @override
   Stream<List<Category>> watchAll() =>
@@ -24,35 +23,39 @@ class CategoryRepositoryImpl implements CategoryRepository {
 
   @override
   Future<List<Category>> fetchVisible() => ErrorMapper.guard(() async {
-        final List<Map<String, dynamic>> rows =
-            await _remote.fetchCategories(onlyVisible: true);
-        return _decodeList(rows);
-      });
+    final List<Map<String, dynamic>> rows = await _remote.fetchCategories(
+      onlyVisible: true,
+    );
+    return _decodeList(rows);
+  });
 
   @override
   Future<Category?> findById(String id) => ErrorMapper.guard(() async {
-        final Map<String, dynamic>? row = await _remote.categoryById(id);
-        return row == null ? null : Category.fromJson(row);
-      });
+    final Map<String, dynamic>? row = await _remote.categoryById(id);
+    return row == null ? null : Category.fromJson(row);
+  });
 
   @override
   Future<Category?> findBySlug(String slug) => ErrorMapper.guard(() async {
-        final Map<String, dynamic>? row = await _remote.categoryBySlug(slug);
-        return row == null ? null : Category.fromJson(row);
-      });
+    final Map<String, dynamic>? row = await _remote.categoryBySlug(slug);
+    return row == null ? null : Category.fromJson(row);
+  });
 
   @override
   Future<Category> create(CategoryDraft draft) => ErrorMapper.guard(() async {
-        final Map<String, dynamic> row =
-            await _remote.insertCategory(draft.toInsert());
-        return Category.fromJson(row);
-      });
+    final Map<String, dynamic> row = await _remote.insertCategory(
+      draft.toInsert(),
+    );
+    return Category.fromJson(row);
+  });
 
   @override
   Future<Category> update(String id, CategoryDraft draft) =>
       ErrorMapper.guard(() async {
-        final Map<String, dynamic> row =
-            await _remote.updateCategory(id, draft.toUpdate());
+        final Map<String, dynamic> row = await _remote.updateCategory(
+          id,
+          draft.toUpdate(),
+        );
         return Category.fromJson(row);
       });
 
@@ -70,11 +73,11 @@ class CategoryRepositoryImpl implements CategoryRepository {
 
   @override
   Future<void> reorder(List<String> orderedIds) => ErrorMapper.guard(
-        () => _remote.reorderRows(
-          CatalogRemoteDataSource.categoriesTable,
-          orderedIds,
-        ),
-      );
+    () => _remote.reorderRows(
+      CatalogRemoteDataSource.categoriesTable,
+      orderedIds,
+    ),
+  );
 
   List<Category> _decodeList(List<Map<String, dynamic>> rows) =>
       rows.map(Category.fromJson).toList(growable: false);

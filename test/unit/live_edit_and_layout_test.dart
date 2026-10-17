@@ -232,8 +232,7 @@ class _FakeProductRepository implements ProductRepository {
     String? categoryId,
     bool onlyPublished = true,
     bool onlyFeatured = false,
-  }) async =>
-      rows;
+  }) async => rows;
 
   @override
   Future<Product?> findById(String id) async =>
@@ -244,7 +243,8 @@ class _FakeProductRepository implements ProductRepository {
       const <Product>[];
 
   @override
-  Future<Product> create(ProductDraft draft) async => throw UnimplementedError();
+  Future<Product> create(ProductDraft draft) async =>
+      throw UnimplementedError();
 
   @override
   Future<Product> update(String id, ProductDraft draft) async =>

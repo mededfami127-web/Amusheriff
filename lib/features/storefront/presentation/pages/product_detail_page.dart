@@ -36,20 +36,22 @@ class ProductDetailPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final AppLocalizations l10n = AppLocalizations.of(context);
     final String language = Localizations.localeOf(context).languageCode;
-    final AsyncValue<Product?> product =
-        ref.watch(productDetailProvider(productId));
+    final AsyncValue<Product?> product = ref.watch(
+      productDetailProvider(productId),
+    );
 
     return AppScaffold(
       showLockup: false,
       title: product.value?.titleFor(language) ?? l10n.stateLoading,
       actions: <Widget>[
-        if (product.value != null)
-          FavouriteButton(productId: productId),
+        if (product.value != null) FavouriteButton(productId: productId),
         if (product.value != null)
           IconButton(
             icon: const Icon(Icons.share_outlined),
             tooltip: l10n.actionShare,
-            onPressed: () => ref.read(linkLauncherProvider).shareProduct(
+            onPressed: () => ref
+                .read(linkLauncherProvider)
+                .shareProduct(
                   title: product.value!.titleFor(language),
                   price: Formatters.money(
                     product.value!.price,
@@ -63,10 +65,9 @@ class ProductDetailPage extends ConsumerWidget {
       body: switch (product) {
         AsyncLoading() => const ShimmerGrid(itemCount: 2),
         AsyncError(:final Object error) => ErrorStateView(
-            failure:
-                error is AppFailure ? error : UnknownFailure(cause: error),
-            onRetry: () => ref.invalidate(productDetailProvider(productId)),
-          ),
+          failure: error is AppFailure ? error : UnknownFailure(cause: error),
+          onRetry: () => ref.invalidate(productDetailProvider(productId)),
+        ),
         AsyncValue<Product?>(:final Product? value) when value == null =>
           EmptyState(
             title: l10n.stateNotFoundTitle,
@@ -103,12 +104,15 @@ class _Body extends ConsumerWidget {
             children: <Widget>[
               Text(
                 product.titleFor(language),
-                style: BrandTypography.displayForLocale(
-                  Localizations.localeOf(context),
-                  base: BrandTypography.displayMedium,
-                ).copyWith(
-                  color: dark ? BrandColors.goldLight : BrandColors.charcoal,
-                ),
+                style:
+                    BrandTypography.displayForLocale(
+                      Localizations.localeOf(context),
+                      base: BrandTypography.displayMedium,
+                    ).copyWith(
+                      color: dark
+                          ? BrandColors.goldLight
+                          : BrandColors.charcoal,
+                    ),
               ),
               const SizedBox(height: 14),
               Row(
@@ -116,8 +120,7 @@ class _Body extends ConsumerWidget {
                 textBaseline: TextBaseline.alphabetic,
                 children: <Widget>[
                   ShaderMask(
-                    shaderCallback:
-                        BrandGradients.goldHorizontal.createShader,
+                    shaderCallback: BrandGradients.goldHorizontal.createShader,
                     blendMode: BlendMode.srcIn,
                     child: Text(
                       Formatters.money(
@@ -267,11 +270,13 @@ class _GalleryState extends ConsumerState<_Gallery> {
                     .read(storageUrlsProvider)
                     .productMedia(item.storagePath),
                 fit: BoxFit.cover,
-                placeholder: (_, __) => const ShimmerBox(height: 320, radius: 0),
+                placeholder: (_, __) =>
+                    const ShimmerBox(height: 320, radius: 0),
                 errorWidget: (_, __, ___) => DecoratedBox(
                   decoration: BoxDecoration(
-                    color:
-                        dark ? BrandColors.plumSurface : const Color(0xFFF3ECE1),
+                    color: dark
+                        ? BrandColors.plumSurface
+                        : const Color(0xFFF3ECE1),
                   ),
                   child: const Icon(Icons.broken_image_outlined, size: 40),
                 ),
@@ -388,9 +393,8 @@ class _ContactActions extends ConsumerWidget {
     Future<void> open(ContactLink link) async {
       final bool ok = await launcher.launch(link, message: message);
       if (!ok && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.contactLaunchFailed)),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.contactLaunchFailed)));
       }
     }
 

@@ -22,13 +22,13 @@ class ContactLinkDraft {
   final int sortOrder;
 
   Map<String, dynamic> toInsert() => <String, dynamic>{
-        'kind': kind.name,
-        'label': label.trim(),
-        'value': value.trim(),
-        'is_primary': isPrimary,
-        'is_visible': isVisible,
-        'sort_order': sortOrder,
-      };
+    'kind': kind.name,
+    'label': label.trim(),
+    'value': value.trim(),
+    'is_primary': isPrimary,
+    'is_visible': isVisible,
+    'sort_order': sortOrder,
+  };
 
   Map<String, dynamic> toUpdate() => toInsert();
 }

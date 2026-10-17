@@ -9,8 +9,8 @@ import 'app_failure.dart';
 /// fallback rather than a crash, and so Part 2 can add cases without touching
 /// every surface.
 String localizeFailure(AppLocalizations l10n, AppFailure failure) {
-  final String extra = failure is ValidationFailure &&
-          failure.fieldErrors.isNotEmpty
+  final String extra =
+      failure is ValidationFailure && failure.fieldErrors.isNotEmpty
       ? ' ${l10n.errorValidation}'
       : '';
 

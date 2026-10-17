@@ -44,4 +44,5 @@ class StorageUrls {
 }
 
 @Riverpod(keepAlive: true)
-StorageUrls storageUrls(Ref ref) => StorageUrls(ref.watch(supabaseClientProvider));
+StorageUrls storageUrls(Ref ref) =>
+    StorageUrls(ref.watch(supabaseClientProvider));

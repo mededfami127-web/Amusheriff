@@ -35,12 +35,15 @@ class StorefrontHomePage extends ConsumerWidget {
     final SiteSettings settings = ref.watch(siteSettingsValueProvider);
     final String language = Localizations.localeOf(context).languageCode;
 
-    final AsyncValue<List<Category>> categories =
-        ref.watch(visibleCategoriesProvider);
-    final AsyncValue<List<Product>> featured =
-        ref.watch(storefrontProductsProvider(featured: true));
-    final AsyncValue<List<Product>> all =
-        ref.watch(storefrontProductsProvider());
+    final AsyncValue<List<Category>> categories = ref.watch(
+      visibleCategoriesProvider,
+    );
+    final AsyncValue<List<Product>> featured = ref.watch(
+      storefrontProductsProvider(featured: true),
+    );
+    final AsyncValue<List<Product>> all = ref.watch(
+      storefrontProductsProvider(),
+    );
 
     return AppScaffold(
       actions: <Widget>[
@@ -69,10 +72,7 @@ class StorefrontHomePage extends ConsumerWidget {
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: <Widget>[
             SliverToBoxAdapter(
-              child: _Hero(
-                settings: settings,
-                language: language,
-              ),
+              child: _Hero(settings: settings, language: language),
             ),
             SliverToBoxAdapter(
               child: _SectionHeader(
@@ -316,12 +316,13 @@ class _SectionHeader extends StatelessWidget {
             textKey: textKey,
             text: title,
             dense: true,
-            style: BrandTypography.displayForLocale(
-              Localizations.localeOf(context),
-              base: BrandTypography.displaySmall,
-            ).copyWith(
-              color: dark ? BrandColors.goldLight : BrandColors.charcoal,
-            ),
+            style:
+                BrandTypography.displayForLocale(
+                  Localizations.localeOf(context),
+                  base: BrandTypography.displaySmall,
+                ).copyWith(
+                  color: dark ? BrandColors.goldLight : BrandColors.charcoal,
+                ),
           ),
           const SizedBox(height: 8),
           const SizedBox(width: 64, child: GoldDivider()),
@@ -419,10 +420,8 @@ class _FeaturedRail extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: products.length,
         separatorBuilder: (_, __) => const SizedBox(width: 14),
-        itemBuilder: (_, int index) => ProductCard(
-          product: products[index],
-          width: 208,
-        ),
+        itemBuilder: (_, int index) =>
+            ProductCard(product: products[index], width: 208),
       ),
     );
   }
@@ -440,13 +439,15 @@ class _ProductGrid extends StatelessWidget {
     return switch (asyncProducts) {
       AsyncLoading() => const SliverToBoxAdapter(child: ShimmerGrid()),
       AsyncError(:final Object error) => SliverToBoxAdapter(
-          child: ErrorStateView(
-            failure: error is AppFailure ? error : UnknownFailure(cause: error),
-            compact: true,
-          ),
+        child: ErrorStateView(
+          failure: error is AppFailure ? error : UnknownFailure(cause: error),
+          compact: true,
         ),
-      AsyncValue<List<Product>>(:final List<Product>? value) =>
-        _gridSliver(l10n, value ?? const <Product>[]),
+      ),
+      AsyncValue<List<Product>>(:final List<Product>? value) => _gridSliver(
+        l10n,
+        value ?? const <Product>[],
+      ),
     };
   }
 
@@ -492,9 +493,7 @@ class _FooterContact extends ConsumerWidget {
           const GoldDivider(withOrnament: true),
           const SizedBox(height: 16),
           Text(
-            count == 0
-                ? l10n.stateEmptyMessage
-                : l10n.actionContactOwner,
+            count == 0 ? l10n.stateEmptyMessage : l10n.actionContactOwner,
             textAlign: TextAlign.center,
             style: BrandTypography.bodySmall.copyWith(
               color: BrandTypography.mutedOn(Theme.of(context).brightness),

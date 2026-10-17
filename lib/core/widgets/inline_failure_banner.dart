@@ -53,10 +53,7 @@ class InlineFailureBanner extends StatelessWidget {
             ),
           ),
           if (onRetry != null && failure.isRetryable)
-            TextButton(
-              onPressed: onRetry,
-              child: Text(l10n.actionRetry),
-            ),
+            TextButton(onPressed: onRetry, child: Text(l10n.actionRetry)),
           if (onDismiss != null)
             IconButton(
               icon: const Icon(Icons.close, size: 16),

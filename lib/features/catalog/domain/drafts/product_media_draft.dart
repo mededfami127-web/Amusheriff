@@ -24,23 +24,23 @@ class ProductMediaDraft {
   final int sortOrder;
 
   Map<String, dynamic> toInsert() => <String, dynamic>{
-        'product_id': productId,
-        'kind': kind.name,
-        'storage_path': storagePath,
-        'thumbnail_path': _nullIfBlank(thumbnailPath),
-        'duration_seconds': durationSeconds,
-        'is_cover': isCover,
-        'sort_order': sortOrder,
-      };
+    'product_id': productId,
+    'kind': kind.name,
+    'storage_path': storagePath,
+    'thumbnail_path': _nullIfBlank(thumbnailPath),
+    'duration_seconds': durationSeconds,
+    'is_cover': isCover,
+    'sort_order': sortOrder,
+  };
 
   Map<String, dynamic> toUpdate() => <String, dynamic>{
-        'kind': kind.name,
-        'storage_path': storagePath,
-        'thumbnail_path': _nullIfBlank(thumbnailPath),
-        'duration_seconds': durationSeconds,
-        'is_cover': isCover,
-        'sort_order': sortOrder,
-      };
+    'kind': kind.name,
+    'storage_path': storagePath,
+    'thumbnail_path': _nullIfBlank(thumbnailPath),
+    'duration_seconds': durationSeconds,
+    'is_cover': isCover,
+    'sort_order': sortOrder,
+  };
 }
 
 String? _nullIfBlank(String? value) {

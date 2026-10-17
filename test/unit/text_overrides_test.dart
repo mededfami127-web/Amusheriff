@@ -11,9 +11,9 @@ class _ShowDashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Text(
-        AppLocalizations.of(context).adminDashboard,
-        textDirection: TextDirection.ltr,
-      );
+    AppLocalizations.of(context).adminDashboard,
+    textDirection: TextDirection.ltr,
+  );
 }
 
 /// Pumps [app] and waits for the localization delegates' futures, exactly as
@@ -36,7 +36,11 @@ void main() {
     test('every string has English wording and a listed screen', () {
       expect(kAppTextEntries, isNotEmpty);
       for (final AppTextEntry entry in kAppTextEntries) {
-        expect(entry.defaults['en'], isNotNull, reason: '${entry.key} has no en');
+        expect(
+          entry.defaults['en'],
+          isNotNull,
+          reason: '${entry.key} has no en',
+        );
         expect(
           kAppTextSections,
           contains(entry.sectionKey),
@@ -61,8 +65,7 @@ void main() {
     });
 
     test('placeholder keys are flagged so the editor can warn', () {
-      final AppTextEntry? category =
-          kAppTextByKey['a11yOpenCategory'];
+      final AppTextEntry? category = kAppTextByKey['a11yOpenCategory'];
       expect(category?.placeholders, contains('name'));
       expect(category?.hasPlaceholders, isTrue);
 
@@ -79,8 +82,10 @@ void main() {
     });
 
     test('falls back to the shipped wording when nothing is overridden', () {
-      final OverridableAppLocalizations l10n =
-          OverridableAppLocalizations(base, const <String, String>{});
+      final OverridableAppLocalizations l10n = OverridableAppLocalizations(
+        base,
+        const <String, String>{},
+      );
 
       expect(l10n.adminDashboard, base.adminDashboard);
       expect(l10n.owns('adminDashboard'), isFalse);
@@ -102,17 +107,17 @@ void main() {
     test('keeps variables working when a template is rewritten', () {
       final OverridableAppLocalizations l10n = OverridableAppLocalizations(
         base,
-        const <String, String>{
-          'a11yOpenCategory': 'Ramaddii {name} bani',
-        },
+        const <String, String>{'a11yOpenCategory': 'Ramaddii {name} bani'},
       );
 
       expect(l10n.a11yOpenCategory('Majlis'), 'Ramaddii Majlis bani');
     });
 
     test('a template without an override still delegates', () {
-      final OverridableAppLocalizations l10n =
-          OverridableAppLocalizations(base, const <String, String>{});
+      final OverridableAppLocalizations l10n = OverridableAppLocalizations(
+        base,
+        const <String, String>{},
+      );
 
       expect(l10n.a11yOpenCategory('Majlis'), base.a11yOpenCategory('Majlis'));
     });
@@ -128,8 +133,9 @@ void main() {
   });
 
   group('wired into a real widget tree', () {
-    testWidgets('a screen renders the owner wording through of(context)',
-        (WidgetTester tester) async {
+    testWidgets('a screen renders the owner wording through of(context)', (
+      WidgetTester tester,
+    ) async {
       await _pumpLocalized(
         tester,
         MaterialApp(
@@ -151,25 +157,29 @@ void main() {
       expect(find.text('Daashboordii koo'), findsOneWidget);
     });
 
-    testWidgets('with no overrides the shipped wording still renders',
-        (WidgetTester tester) async {
+    testWidgets('with no overrides the shipped wording still renders', (
+      WidgetTester tester,
+    ) async {
       await _pumpLocalized(
         tester,
         MaterialApp(
-          localizationsDelegates:
-              appLocalizationsDelegates(overrides: const <String, String>{}),
+          localizationsDelegates: appLocalizationsDelegates(
+            overrides: const <String, String>{},
+          ),
           supportedLocales: AppLocalizations.supportedLocales,
           home: const _ShowDashboard(),
         ),
       );
 
-      final AppLocalizations en =
-          await AppLocalizations.delegate.load(const Locale('en'));
+      final AppLocalizations en = await AppLocalizations.delegate.load(
+        const Locale('en'),
+      );
       expect(find.text(en.adminDashboard), findsOneWidget);
     });
 
-    testWidgets('Oromo renders the generated localizations',
-        (WidgetTester tester) async {
+    testWidgets('Oromo renders the generated localizations', (
+      WidgetTester tester,
+    ) async {
       // The same delegate list the app installs, so this also proves Oromo no
       // longer trips the "not supported by all of its localization delegates"
       // warning the SDK emits for a locale it does not translate.
@@ -185,8 +195,9 @@ void main() {
         ),
       );
 
-      final AppLocalizations om =
-          await AppLocalizations.delegate.load(const Locale('om'));
+      final AppLocalizations om = await AppLocalizations.delegate.load(
+        const Locale('om'),
+      );
       expect(find.text(om.adminDashboard), findsOneWidget);
       expect(om.adminDashboard, 'Daashboordii');
     });
@@ -196,14 +207,11 @@ void main() {
     test('loads the override-aware instance for the active locale', () async {
       const OverridableLocalizationsDelegate delegate =
           OverridableLocalizationsDelegate(
-        overrides: <String, String>{'navHome': 'Mana koo'},
-      );
+            overrides: <String, String>{'navHome': 'Mana koo'},
+          );
 
       final AppLocalizations l10n = await delegate.load(const Locale('en'));
-      expect(
-        l10n,
-        isA<OverridableAppLocalizations>(),
-      );
+      expect(l10n, isA<OverridableAppLocalizations>());
       expect(l10n.navHome, 'Mana koo');
     });
 
@@ -218,8 +226,8 @@ void main() {
     test('reloads only when the wording actually changed', () {
       const OverridableLocalizationsDelegate first =
           OverridableLocalizationsDelegate(
-        overrides: <String, String>{'navHome': 'a'},
-      );
+            overrides: <String, String>{'navHome': 'a'},
+          );
 
       expect(
         first.shouldReload(

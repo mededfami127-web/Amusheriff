@@ -51,9 +51,12 @@ class FavouriteButton extends ConsumerWidget {
               )
             : null,
         onPressed: () async {
-          final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
-          final bool added =
-              await ref.read(favouritesProvider.notifier).toggle(productId);
+          final ScaffoldMessengerState messenger = ScaffoldMessenger.of(
+            context,
+          );
+          final bool added = await ref
+              .read(favouritesProvider.notifier)
+              .toggle(productId);
           messenger.hideCurrentSnackBar();
           messenger.showSnackBar(
             SnackBar(

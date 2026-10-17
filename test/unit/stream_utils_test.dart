@@ -7,20 +7,19 @@ void main() {
   group('combineLatest', () {
     test('emits only once both sources have produced a value', () async {
       final StreamController<List<int>> a = StreamController<List<int>>();
-      final StreamController<List<String>> b =
-          StreamController<List<String>>();
+      final StreamController<List<String>> b = StreamController<List<String>>();
       addTearDown(() async {
         await a.close();
         await b.close();
       });
 
       final List<String> emitted = <String>[];
-      final StreamSubscription<String> sub = combineLatest<
-          List<int>, List<String>, String>(
-        a.stream,
-        b.stream,
-        (List<int> x, List<String> y) => '${x.join(",")}|${y.join(",")}',
-      ).listen(emitted.add);
+      final StreamSubscription<String> sub =
+          combineLatest<List<int>, List<String>, String>(
+            a.stream,
+            b.stream,
+            (List<int> x, List<String> y) => '${x.join(",")}|${y.join(",")}',
+          ).listen(emitted.add);
 
       a.add(<int>[1]);
       await Future<void>.delayed(Duration.zero);
@@ -68,10 +67,13 @@ void main() {
 
   group('groupBy', () {
     test('buckets items and preserves insertion order', () {
-      final Map<String, List<int>> grouped = groupBy<int, String>(
-        <int>[1, 2, 3, 4, 5],
-        (int value) => value.isEven ? 'even' : 'odd',
-      );
+      final Map<String, List<int>> grouped = groupBy<int, String>(<int>[
+        1,
+        2,
+        3,
+        4,
+        5,
+      ], (int value) => value.isEven ? 'even' : 'odd');
       expect(grouped.keys.toList(), <String>['odd', 'even']);
       expect(grouped['odd'], <int>[1, 3, 5]);
       expect(grouped['even'], <int>[2, 4]);
@@ -84,9 +86,10 @@ void main() {
       addTearDown(source.close);
 
       final List<int> emitted = <int>[];
-      final StreamSubscription<int> sub =
-          debounce<int>(source.stream, const Duration(milliseconds: 30))
-              .listen(emitted.add);
+      final StreamSubscription<int> sub = debounce<int>(
+        source.stream,
+        const Duration(milliseconds: 30),
+      ).listen(emitted.add);
 
       source.add(1);
       source.add(2);

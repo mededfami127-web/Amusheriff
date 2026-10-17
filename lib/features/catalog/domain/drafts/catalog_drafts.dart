@@ -29,14 +29,14 @@ class CategoryDraft {
 
   /// Full row for insert. `updated_at` is handled by the DB trigger.
   Map<String, dynamic> toInsert() => <String, dynamic>{
-        'name': name.trim(),
-        'slug': slug.trim(),
-        'name_am': _nullIfBlank(nameAm),
-        'name_ar': _nullIfBlank(nameAr),
-        'cover_path': _nullIfBlank(coverPath),
-        'sort_order': sortOrder,
-        'is_visible': isVisible,
-      };
+    'name': name.trim(),
+    'slug': slug.trim(),
+    'name_am': _nullIfBlank(nameAm),
+    'name_ar': _nullIfBlank(nameAr),
+    'cover_path': _nullIfBlank(coverPath),
+    'sort_order': sortOrder,
+    'is_visible': isVisible,
+  };
 
   /// Same shape for update — sending nulls clears the optional columns.
   Map<String, dynamic> toUpdate() => toInsert();
@@ -77,21 +77,21 @@ class ProductDraft {
   final int sortOrder;
 
   Map<String, dynamic> toInsert() => <String, dynamic>{
-        'category_id': categoryId,
-        'title': title.trim(),
-        'title_am': _nullIfBlank(titleAm),
-        'title_ar': _nullIfBlank(titleAr),
-        'description': _nullIfBlank(description),
-        'description_am': _nullIfBlank(descriptionAm),
-        'description_ar': _nullIfBlank(descriptionAr),
-        'price': price,
-        'compare_at_price': compareAtPrice,
-        'currency_code': currencyCode,
-        'is_available': isAvailable,
-        'is_featured': isFeatured,
-        'is_published': isPublished,
-        'sort_order': sortOrder,
-      };
+    'category_id': categoryId,
+    'title': title.trim(),
+    'title_am': _nullIfBlank(titleAm),
+    'title_ar': _nullIfBlank(titleAr),
+    'description': _nullIfBlank(description),
+    'description_am': _nullIfBlank(descriptionAm),
+    'description_ar': _nullIfBlank(descriptionAr),
+    'price': price,
+    'compare_at_price': compareAtPrice,
+    'currency_code': currencyCode,
+    'is_available': isAvailable,
+    'is_featured': isFeatured,
+    'is_published': isPublished,
+    'sort_order': sortOrder,
+  };
 
   Map<String, dynamic> toUpdate() => toInsert();
 }
@@ -117,23 +117,23 @@ class ProductMediaDraft {
   final int sortOrder;
 
   Map<String, dynamic> toInsert() => <String, dynamic>{
-        'product_id': productId,
-        'kind': kind.name,
-        'storage_path': storagePath,
-        'thumbnail_path': _nullIfBlank(thumbnailPath),
-        'duration_seconds': durationSeconds,
-        'is_cover': isCover,
-        'sort_order': sortOrder,
-      };
+    'product_id': productId,
+    'kind': kind.name,
+    'storage_path': storagePath,
+    'thumbnail_path': _nullIfBlank(thumbnailPath),
+    'duration_seconds': durationSeconds,
+    'is_cover': isCover,
+    'sort_order': sortOrder,
+  };
 
   Map<String, dynamic> toUpdate() => <String, dynamic>{
-        'kind': kind.name,
-        'storage_path': storagePath,
-        'thumbnail_path': _nullIfBlank(thumbnailPath),
-        'duration_seconds': durationSeconds,
-        'is_cover': isCover,
-        'sort_order': sortOrder,
-      };
+    'kind': kind.name,
+    'storage_path': storagePath,
+    'thumbnail_path': _nullIfBlank(thumbnailPath),
+    'duration_seconds': durationSeconds,
+    'is_cover': isCover,
+    'sort_order': sortOrder,
+  };
 }
 
 String? _nullIfBlank(String? value) {

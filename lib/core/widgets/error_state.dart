@@ -40,14 +40,14 @@ class ErrorStateView extends StatelessWidget {
   }
 
   IconData _iconFor(AppFailure failure) => switch (failure) {
-        NetworkFailure() => Icons.wifi_off_rounded,
-        TimeoutFailure() => Icons.hourglass_bottom_rounded,
-        AuthFailure() => Icons.lock_outline_rounded,
-        PermissionFailure() => Icons.gpp_maybe_outlined,
-        NotFoundFailure() => Icons.search_off_rounded,
-        ValidationFailure() => Icons.rule_folder_outlined,
-        MediaFailure() || StorageFailure() => Icons.cloud_off_rounded,
-        ServerFailure() => Icons.dns_outlined,
-        UnknownFailure() => Icons.error_outline_rounded,
-      };
+    NetworkFailure() => Icons.wifi_off_rounded,
+    TimeoutFailure() => Icons.hourglass_bottom_rounded,
+    AuthFailure() => Icons.lock_outline_rounded,
+    PermissionFailure() => Icons.gpp_maybe_outlined,
+    NotFoundFailure() => Icons.search_off_rounded,
+    ValidationFailure() => Icons.rule_folder_outlined,
+    MediaFailure() || StorageFailure() => Icons.cloud_off_rounded,
+    ServerFailure() => Icons.dns_outlined,
+    UnknownFailure() => Icons.error_outline_rounded,
+  };
 }

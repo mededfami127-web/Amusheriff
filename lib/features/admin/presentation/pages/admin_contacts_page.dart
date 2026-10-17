@@ -26,7 +26,9 @@ class AdminContactsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final AppLocalizations l10n = AppLocalizations.of(context);
-    final AsyncValue<List<ContactLink>> async = ref.watch(allContactLinksProvider);
+    final AsyncValue<List<ContactLink>> async = ref.watch(
+      allContactLinksProvider,
+    );
 
     return AdminScaffold(
       title: l10n.adminContacts,
@@ -59,7 +61,8 @@ class AdminContactsPage extends ConsumerWidget {
           }
           return _ContactList(
             links: links,
-            onEditRequested: (ContactLink link) => _openSheet(context, ref, link),
+            onEditRequested: (ContactLink link) =>
+                _openSheet(context, ref, link),
           );
         },
       ),
@@ -67,8 +70,9 @@ class AdminContactsPage extends ConsumerWidget {
   }
 
   void _openSheet(BuildContext context, WidgetRef ref, ContactLink? existing) {
-    final ContactsEditorController controller =
-        ref.read(contactsEditorControllerProvider.notifier);
+    final ContactsEditorController controller = ref.read(
+      contactsEditorControllerProvider.notifier,
+    );
     if (existing == null) {
       controller.startNew();
     } else {
@@ -101,7 +105,9 @@ class _ContactList extends ConsumerWidget {
         ordered.insert(newIndex, moved);
         ref
             .read(contactRepositoryProvider)
-            .reorder(ordered.map((ContactLink l) => l.id).toList(growable: false));
+            .reorder(
+              ordered.map((ContactLink l) => l.id).toList(growable: false),
+            );
       },
       children: <Widget>[
         for (final ContactLink link in links)
@@ -131,8 +137,9 @@ class _ContactTile extends ConsumerWidget {
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         leading: CircleAvatar(
-          backgroundColor:
-              link.isPrimary ? BrandColors.gold : BrandColors.royalViolet,
+          backgroundColor: link.isPrimary
+              ? BrandColors.gold
+              : BrandColors.royalViolet,
           child: Icon(
             link.kind.icon,
             color: link.isPrimary ? BrandColors.deepPlum : BrandColors.ivory,
@@ -150,8 +157,7 @@ class _ContactTile extends ConsumerWidget {
             if (link.isPrimary) ...<Widget>[
               const SizedBox(width: 8),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
                   color: BrandColors.gold.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(999),
@@ -208,7 +214,8 @@ class _ContactTile extends ConsumerWidget {
     WidgetRef ref,
     AppLocalizations l10n,
   ) async {
-    final bool confirmed = await showDialog<bool>(
+    final bool confirmed =
+        await showDialog<bool>(
           context: context,
           builder: (BuildContext dialogContext) => AlertDialog(
             title: Text(l10n.adminConfirmDeleteContact),

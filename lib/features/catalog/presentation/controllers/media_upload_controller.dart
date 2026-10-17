@@ -61,15 +61,14 @@ class MediaUploadItem {
     AppFailure? failure,
     String? mediaId,
     bool clearFailure = false,
-  }) =>
-      MediaUploadItem(
-        id: id,
-        file: file,
-        kind: kind,
-        phase: phase ?? this.phase,
-        failure: clearFailure ? null : failure ?? this.failure,
-        mediaId: mediaId ?? this.mediaId,
-      );
+  }) => MediaUploadItem(
+    id: id,
+    file: file,
+    kind: kind,
+    phase: phase ?? this.phase,
+    failure: clearFailure ? null : failure ?? this.failure,
+    mediaId: mediaId ?? this.mediaId,
+  );
 }
 
 /// Upload queue for the media manager: **concurrency 2**, per-file phase,
@@ -92,11 +91,11 @@ class MediaUploadController extends _$MediaUploadController {
   int _seq = 0;
 
   bool get hasPending => state.any(
-        (MediaUploadItem i) =>
-            i.phase == UploadPhase.queued ||
-            i.phase == UploadPhase.processing ||
-            i.phase == UploadPhase.uploading,
-      );
+    (MediaUploadItem i) =>
+        i.phase == UploadPhase.queued ||
+        i.phase == UploadPhase.processing ||
+        i.phase == UploadPhase.uploading,
+  );
 
   /// Queue completion as a real fraction: finished files over total.
   double get progress {
@@ -123,13 +122,15 @@ class MediaUploadController extends _$MediaUploadController {
     final List<MediaUploadItem> pending = added
         .map((MediaUploadItem i) => i)
         .toList(growable: true);
-    final List<Future<void>> workers =
-        List<Future<void>>.generate(maxConcurrent, (int index) async {
-      while (pending.isNotEmpty) {
-        final MediaUploadItem next = pending.removeAt(0);
-        await _runOne(productId, next.id);
-      }
-    });
+    final List<Future<void>> workers = List<Future<void>>.generate(
+      maxConcurrent,
+      (int index) async {
+        while (pending.isNotEmpty) {
+          final MediaUploadItem next = pending.removeAt(0);
+          await _runOne(productId, next.id);
+        }
+      },
+    );
     await Future.wait<void>(workers);
   }
 
@@ -142,8 +143,9 @@ class MediaUploadController extends _$MediaUploadController {
     }
 
     final StorageDataSource storage = ref.read(storageDataSourceProvider);
-    final ProductMediaRepository mediaRepo =
-        ref.read(productMediaRepositoryProvider);
+    final ProductMediaRepository mediaRepo = ref.read(
+      productMediaRepositoryProvider,
+    );
 
     String? uploadedPath;
     String? uploadedThumb;
@@ -203,9 +205,9 @@ class MediaUploadController extends _$MediaUploadController {
         return;
       }
 
-      final int sortOrder = await mediaRepo.fetchForProduct(productId).then(
-            (List<ProductMedia> rows) => rows.length,
-          );
+      final int sortOrder = await mediaRepo
+          .fetchForProduct(productId)
+          .then((List<ProductMedia> rows) => rows.length);
 
       final ProductMedia media = await mediaRepo.add(
         ProductMediaDraft(
@@ -286,8 +288,9 @@ class MediaUploadController extends _$MediaUploadController {
         .toList(growable: false);
   }
 
-  void dismiss(String itemId) => state =
-      state.where((MediaUploadItem i) => i.id != itemId).toList(growable: false);
+  void dismiss(String itemId) => state = state
+      .where((MediaUploadItem i) => i.id != itemId)
+      .toList(growable: false);
 
   void reset() {
     _cancelled.clear();

@@ -43,7 +43,7 @@ sealed class AppFailure implements Exception {
 /// No connectivity, or the request could not reach the backend.
 final class NetworkFailure extends AppFailure {
   const NetworkFailure({super.debugMessage, super.cause, super.statusCode})
-      : super(messageKey: 'errorNetwork');
+    : super(messageKey: 'errorNetwork');
 
   @override
   bool get isRetryable => true;
@@ -52,7 +52,7 @@ final class NetworkFailure extends AppFailure {
 /// The request timed out.
 final class TimeoutFailure extends AppFailure {
   const TimeoutFailure({super.debugMessage, super.cause})
-      : super(messageKey: 'errorTimeout');
+    : super(messageKey: 'errorTimeout');
 
   @override
   bool get isRetryable => true;
@@ -90,7 +90,7 @@ final class AuthFailure extends AppFailure {
 /// Signed in, but not allowed to perform the operation (RLS denied the write).
 final class PermissionFailure extends AppFailure {
   const PermissionFailure({super.debugMessage, super.cause, super.statusCode})
-      : super(messageKey: 'errorPermission');
+    : super(messageKey: 'errorPermission');
 
   @override
   bool get isRetryable => false;
@@ -99,7 +99,7 @@ final class PermissionFailure extends AppFailure {
 /// The requested row does not exist, or is not visible to this user.
 final class NotFoundFailure extends AppFailure {
   const NotFoundFailure({super.debugMessage, super.cause, this.entity})
-      : super(messageKey: 'errorNotFound', statusCode: 404);
+    : super(messageKey: 'errorNotFound', statusCode: 404);
 
   final String? entity;
 
@@ -138,7 +138,7 @@ final class MediaFailure extends AppFailure {
 /// Storage (bucket) access failed.
 final class StorageFailure extends AppFailure {
   const StorageFailure({super.debugMessage, super.cause, super.statusCode})
-      : super(messageKey: 'errorStorage');
+    : super(messageKey: 'errorStorage');
 
   @override
   bool get isRetryable => true;
@@ -147,7 +147,7 @@ final class StorageFailure extends AppFailure {
 /// Anything we could not classify. Always logged together with its cause.
 final class UnknownFailure extends AppFailure {
   const UnknownFailure({super.debugMessage, super.cause, super.statusCode})
-      : super(messageKey: 'errorUnknown');
+    : super(messageKey: 'errorUnknown');
 
   @override
   bool get isRetryable => true;

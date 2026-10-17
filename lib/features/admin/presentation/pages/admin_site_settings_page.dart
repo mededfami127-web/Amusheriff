@@ -30,10 +30,12 @@ class AdminSiteSettingsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final AppLocalizations l10n = AppLocalizations.of(context);
-    final SiteSettingsEditorState state =
-        ref.watch(siteSettingsEditorControllerProvider);
-    final SiteSettingsEditorController controller =
-        ref.read(siteSettingsEditorControllerProvider.notifier);
+    final SiteSettingsEditorState state = ref.watch(
+      siteSettingsEditorControllerProvider,
+    );
+    final SiteSettingsEditorController controller = ref.read(
+      siteSettingsEditorControllerProvider.notifier,
+    );
     final bool saving = state.status.saving;
 
     return AdminScaffold(
@@ -135,9 +137,9 @@ class AdminSiteSettingsPage extends ConsumerWidget {
                     if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text(ok
-                            ? l10n.adminSiteSettingsSaved
-                            : l10n.errorServer),
+                        content: Text(
+                          ok ? l10n.adminSiteSettingsSaved : l10n.errorServer,
+                        ),
                       ),
                     );
                   },
@@ -261,9 +263,7 @@ class _LogoPickerState extends ConsumerState<_LogoPicker> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                Expanded(
-                  child: Text(path, style: BrandTypography.bodySmall),
-                ),
+                Expanded(child: Text(path, style: BrandTypography.bodySmall)),
                 IconButton(
                   icon: const Icon(Icons.delete_outline_rounded),
                   tooltip: l10n.actionDelete,
@@ -309,7 +309,9 @@ class _LogoPickerState extends ConsumerState<_LogoPicker> {
       }
 
       final String extension = _extensionOf(picked.name);
-      final String path = await ref.read(storageDataSourceProvider).upload(
+      final String path = await ref
+          .read(storageDataSourceProvider)
+          .upload(
             bucket: StorageDataSource.brandBucket,
             path: StorageDataSource.brandPath(
               name: 'logo',
@@ -321,9 +323,7 @@ class _LogoPickerState extends ConsumerState<_LogoPicker> {
       widget.onPicked(path);
     } on Object catch (error) {
       messenger.showSnackBar(
-        SnackBar(
-          content: Text(localizeFailure(l10n, ErrorMapper.map(error))),
-        ),
+        SnackBar(content: Text(localizeFailure(l10n, ErrorMapper.map(error)))),
       );
     } finally {
       if (mounted) setState(() => _uploading = false);
@@ -337,8 +337,8 @@ class _LogoPickerState extends ConsumerState<_LogoPicker> {
   }
 
   static String _contentTypeOf(String extension) => switch (extension) {
-        'jpg' || 'jpeg' => 'image/jpeg',
-        'webp' => 'image/webp',
-        _ => 'image/png',
-      };
+    'jpg' || 'jpeg' => 'image/jpeg',
+    'webp' => 'image/webp',
+    _ => 'image/png',
+  };
 }

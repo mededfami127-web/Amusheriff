@@ -33,10 +33,7 @@ class SettingsPage extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
         children: <Widget>[
-          _Section(
-            title: l10n.settingsLanguage,
-            icon: Icons.translate_rounded,
-          ),
+          _Section(title: l10n.settingsLanguage, icon: Icons.translate_rounded),
           const SizedBox(height: 10),
           RadioGroup<AppLanguage>(
             groupValue: prefs.language,
@@ -115,12 +112,12 @@ class SettingsPage extends ConsumerWidget {
                     .read(contactLauncherProvider)
                     .launch(link)
                     .then((bool ok) {
-                  if (!ok && context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(l10n.contactLaunchFailed)),
-                    );
-                  }
-                }),
+                      if (!ok && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(l10n.contactLaunchFailed)),
+                        );
+                      }
+                    }),
               ),
             ),
             const SizedBox(height: 20),
@@ -177,13 +174,14 @@ class _Section extends StatelessWidget {
         const SizedBox(width: 10),
         Text(
           title,
-          style: BrandTypography.displayForLocale(
-            Localizations.localeOf(context),
-            base: BrandTypography.displaySmall,
-          ).copyWith(
-            fontSize: 19,
-            color: dark ? BrandColors.goldLight : BrandColors.charcoal,
-          ),
+          style:
+              BrandTypography.displayForLocale(
+                Localizations.localeOf(context),
+                base: BrandTypography.displaySmall,
+              ).copyWith(
+                fontSize: 19,
+                color: dark ? BrandColors.goldLight : BrandColors.charcoal,
+              ),
         ),
       ],
     );

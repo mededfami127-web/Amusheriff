@@ -24,7 +24,10 @@ void main() {
     });
 
     test('accepts a legacy authenticated JWT', () {
-      expect(Env.looksLikeServiceRoleKey(_jwtWithRole('authenticated')), isFalse);
+      expect(
+        Env.looksLikeServiceRoleKey(_jwtWithRole('authenticated')),
+        isFalse,
+      );
     });
 
     test('rejects a new-style sb_secret_ key', () {
@@ -37,13 +40,23 @@ void main() {
     });
 
     test('does not throw on malformed input', () {
-      for (final String bad in <String>['', 'not-a-jwt', 'a.b', 'a.b.c.d', '..']) {
+      for (final String bad in <String>[
+        '',
+        'not-a-jwt',
+        'a.b',
+        'a.b.c.d',
+        '..',
+      ]) {
         expect(
           () => Env.looksLikeServiceRoleKey(bad),
           returnsNormally,
           reason: 'input: "$bad"',
         );
-        expect(Env.looksLikeServiceRoleKey(bad), isFalse, reason: 'input: "$bad"');
+        expect(
+          Env.looksLikeServiceRoleKey(bad),
+          isFalse,
+          reason: 'input: "$bad"',
+        );
       }
     });
 
@@ -53,13 +66,21 @@ void main() {
     });
 
     test('a JWT whose payload is not a JSON object is unclassified', () {
-      final String seg = base64Url.encode(utf8.encode('[1,2,3]')).replaceAll('=', '');
+      final String seg = base64Url
+          .encode(utf8.encode('[1,2,3]'))
+          .replaceAll('=', '');
       expect(Env.looksLikeServiceRoleKey('aaa.$seg.ccc'), isFalse);
     });
 
     test('role must match exactly — no substring or case folding', () {
-      expect(Env.looksLikeServiceRoleKey(_jwtWithRole('service_role_v2')), isFalse);
-      expect(Env.looksLikeServiceRoleKey(_jwtWithRole('SERVICE_ROLE')), isFalse);
+      expect(
+        Env.looksLikeServiceRoleKey(_jwtWithRole('service_role_v2')),
+        isFalse,
+      );
+      expect(
+        Env.looksLikeServiceRoleKey(_jwtWithRole('SERVICE_ROLE')),
+        isFalse,
+      );
     });
   });
 }

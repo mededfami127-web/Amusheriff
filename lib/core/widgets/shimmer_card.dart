@@ -21,8 +21,7 @@ class ShimmerBox extends StatelessWidget {
     final bool dark = Theme.of(context).brightness == Brightness.dark;
     return Shimmer.fromColors(
       baseColor: dark ? BrandColors.plumSurface : const Color(0xFFEDE6DA),
-      highlightColor:
-          dark ? const Color(0xFF3A2A4C) : const Color(0xFFFBF8F2),
+      highlightColor: dark ? const Color(0xFF3A2A4C) : const Color(0xFFFBF8F2),
       child: Container(
         height: height,
         width: width,
@@ -37,11 +36,7 @@ class ShimmerBox extends StatelessWidget {
 
 /// Product-card shaped placeholder used while the catalogue loads.
 class ShimmerCard extends StatelessWidget {
-  const ShimmerCard({
-    super.key,
-    this.height = 260,
-    this.showLines = true,
-  });
+  const ShimmerCard({super.key, this.height = 260, this.showLines = true});
 
   final double height;
   final bool showLines;
@@ -111,11 +106,8 @@ class ShimmerRail extends StatelessWidget {
         physics: const NeverScrollableScrollPhysics(),
         itemCount: itemCount,
         separatorBuilder: (_, __) => const SizedBox(width: 14),
-        itemBuilder: (_, __) => ShimmerBox(
-          height: height,
-          width: height * 0.82,
-          radius: 20,
-        ),
+        itemBuilder: (_, __) =>
+            ShimmerBox(height: height, width: height * 0.82, radius: 20),
       ),
     );
   }

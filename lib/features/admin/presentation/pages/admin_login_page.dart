@@ -54,7 +54,10 @@ class _AdminLoginPageState extends ConsumerState<AdminLoginPage> {
 
     final bool ok = await ref
         .read(adminAuthControllerProvider.notifier)
-        .signIn(email: _emailController.text, password: _passwordController.text);
+        .signIn(
+          email: _emailController.text,
+          password: _passwordController.text,
+        );
 
     if (!mounted) return;
 
@@ -68,7 +71,9 @@ class _AdminLoginPageState extends ConsumerState<AdminLoginPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            _isLocked ? l10n.errorTooManyAttempts : l10n.errorInvalidCredentials,
+            _isLocked
+                ? l10n.errorTooManyAttempts
+                : l10n.errorInvalidCredentials,
           ),
         ),
       );
@@ -78,9 +83,8 @@ class _AdminLoginPageState extends ConsumerState<AdminLoginPage> {
   Future<void> _forgotPassword() async {
     final AppLocalizations l10n = AppLocalizations.of(context);
     if (_emailController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.adminEmailLabel)),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.adminEmailLabel)));
       return;
     }
 

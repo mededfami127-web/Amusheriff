@@ -26,14 +26,19 @@ class AdminDashboardPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final AppLocalizations l10n = AppLocalizations.of(context);
 
-    final AsyncValue<List<Category>> categories =
-        ref.watch(allCategoriesProvider);
-    final AsyncValue<List<Product>> products =
-        ref.watch(adminProductsProvider());
-    final AsyncValue<List<Inquiry>> inquiries = ref.watch(adminInquiriesProvider);
+    final AsyncValue<List<Category>> categories = ref.watch(
+      allCategoriesProvider,
+    );
+    final AsyncValue<List<Product>> products = ref.watch(
+      adminProductsProvider(),
+    );
+    final AsyncValue<List<Inquiry>> inquiries = ref.watch(
+      adminInquiriesProvider,
+    );
     final int inquiriesThisWeek = ref.watch(inquiriesThisWeekProvider);
-    final List<MapEntry<String, int>> mostContacted =
-        ref.watch(mostContactedProductsProvider);
+    final List<MapEntry<String, int>> mostContacted = ref.watch(
+      mostContactedProductsProvider,
+    );
 
     return AdminScaffold(
       title: l10n.adminDashboard,
@@ -112,7 +117,10 @@ class AdminDashboardPage extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 26),
-          _SectionHeader(title: l10n.adminQuickActions, textKey: 'adminQuickActions'),
+          _SectionHeader(
+            title: l10n.adminQuickActions,
+            textKey: 'adminQuickActions',
+          ),
           const SizedBox(height: 10),
           _QuickAction(
             label: l10n.adminProducts,
@@ -151,7 +159,10 @@ class AdminDashboardPage extends ConsumerWidget {
             route: Routes.adminTextEditor,
           ),
           const SizedBox(height: 26),
-          _SectionHeader(title: l10n.adminMostContacted, textKey: 'adminMostContacted'),
+          _SectionHeader(
+            title: l10n.adminMostContacted,
+            textKey: 'adminMostContacted',
+          ),
           const SizedBox(height: 6),
           if (mostContacted.isEmpty)
             LiveEditableText(
@@ -204,8 +215,8 @@ class _StatsCard extends StatelessWidget {
     final String display = error
         ? '—'
         : loading && value == null
-            ? '…'
-            : (value ?? 0).toString();
+        ? '…'
+        : (value ?? 0).toString();
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -234,10 +245,7 @@ class _StatsCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          Text(
-            display,
-            style: BrandTypography.displayWeighted(700, size: 30),
-          ),
+          Text(display, style: BrandTypography.displayWeighted(700, size: 30)),
         ],
       ),
     );

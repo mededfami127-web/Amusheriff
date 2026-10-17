@@ -25,16 +25,19 @@ const String _templateName = 'app_en.arb';
 void main() {
   final Directory dir = Directory(_arbDir);
   if (!dir.existsSync()) {
-    stderr.writeln('error: $_arbDir does not exist — run this from the repository root.');
+    stderr.writeln(
+      'error: $_arbDir does not exist — run this from the repository root.',
+    );
     exit(2);
   }
 
-  final List<File> arbs = dir
-      .listSync()
-      .whereType<File>()
-      .where((File file) => file.path.endsWith('.arb'))
-      .toList()
-    ..sort((File a, File b) => a.path.compareTo(b.path));
+  final List<File> arbs =
+      dir
+          .listSync()
+          .whereType<File>()
+          .where((File file) => file.path.endsWith('.arb'))
+          .toList()
+        ..sort((File a, File b) => a.path.compareTo(b.path));
 
   File? template;
   for (final File file in arbs) {
@@ -45,7 +48,9 @@ void main() {
     exit(2);
   }
   if (arbs.length < 2) {
-    stderr.writeln('error: $_arbDir holds no translations besides $_templateName.');
+    stderr.writeln(
+      'error: $_arbDir holds no translations besides $_templateName.',
+    );
     exit(2);
   }
 
@@ -67,21 +72,31 @@ void main() {
       stderr.writeln('    missing (${missing.length}): ${missing.join(', ')}');
     }
     if (unknown.isNotEmpty) {
-      stderr.writeln('    not in the template (${unknown.length}): ${unknown.join(', ')}');
+      stderr.writeln(
+        '    not in the template (${unknown.length}): ${unknown.join(', ')}',
+      );
     }
   }
 
   if (failed) {
     stderr.writeln('');
-    stderr.writeln('Add the key to every lib/l10n/app_*.arb, then regenerate the');
+    stderr.writeln(
+      'Add the key to every lib/l10n/app_*.arb, then regenerate the',
+    );
     stderr.writeln('committed output:');
     stderr.writeln('  flutter gen-l10n && dart run tool/gen_text_overlay.dart');
     exit(1);
   }
 
-  final String locales =
-      arbs.map((File file) => _name(file).replaceAll('app_', '').replaceAll('.arb', '')).join(', ');
-  stdout.writeln('l10n parity OK: ${templateKeys.length} message keys in each of $locales.');
+  final String locales = arbs
+      .map(
+        (File file) =>
+            _name(file).replaceAll('app_', '').replaceAll('.arb', ''),
+      )
+      .join(', ');
+  stdout.writeln(
+    'l10n parity OK: ${templateKeys.length} message keys in each of $locales.',
+  );
 }
 
 /// `lib/l10n/app_am.arb` → `app_am.arb`.

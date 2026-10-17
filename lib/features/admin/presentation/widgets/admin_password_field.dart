@@ -108,8 +108,9 @@ class _AdminPasswordFieldState extends State<AdminPasswordField> {
             padding: const EdgeInsets.only(bottom: 8),
             child: Text(
               widget.label,
-              style:
-                  BrandTypography.labelLarge.copyWith(color: BrandColors.goldLight),
+              style: BrandTypography.labelLarge.copyWith(
+                color: BrandColors.goldLight,
+              ),
             ),
           ),
           Container(
@@ -147,8 +148,10 @@ class _AdminPasswordFieldState extends State<AdminPasswordField> {
                   ),
                   onPressed: () => setState(() => _obscure = !_obscure),
                   padding: EdgeInsets.zero,
-                  constraints:
-                      const BoxConstraints(minWidth: 40, minHeight: 40),
+                  constraints: const BoxConstraints(
+                    minWidth: 40,
+                    minHeight: 40,
+                  ),
                 ),
               ],
             ),
@@ -184,8 +187,9 @@ class _AdminPasswordFieldState extends State<AdminPasswordField> {
             const SizedBox(height: 6),
             Text(
               widget.error!,
-              style:
-                  BrandTypography.bodySmall.copyWith(color: BrandColors.danger),
+              style: BrandTypography.bodySmall.copyWith(
+                color: BrandColors.danger,
+              ),
             ),
           ],
         ],

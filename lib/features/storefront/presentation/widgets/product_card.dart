@@ -51,10 +51,8 @@ class ProductCard extends ConsumerWidget {
                         fit: BoxFit.cover,
                         fadeInDuration: const Duration(milliseconds: 220),
                         placeholder: (_, __) => _Placeholder(dark: dark),
-                        errorWidget: (_, __, ___) => _Placeholder(
-                          dark: dark,
-                          failed: true,
-                        ),
+                        errorWidget: (_, __, ___) =>
+                            _Placeholder(dark: dark, failed: true),
                         // Helps screen readers and keeps a11y labels localized.
                         imageBuilder: (_, ImageProvider provider) => Semantics(
                           label: l10n.a11yProductImage(title),
@@ -68,7 +66,9 @@ class ProductCard extends ConsumerWidget {
                         start: 10,
                         child: _DiscountBadge(
                           percent: product.discountPercent ?? 0,
-                          label: l10n.labelDiscount(product.discountPercent ?? 0),
+                          label: l10n.labelDiscount(
+                            product.discountPercent ?? 0,
+                          ),
                         ),
                       ),
                     if (!product.isAvailable)

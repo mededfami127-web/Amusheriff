@@ -31,7 +31,11 @@ abstract final class Formatters {
   }
 
   /// Compact price for dense grids, e.g. `12.5K ETB`.
-  static String compactMoney(num amount, {String currency = 'ETB', String? locale}) {
+  static String compactMoney(
+    num amount, {
+    String currency = 'ETB',
+    String? locale,
+  }) {
     final NumberFormat format = NumberFormat.compactCurrency(
       locale: locale,
       symbol: currency,
@@ -41,8 +45,10 @@ abstract final class Formatters {
   }
 
   static String decimal(num value, {int digits = 0, String? locale}) =>
-      NumberFormat.decimalPatternDigits(locale: locale, decimalDigits: digits)
-          .format(value);
+      NumberFormat.decimalPatternDigits(
+        locale: locale,
+        decimalDigits: digits,
+      ).format(value);
 
   static String percent(num ratio, {int digits = 0, String? locale}) =>
       NumberFormat.percentPattern(locale).format(ratio);

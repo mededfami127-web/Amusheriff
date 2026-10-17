@@ -27,8 +27,9 @@ class CategoryPage extends ConsumerWidget {
     final bool dark = Theme.of(context).brightness == Brightness.dark;
     final String language = Localizations.localeOf(context).languageCode;
 
-    final AsyncValue<Category?> category =
-        ref.watch(categoryBySlugProvider(slug));
+    final AsyncValue<Category?> category = ref.watch(
+      categoryBySlugProvider(slug),
+    );
 
     final String? categoryId = category.value?.id;
     final AsyncValue<List<Product>> products = categoryId == null
@@ -41,10 +42,9 @@ class CategoryPage extends ConsumerWidget {
       body: switch (category) {
         AsyncLoading() => const ShimmerGrid(),
         AsyncError(:final Object error) => ErrorStateView(
-            failure:
-                error is AppFailure ? error : UnknownFailure(cause: error),
-            onRetry: () => ref.invalidate(categoryBySlugProvider(slug)),
-          ),
+          failure: error is AppFailure ? error : UnknownFailure(cause: error),
+          onRetry: () => ref.invalidate(categoryBySlugProvider(slug)),
+        ),
         AsyncValue<Category?>(:final Category? value) when value == null =>
           EmptyState(
             title: l10n.stateNotFoundTitle,
@@ -52,46 +52,46 @@ class CategoryPage extends ConsumerWidget {
             icon: Icons.category_outlined,
           ),
         _ => CustomScrollView(
-            slivers: <Widget>[
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 18, 16, 4),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        category.value!.nameFor(language),
-                        style: BrandTypography.displayForLocale(
-                          Localizations.localeOf(context),
-                          base: BrandTypography.displayMedium,
-                        ).copyWith(
-                          color: dark
-                              ? BrandColors.goldLight
-                              : BrandColors.charcoal,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      const SizedBox(width: 72, child: GoldDivider()),
-                    ],
-                  ),
+          slivers: <Widget>[
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 18, 16, 4),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      category.value!.nameFor(language),
+                      style:
+                          BrandTypography.displayForLocale(
+                            Localizations.localeOf(context),
+                            base: BrandTypography.displayMedium,
+                          ).copyWith(
+                            color: dark
+                                ? BrandColors.goldLight
+                                : BrandColors.charcoal,
+                          ),
+                    ),
+                    const SizedBox(height: 10),
+                    const SizedBox(width: 72, child: GoldDivider()),
+                  ],
                 ),
               ),
-              switch (products) {
-                AsyncLoading() =>
-                  const SliverToBoxAdapter(child: ShimmerGrid()),
-                AsyncError(:final Object error) => SliverToBoxAdapter(
-                    child: ErrorStateView(
-                      failure: error is AppFailure
-                          ? error
-                          : UnknownFailure(cause: error),
-                      compact: true,
-                    ),
-                  ),
-                AsyncValue<List<Product>>(:final List<Product>? value) =>
-                  _gridSliver(context, value ?? const <Product>[]),
-              },
-            ],
-          ),
+            ),
+            switch (products) {
+              AsyncLoading() => const SliverToBoxAdapter(child: ShimmerGrid()),
+              AsyncError(:final Object error) => SliverToBoxAdapter(
+                child: ErrorStateView(
+                  failure: error is AppFailure
+                      ? error
+                      : UnknownFailure(cause: error),
+                  compact: true,
+                ),
+              ),
+              AsyncValue<List<Product>>(:final List<Product>? value) =>
+                _gridSliver(context, value ?? const <Product>[]),
+            },
+          ],
+        ),
       },
     );
   }

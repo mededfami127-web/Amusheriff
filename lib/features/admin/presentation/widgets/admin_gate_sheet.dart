@@ -29,10 +29,8 @@ Future<void> showAdminGateSheet(
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
-    builder: (BuildContext context) => _AdminGateSheet(
-      returnTo: returnTo,
-      alreadyUnlocked: alreadyUnlocked,
-    ),
+    builder: (BuildContext context) =>
+        _AdminGateSheet(returnTo: returnTo, alreadyUnlocked: alreadyUnlocked),
   );
 }
 
@@ -62,8 +60,8 @@ class _AdminGateSheetState extends ConsumerState<_AdminGateSheet> {
   /// Where the owner lands after unlocking.
   String get _destination =>
       widget.returnTo != null && widget.returnTo!.isNotEmpty
-          ? widget.returnTo!
-          : Routes.adminRoot;
+      ? widget.returnTo!
+      : Routes.adminRoot;
 
   Future<void> _submit() async {
     final AppLocalizations l10n = AppLocalizations.of(context);
@@ -71,10 +69,9 @@ class _AdminGateSheetState extends ConsumerState<_AdminGateSheet> {
     FocusScope.of(context).unfocus();
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    final bool ok = await ref.read(adminGateProvider.notifier).unlock(
-          username: _username.text,
-          password: _password.text,
-        );
+    final bool ok = await ref
+        .read(adminGateProvider.notifier)
+        .unlock(username: _username.text, password: _password.text);
     if (!ok || !mounted) return;
 
     Navigator.of(context).pop();
@@ -138,8 +135,10 @@ class _AdminGateSheetState extends ConsumerState<_AdminGateSheet> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close_rounded,
-                          color: BrandColors.ivory),
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        color: BrandColors.ivory,
+                      ),
                       tooltip: l10n.actionClose,
                       onPressed: () => Navigator.of(context).pop(),
                     ),
@@ -151,10 +150,14 @@ class _AdminGateSheetState extends ConsumerState<_AdminGateSheet> {
               if (widget.alreadyUnlocked) ...<Widget>[
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.lock_open_rounded,
-                      color: BrandColors.success),
-                  title: Text(l10n.gateUnlocked,
-                      style: BrandTypography.bodyMedium),
+                  leading: const Icon(
+                    Icons.lock_open_rounded,
+                    color: BrandColors.success,
+                  ),
+                  title: Text(
+                    l10n.gateUnlocked,
+                    style: BrandTypography.bodyMedium,
+                  ),
                   trailing: TextButton(
                     onPressed: () => context.go(_destination),
                     child: Text(l10n.actionContinue),
@@ -172,9 +175,8 @@ class _AdminGateSheetState extends ConsumerState<_AdminGateSheet> {
                   prefixIcon: const Icon(Icons.person_outline_rounded),
                   border: const OutlineInputBorder(),
                 ),
-                validator: (String? v) => (v ?? '').trim().isEmpty
-                    ? l10n.validateRequired
-                    : null,
+                validator: (String? v) =>
+                    (v ?? '').trim().isEmpty ? l10n.validateRequired : null,
               ),
               const SizedBox(height: 14),
               TextFormField(

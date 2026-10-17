@@ -28,10 +28,8 @@ abstract class ProductMedia with _$ProductMedia {
 
   bool get isVideo => kind.isVideo;
   bool get isImage => kind.isImage;
-  bool get hasThumbnail =>
-      thumbnailPath != null && thumbnailPath!.isNotEmpty;
+  bool get hasThumbnail => thumbnailPath != null && thumbnailPath!.isNotEmpty;
 
-  Duration? get duration => durationSeconds == null
-      ? null
-      : Duration(seconds: durationSeconds!);
+  Duration? get duration =>
+      durationSeconds == null ? null : Duration(seconds: durationSeconds!);
 }

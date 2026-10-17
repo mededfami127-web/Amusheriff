@@ -29,13 +29,13 @@ class SiteSettingsRepositoryImpl implements SiteSettingsRepository {
 
   @override
   Future<SiteSettings?> fetch() => ErrorMapper.guard(() async {
-        final Map<String, dynamic>? row = await _client
-            .from(table)
-            .select()
-            .eq('id', singletonId)
-            .maybeSingle();
-        return row == null ? null : SiteSettings.fromJson(row);
-      });
+    final Map<String, dynamic>? row = await _client
+        .from(table)
+        .select()
+        .eq('id', singletonId)
+        .maybeSingle();
+    return row == null ? null : SiteSettings.fromJson(row);
+  });
 
   @override
   Future<SiteSettings> save(SiteSettingsDraft draft) =>

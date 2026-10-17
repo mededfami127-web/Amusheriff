@@ -10,8 +10,7 @@ enum AppFlavor {
   staging,
   prod;
 
-  static const String _raw =
-      String.fromEnvironment('FLAVOR', defaultValue: '');
+  static const String _raw = String.fromEnvironment('FLAVOR', defaultValue: '');
 
   /// Flavor resolved from `--dart-define=FLAVOR=...`.
   ///
@@ -33,15 +32,15 @@ enum AppFlavor {
   /// Gradle build does not apply it yet (D-019), so dev/staging/prod currently
   /// share one application id and cannot be installed side by side.
   String get applicationIdSuffix => switch (this) {
-        AppFlavor.dev => '.dev',
-        AppFlavor.staging => '.staging',
-        AppFlavor.prod => '',
-      };
+    AppFlavor.dev => '.dev',
+    AppFlavor.staging => '.staging',
+    AppFlavor.prod => '',
+  };
 
   /// Display suffix appended to the app label in non-production builds.
   String get labelSuffix => switch (this) {
-        AppFlavor.dev => ' (dev)',
-        AppFlavor.staging => ' (staging)',
-        AppFlavor.prod => '',
-      };
+    AppFlavor.dev => ' (dev)',
+    AppFlavor.staging => ' (staging)',
+    AppFlavor.prod => '',
+  };
 }

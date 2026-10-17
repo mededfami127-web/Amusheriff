@@ -20,36 +20,37 @@ class ContactRepositoryImpl implements ContactRepository {
 
   @override
   Future<List<ContactLink>> fetchVisible() => ErrorMapper.guard(() async {
-        final List<Map<String, dynamic>> rows =
-            await _remote.fetch(onlyVisible: true);
-        return _decodeList(rows);
-      });
+    final List<Map<String, dynamic>> rows = await _remote.fetch(
+      onlyVisible: true,
+    );
+    return _decodeList(rows);
+  });
 
   @override
   Future<ContactLink?> findById(String id) => ErrorMapper.guard(() async {
-        final Map<String, dynamic>? row = await _remote.byId(id);
-        return row == null ? null : ContactLink.fromJson(row);
-      });
+    final Map<String, dynamic>? row = await _remote.byId(id);
+    return row == null ? null : ContactLink.fromJson(row);
+  });
 
   @override
   Future<ContactLink> create(ContactLinkDraft draft) =>
       ErrorMapper.guard(() async {
-        final Map<String, dynamic> row =
-            await _remote.insert(draft.toInsert());
+        final Map<String, dynamic> row = await _remote.insert(draft.toInsert());
         return ContactLink.fromJson(row);
       });
 
   @override
   Future<ContactLink> update(String id, ContactLinkDraft draft) =>
       ErrorMapper.guard(() async {
-        final Map<String, dynamic> row =
-            await _remote.update(id, draft.toUpdate());
+        final Map<String, dynamic> row = await _remote.update(
+          id,
+          draft.toUpdate(),
+        );
         return ContactLink.fromJson(row);
       });
 
   @override
-  Future<void> delete(String id) =>
-      ErrorMapper.guard(() => _remote.delete(id));
+  Future<void> delete(String id) => ErrorMapper.guard(() => _remote.delete(id));
 
   @override
   Future<void> setVisibility(String id, {required bool isVisible}) =>

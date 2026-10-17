@@ -32,13 +32,12 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> signInWithPassword({
     required String email,
     required String password,
-  }) =>
-      ErrorMapper.guard(() async {
-        await _client.auth.signInWithPassword(
-          email: email.trim(),
-          password: password,
-        );
-      });
+  }) => ErrorMapper.guard(() async {
+    await _client.auth.signInWithPassword(
+      email: email.trim(),
+      password: password,
+    );
+  });
 
   @override
   Future<void> signOut() =>
@@ -46,18 +45,16 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> sendPasswordReset(String email) => ErrorMapper.guard(() async {
-        await _client.auth.resetPasswordForEmail(
-          email.trim(),
-          redirectTo: 'amusheriff://reset-password',
-        );
-      });
+    await _client.auth.resetPasswordForEmail(
+      email.trim(),
+      redirectTo: 'amusheriff://reset-password',
+    );
+  });
 
   @override
   Future<void> updatePassword(String newPassword) => ErrorMapper.guard(
-        () => _client.auth.updateUser(
-          UserAttributes(password: newPassword),
-        ),
-      );
+    () => _client.auth.updateUser(UserAttributes(password: newPassword)),
+  );
 
   @override
   Future<bool> verifyPassword({
@@ -84,17 +81,17 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<bool> isAdmin() => ErrorMapper.guard(() async {
-        final String? userId = _client.auth.currentUser?.id;
-        if (userId == null) return false;
+    final String? userId = _client.auth.currentUser?.id;
+    if (userId == null) return false;
 
-        final Map<String, dynamic>? row = await _client
-            .from(profilesTable)
-            .select('is_admin')
-            .eq('id', userId)
-            .maybeSingle();
+    final Map<String, dynamic>? row = await _client
+        .from(profilesTable)
+        .select('is_admin')
+        .eq('id', userId)
+        .maybeSingle();
 
-        // A missing row means the trigger has not provisioned the profile yet;
-        // treat that as "not an admin" rather than an error.
-        return row?['is_admin'] == true;
-      });
+    // A missing row means the trigger has not provisioned the profile yet;
+    // treat that as "not an admin" rather than an error.
+    return row?['is_admin'] == true;
+  });
 }

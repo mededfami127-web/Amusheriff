@@ -42,10 +42,9 @@ class _AdminGatePasswordPageState extends ConsumerState<AdminGatePasswordPage> {
     FocusScope.of(context).unfocus();
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    final bool ok = await ref.read(adminGateProvider.notifier).changePassword(
-          current: _current.text,
-          next: _next.text,
-        );
+    final bool ok = await ref
+        .read(adminGateProvider.notifier)
+        .changePassword(current: _current.text, next: _next.text);
 
     if (!mounted) return;
     messenger.showSnackBar(
@@ -83,8 +82,11 @@ class _AdminGatePasswordPageState extends ConsumerState<AdminGatePasswordPage> {
                 ),
                 child: Row(
                   children: <Widget>[
-                    const Icon(Icons.info_outline_rounded,
-                        size: 18, color: BrandColors.gold),
+                    const Icon(
+                      Icons.info_outline_rounded,
+                      size: 18,
+                      color: BrandColors.gold,
+                    ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
@@ -136,8 +138,8 @@ class _AdminGatePasswordPageState extends ConsumerState<AdminGatePasswordPage> {
                 ),
                 validator: (String? v) =>
                     Validators.confirmPassword(v, _next.text) == null
-                        ? null
-                        : l10n.validatePasswordMismatch,
+                    ? null
+                    : l10n.validatePasswordMismatch,
               ),
               const SizedBox(height: 10),
               Text(

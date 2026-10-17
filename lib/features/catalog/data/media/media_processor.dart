@@ -52,8 +52,7 @@ class MediaProcessor {
   Future<ProcessedMedia> process({
     required XFile file,
     required MediaKind kind,
-  }) =>
-      kind.isVideo ? _processVideo(file) : _processImage(file);
+  }) => kind.isVideo ? _processVideo(file) : _processImage(file);
 
   Future<ProcessedMedia> _processImage(XFile file) async {
     final Uint8List? bytes = await FlutterImageCompress.compressWithFile(
@@ -95,9 +94,11 @@ class MediaProcessor {
       );
     }
 
-    final int? durationSeconds =
-        info.duration == null ? null : (info.duration! / 1000).round();
-    if (durationSeconds != null && durationSeconds > MediaKind.maxVideoSeconds) {
+    final int? durationSeconds = info.duration == null
+        ? null
+        : (info.duration! / 1000).round();
+    if (durationSeconds != null &&
+        durationSeconds > MediaKind.maxVideoSeconds) {
       throw const MediaFailure(messageKey: 'validateVideoTooLong');
     }
 

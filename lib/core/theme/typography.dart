@@ -30,8 +30,8 @@ abstract final class BrandTypography {
   ];
 
   static List<FontVariation> _weight(double w) => <FontVariation>[
-        FontVariation('wght', w),
-      ];
+    FontVariation('wght', w),
+  ];
 
   // ── Display (Playfair Display) ────────────────────────────────────────────
   static const TextStyle brandTitle = TextStyle(
@@ -129,7 +129,8 @@ abstract final class BrandTypography {
   );
 
   /// Convenience accessor for a specific variable weight on the display face.
-  static TextStyle displayWeighted(double wght, {double size = 32}) => TextStyle(
+  static TextStyle displayWeighted(double wght, {double size = 32}) =>
+      TextStyle(
         fontFamily: displayFamily,
         fontSize: size,
         height: 1.14,

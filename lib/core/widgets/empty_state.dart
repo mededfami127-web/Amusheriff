@@ -27,7 +27,10 @@ class EmptyState extends StatelessWidget {
     final bool dark = Theme.of(context).brightness == Brightness.dark;
     return Center(
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 32, vertical: compact ? 28 : 56),
+        padding: EdgeInsets.symmetric(
+          horizontal: 32,
+          vertical: compact ? 28 : 56,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
@@ -45,18 +48,23 @@ class EmptyState extends StatelessWidget {
                   ),
                 ],
               ),
-              child: Icon(icon, color: BrandColors.ivory, size: compact ? 30 : 38),
+              child: Icon(
+                icon,
+                color: BrandColors.ivory,
+                size: compact ? 30 : 38,
+              ),
             ),
             const SizedBox(height: 22),
             Text(
               title,
               textAlign: TextAlign.center,
-              style: BrandTypography.displayForLocale(
-                Localizations.localeOf(context),
-                base: BrandTypography.displaySmall,
-              ).copyWith(
-                color: dark ? BrandColors.goldLight : BrandColors.charcoal,
-              ),
+              style:
+                  BrandTypography.displayForLocale(
+                    Localizations.localeOf(context),
+                    base: BrandTypography.displaySmall,
+                  ).copyWith(
+                    color: dark ? BrandColors.goldLight : BrandColors.charcoal,
+                  ),
             ),
             const SizedBox(height: 12),
             const SizedBox(width: 90, child: GoldDivider(withOrnament: true)),
@@ -67,9 +75,7 @@ class EmptyState extends StatelessWidget {
                 message,
                 textAlign: TextAlign.center,
                 style: BrandTypography.bodyMedium.copyWith(
-                  color: BrandTypography.mutedOn(
-                    Theme.of(context).brightness,
-                  ),
+                  color: BrandTypography.mutedOn(Theme.of(context).brightness),
                 ),
               ),
             ),

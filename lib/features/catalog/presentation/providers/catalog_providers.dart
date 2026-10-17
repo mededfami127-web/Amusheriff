@@ -57,17 +57,16 @@ Future<Category?> categoryBySlug(Ref ref, String slug) =>
 /// Counted client-side from the same Realtime stream the storefront already
 /// subscribes to, so no extra view or round trip is needed.
 @riverpod
-Stream<Map<String, int>> categoryProductCounts(Ref ref) =>
-    ref.watch(productRepositoryProvider).watch(onlyPublished: true).map(
-      (List<Product> products) {
-        final Map<String, int> counts = <String, int>{};
-        for (final Product product in products) {
-          counts[product.categoryId] =
-              (counts[product.categoryId] ?? 0) + 1;
-        }
-        return counts;
-      },
-    );
+Stream<Map<String, int>> categoryProductCounts(Ref ref) => ref
+    .watch(productRepositoryProvider)
+    .watch(onlyPublished: true)
+    .map((List<Product> products) {
+      final Map<String, int> counts = <String, int>{};
+      for (final Product product in products) {
+        counts[product.categoryId] = (counts[product.categoryId] ?? 0) + 1;
+      }
+      return counts;
+    });
 
 /// Storefront product list with media joined in memory.
 ///
@@ -80,7 +79,9 @@ Stream<List<Product>> storefrontProducts(
   bool featured = false,
 }) {
   final ProductRepository products = ref.watch(productRepositoryProvider);
-  final ProductMediaRepository media = ref.watch(productMediaRepositoryProvider);
+  final ProductMediaRepository media = ref.watch(
+    productMediaRepositoryProvider,
+  );
 
   return combineLatest(
     products.watch(
@@ -97,7 +98,9 @@ Stream<List<Product>> storefrontProducts(
 @riverpod
 Stream<List<Product>> adminProducts(Ref ref, {String? categoryId}) {
   final ProductRepository products = ref.watch(productRepositoryProvider);
-  final ProductMediaRepository media = ref.watch(productMediaRepositoryProvider);
+  final ProductMediaRepository media = ref.watch(
+    productMediaRepositoryProvider,
+  );
 
   return combineLatest(
     products.watch(categoryId: categoryId, onlyPublished: false),
@@ -110,16 +113,17 @@ Stream<List<Product>> adminProducts(Ref ref, {String? categoryId}) {
 @riverpod
 Stream<Product?> productDetail(Ref ref, String id) {
   final ProductRepository products = ref.watch(productRepositoryProvider);
-  final ProductMediaRepository media = ref.watch(productMediaRepositoryProvider);
-
-  return combineLatest(
-    products.watchOne(id),
-    media.watchForProduct(id),
-    (Product? product, List<ProductMedia> items) {
-      if (product == null) return null;
-      return product.copyWith(media: _sortMedia(items));
-    },
+  final ProductMediaRepository media = ref.watch(
+    productMediaRepositoryProvider,
   );
+
+  return combineLatest(products.watchOne(id), media.watchForProduct(id), (
+    Product? product,
+    List<ProductMedia> items,
+  ) {
+    if (product == null) return null;
+    return product.copyWith(media: _sortMedia(items));
+  });
 }
 
 @riverpod
@@ -127,17 +131,18 @@ Future<List<Product>> searchProducts(Ref ref, String query) =>
     ref.watch(productRepositoryProvider).search(query);
 
 /// Builds a `productId -> List<ProductMedia>` index and attaches it.
-List<Product> _attachMedia(
-  List<Product> products,
-  List<ProductMedia> media,
-) {
-  final Map<String, List<ProductMedia>> byProduct =
-      groupBy(media, (ProductMedia m) => m.productId);
+List<Product> _attachMedia(List<Product> products, List<ProductMedia> media) {
+  final Map<String, List<ProductMedia>> byProduct = groupBy(
+    media,
+    (ProductMedia m) => m.productId,
+  );
 
   return products
-      .map((Product p) => p.copyWith(
-            media: _sortMedia(byProduct[p.id] ?? const <ProductMedia>[]),
-          ))
+      .map(
+        (Product p) => p.copyWith(
+          media: _sortMedia(byProduct[p.id] ?? const <ProductMedia>[]),
+        ),
+      )
       .toList(growable: false);
 }
 

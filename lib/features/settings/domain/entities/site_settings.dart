@@ -32,11 +32,11 @@ abstract class SiteSettings with _$SiteSettings {
   static const SiteSettings fallback = SiteSettings();
 
   String storeNameFor(String languageCode) => switch (languageCode) {
-        'am' => _pick(storeNameAm, storeNameEn),
-        'ar' => _pick(storeNameAr, storeNameEn),
-        'om' => _pick(storeNameOm, storeNameEn),
-        _ => _pick(storeNameEn, storeNameAm),
-      };
+    'am' => _pick(storeNameAm, storeNameEn),
+    'ar' => _pick(storeNameAr, storeNameEn),
+    'om' => _pick(storeNameOm, storeNameEn),
+    _ => _pick(storeNameEn, storeNameAm),
+  };
 
   bool get hasAbout => about != null && about!.trim().isNotEmpty;
   bool get hasTagline => tagline != null && tagline!.trim().isNotEmpty;
@@ -61,9 +61,9 @@ enum AppLanguage {
   bool get isRtl => this == AppLanguage.ar;
 
   static AppLanguage fromCode(String? code) => AppLanguage.values.firstWhere(
-        (AppLanguage l) => l.code == code,
-        orElse: () => AppLanguage.en,
-      );
+    (AppLanguage l) => l.code == code,
+    orElse: () => AppLanguage.en,
+  );
 
   /// Resolves the device locale to a supported language, defaulting to English.
   static AppLanguage fromDeviceLocale(String? languageCode) {

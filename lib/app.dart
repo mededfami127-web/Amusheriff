@@ -25,8 +25,9 @@ class AmuApp extends ConsumerWidget {
 
     // The owner's own wording for the language on screen. Empty until the first
     // event (and whenever the fetch fails), which renders the shipped ARB text.
-    final Map<String, String> overrides =
-        ref.watch(textOverridesValueProvider(prefs.language.code));
+    final Map<String, String> overrides = ref.watch(
+      textOverridesValueProvider(prefs.language.code),
+    );
 
     return MaterialApp.router(
       onGenerateTitle: (BuildContext context) =>
