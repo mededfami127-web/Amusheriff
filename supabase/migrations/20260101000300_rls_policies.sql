@@ -1,5 +1,4 @@
--- ═══════════════════════════════════════════════════════════════════════════
--- 004 · Row Level Security
+-- 004 - Row Level Security
 --
 -- Model
 --   * RLS is enabled on EVERY table. With no policy, access is denied, so the
@@ -10,7 +9,6 @@
 --     write a row it would not be allowed to read back.
 --   * RLS is NOT forced on the table owner: SECURITY DEFINER helpers
 --     (is_admin, reorder_rows, audit_row, handle_new_user) must keep working.
--- ═══════════════════════════════════════════════════════════════════════════
 
 alter table public.profiles       enable row level security;
 alter table public.site_settings  enable row level security;
@@ -21,13 +19,11 @@ alter table public.contact_links  enable row level security;
 alter table public.inquiries      enable row level security;
 alter table public.audit_log      enable row level security;
 
--- ───────────────────────────────────────────────────────────────────────────
 -- profiles
 --   A user may read and update their own row. There is deliberately NO insert
 --   policy: rows appear only through handle_new_user(). A user cannot promote
 --   themselves because guard_profiles_is_admin() rejects the write, and the
 --   UPDATE policy's WITH CHECK pins the row id to the caller.
--- ───────────────────────────────────────────────────────────────────────────
 drop policy if exists profiles_select_own on public.profiles;
 create policy profiles_select_own on public.profiles
   for select to authenticated
@@ -40,9 +36,7 @@ create policy profiles_update_own on public.profiles
   using (id = auth.uid())
   with check (id = auth.uid());
 
--- ───────────────────────────────────────────────────────────────────────────
--- site_settings — world-readable branding, owner-writable singleton row
--- ───────────────────────────────────────────────────────────────────────────
+-- site_settings - world-readable branding, owner-writable singleton row
 drop policy if exists site_settings_public_select on public.site_settings;
 create policy site_settings_public_select on public.site_settings
   for select to anon, authenticated
@@ -59,9 +53,7 @@ create policy site_settings_admin_update on public.site_settings
   using (public.is_admin() and id = 1)
   with check (public.is_admin() and id = 1);
 
--- ───────────────────────────────────────────────────────────────────────────
 -- categories
--- ───────────────────────────────────────────────────────────────────────────
 drop policy if exists categories_public_select on public.categories;
 create policy categories_public_select on public.categories
   for select to anon, authenticated
@@ -88,9 +80,7 @@ create policy categories_admin_delete on public.categories
   for delete to authenticated
   using (public.is_admin());
 
--- ───────────────────────────────────────────────────────────────────────────
--- products — visible only when published AND its category is visible
--- ───────────────────────────────────────────────────────────────────────────
+-- products - visible only when published AND its category is visible
 drop policy if exists products_public_select on public.products;
 create policy products_public_select on public.products
   for select to anon, authenticated
@@ -125,9 +115,7 @@ create policy products_admin_delete on public.products
   for delete to authenticated
   using (public.is_admin());
 
--- ───────────────────────────────────────────────────────────────────────────
--- product_media — visible only while its product is publicly visible
--- ───────────────────────────────────────────────────────────────────────────
+-- product_media - visible only while its product is publicly visible
 drop policy if exists product_media_public_select on public.product_media;
 create policy product_media_public_select on public.product_media
   for select to anon, authenticated
@@ -163,9 +151,7 @@ create policy product_media_admin_delete on public.product_media
   for delete to authenticated
   using (public.is_admin());
 
--- ───────────────────────────────────────────────────────────────────────────
 -- contact_links
--- ───────────────────────────────────────────────────────────────────────────
 drop policy if exists contact_links_public_select on public.contact_links;
 create policy contact_links_public_select on public.contact_links
   for select to anon, authenticated
@@ -192,9 +178,7 @@ create policy contact_links_admin_delete on public.contact_links
   for delete to authenticated
   using (public.is_admin());
 
--- ───────────────────────────────────────────────────────────────────────────
--- inquiries — anonymous INSERT only; the owner reads and prunes
--- ───────────────────────────────────────────────────────────────────────────
+-- inquiries - anonymous INSERT only; the owner reads and prunes
 drop policy if exists inquiries_public_insert on public.inquiries;
 create policy inquiries_public_insert on public.inquiries
   for insert to anon, authenticated
@@ -210,9 +194,7 @@ create policy inquiries_admin_delete on public.inquiries
   for delete to authenticated
   using (public.is_admin());
 
--- ───────────────────────────────────────────────────────────────────────────
--- audit_log — owner-readable, append-only through the audit trigger only
--- ───────────────────────────────────────────────────────────────────────────
+-- audit_log - owner-readable, append-only through the audit trigger only
 drop policy if exists audit_log_admin_select on public.audit_log;
 create policy audit_log_admin_select on public.audit_log
   for select to authenticated

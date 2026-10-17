@@ -79,6 +79,12 @@ List<AdminDestination> _destinations(AppLocalizations l10n) =>
         route: Routes.adminTextEditor,
       ),
       AdminDestination(
+        label: l10n.adminSystemCheck,
+        textKey: 'adminSystemCheck',
+        icon: Icons.health_and_safety_outlined,
+        route: Routes.adminSystemCheck,
+      ),
+      AdminDestination(
         label: l10n.adminChangePassword,
         textKey: 'adminChangePassword',
         icon: Icons.password_rounded,

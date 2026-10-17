@@ -488,6 +488,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminStrengthWeak => 'Weak';
 
   @override
+  String get adminSystemCheck => 'System check';
+
+  @override
   String get adminTagline => 'Tagline';
 
   @override
@@ -614,6 +617,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorAuth => 'We could not sign you in.';
+
+  @override
+  String get errorBackendNotSetUp =>
+      'The database is not set up on this build\'s server yet. Open the owner gateway\'s system check to see what to run.';
 
   @override
   String get errorCheckViolation => 'A value is outside the allowed range.';
@@ -880,6 +887,62 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get stateSaving => 'Saving…';
+
+  @override
+  String get systemCheckAccount => 'Signed in as';
+
+  @override
+  String get systemCheckAllGood =>
+      'Everything this build needs is present on the backend.';
+
+  @override
+  String get systemCheckBuild => 'Build';
+
+  @override
+  String get systemCheckFixDatabase =>
+      'supabase db push — applies every table, bucket and policy';
+
+  @override
+  String get systemCheckFixFunction =>
+      'supabase functions deploy inquiry — deploys the contact endpoint';
+
+  @override
+  String get systemCheckFixNetwork =>
+      'Check the Supabase project URL in this build\'s config and your internet connection.';
+
+  @override
+  String get systemCheckFixSeed => 'supabase db seed — adds the starter rows';
+
+  @override
+  String get systemCheckMissing => 'Not set up';
+
+  @override
+  String get systemCheckMissingSummary =>
+      'Some of what this build needs is missing on the backend. Run these in the project folder, then run the checks again:';
+
+  @override
+  String get systemCheckNotSignedIn => 'Not signed in';
+
+  @override
+  String get systemCheckOk => 'Ready';
+
+  @override
+  String get systemCheckProject => 'Supabase project';
+
+  @override
+  String get systemCheckRestricted => 'Ready · restricted';
+
+  @override
+  String get systemCheckRun => 'Run checks again';
+
+  @override
+  String get systemCheckTitle => 'System check';
+
+  @override
+  String get systemCheckUnreachable => 'Unreachable';
+
+  @override
+  String get systemCheckUnknown => 'Unknown';
 
   @override
   String get tagline =>

@@ -16,6 +16,7 @@ String localizeFailure(AppLocalizations l10n, AppFailure failure) {
 
   final String message = switch (failure.messageKey) {
     'errorNetwork' => l10n.errorNetwork,
+    'errorBackendNotSetUp' => l10n.errorBackendNotSetUp,
     'errorTimeout' => l10n.errorTimeout,
     'errorServer' => l10n.errorServer,
     'errorAuth' => l10n.errorAuth,

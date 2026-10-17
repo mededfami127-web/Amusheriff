@@ -58,3 +58,4 @@ config/*.json
 *.jks
 *.keystore
 key.properties
+regression2/

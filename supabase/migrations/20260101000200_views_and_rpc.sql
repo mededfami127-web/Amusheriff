@@ -1,15 +1,11 @@
--- ═══════════════════════════════════════════════════════════════════════════
--- 003 · Public views, RPCs and the inquiry rate limiter
--- ═══════════════════════════════════════════════════════════════════════════
+-- 003 - Public views, RPCs and the inquiry rate limiter
 
--- ───────────────────────────────────────────────────────────────────────────
--- v_products_public — published products in visible categories, each joined
+-- v_products_public - published products in visible categories, each joined
 -- with its cover media and media counts.
 --
 -- `security_invoker = true` (PostgreSQL 15+) means the view is evaluated with
 -- the CALLER's privileges, so RLS still applies. Without it, a view owned by
 -- the migration role would leak unpublished rows to anonymous visitors.
--- ───────────────────────────────────────────────────────────────────────────
 create or replace view public.v_products_public
 with (security_invoker = true)
 as
@@ -59,9 +55,7 @@ where p.is_published
 comment on view public.v_products_public is
   'Storefront read model: published products in visible categories with cover media.';
 
--- ───────────────────────────────────────────────────────────────────────────
--- v_categories_with_counts — categories plus their published-product counts
--- ───────────────────────────────────────────────────────────────────────────
+-- v_categories_with_counts - categories plus their published-product counts
 create or replace view public.v_categories_with_counts
 with (security_invoker = true)
 as
@@ -86,12 +80,10 @@ from public.categories c;
 comment on view public.v_categories_with_counts is
   'Categories with their published product counts.';
 
--- ───────────────────────────────────────────────────────────────────────────
--- search_products — trigram + substring search, RLS-safe
+-- search_products - trigram + substring search, RLS-safe
 --
 -- `security invoker` (the default) so RLS on public.products still applies:
 -- an anonymous caller can only ever match published rows.
--- ───────────────────────────────────────────────────────────────────────────
 create or replace function public.search_products(q text, p_limit int default 40)
 returns setof public.products
 language sql
@@ -132,12 +124,10 @@ comment on function public.search_products(text, int) is
 revoke all on function public.search_products(text, int) from public;
 grant execute on function public.search_products(text, int) to anon, authenticated, service_role;
 
--- ───────────────────────────────────────────────────────────────────────────
--- reorder_rows — persist a whole manual ordering in one transaction
+-- reorder_rows - persist a whole manual ordering in one transaction
 --
 -- SECURITY DEFINER because it performs dynamic SQL; the explicit is_admin()
 -- check is therefore mandatory (RLS is bypassed inside a definer function).
--- ───────────────────────────────────────────────────────────────────────────
 create or replace function public.reorder_rows(p_table text, p_ids uuid[])
 returns void
 language plpgsql
@@ -152,7 +142,7 @@ begin
     raise exception 'not authorised' using errcode = '42501';
   end if;
 
-  if p_table not in ('categories', 'products', 'product_media', 'contact_links') then
+  if p_table not in ('categories', 'products', 'product_media') then
     raise exception 'reorder_rows: unsupported table %', p_table
       using errcode = '22023';
   end if;
@@ -175,13 +165,11 @@ comment on function public.reorder_rows(text, uuid[]) is
 revoke all on function public.reorder_rows(text, uuid[]) from public;
 grant execute on function public.reorder_rows(text, uuid[]) to authenticated, service_role;
 
--- ───────────────────────────────────────────────────────────────────────────
 -- inquiries rate limiting
 --
 -- The storefront writes leads straight to public.inquiries (RLS allows anon
 -- INSERT only). A BEFORE INSERT trigger caps how fast a single device can do
 -- it, so the protection holds even before the Edge Function layer exists.
--- ───────────────────────────────────────────────────────────────────────────
 create or replace function public.guard_inquiry_rate()
 returns trigger
 language plpgsql

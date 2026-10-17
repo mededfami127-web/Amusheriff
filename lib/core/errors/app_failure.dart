@@ -137,8 +137,12 @@ final class MediaFailure extends AppFailure {
 
 /// Storage (bucket) access failed.
 final class StorageFailure extends AppFailure {
-  const StorageFailure({super.debugMessage, super.cause, super.statusCode})
-    : super(messageKey: 'errorStorage');
+  const StorageFailure({
+    super.debugMessage,
+    super.cause,
+    super.statusCode,
+    super.messageKey = 'errorStorage',
+  });
 
   @override
   bool get isRetryable => true;

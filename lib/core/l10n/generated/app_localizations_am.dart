@@ -482,6 +482,9 @@ class AppLocalizationsAm extends AppLocalizations {
   String get adminStrengthWeak => 'አትካለ';
 
   @override
+  String get adminSystemCheck => 'የስርዓት ምርመራ';
+
+  @override
   String get adminTagline => 'አፈጻጸም';
 
   @override
@@ -606,6 +609,10 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get errorAuth => 'መግቢያ አልተሳካም።';
+
+  @override
+  String get errorBackendNotSetUp =>
+      'የዳታቤዝ በዚህ መግንባታ ማውረጃ ላይ አልተዘጋጀም። ምን መሠራት እንዳለብዎት ለማየት የባለቤቱን መግቢያ ይክፈቱ።';
 
   @override
   String get errorCheckViolation => 'አንድ እሴት ከተፈቀደው ክልል ውጭ ነው።';
@@ -864,6 +871,61 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get stateSaving => 'በመቀመጥ ላይ…';
+
+  @override
+  String get systemCheckAccount => 'የተገናኘው';
+
+  @override
+  String get systemCheckAllGood => 'ይህ መግንባታ የሚፈልገው ሁሉ በበኋኑ አለ።';
+
+  @override
+  String get systemCheckBuild => 'መግንባታ';
+
+  @override
+  String get systemCheckFixDatabase =>
+      'supabase db push — ሁሉንም ሰንጠረዥ፣ ቅርጫትና ፖሊሲ ይተግብራል';
+
+  @override
+  String get systemCheckFixFunction =>
+      'supabase functions deploy inquiry — የመገናኛ መጨረሻን ይወስዳል';
+
+  @override
+  String get systemCheckFixNetwork =>
+      'በዚህ መግንባታ ማዋቀሪያ ውስጥ ያለውን የ Supabase ፕሮጀክት አድራሻና ኢንተርኔት ግንኙነትዎን ያረጋግጡ።';
+
+  @override
+  String get systemCheckFixSeed => 'supabase db seed — የመጀመሪያ ርድፍ ይጨምራል';
+
+  @override
+  String get systemCheckMissing => 'አልተዘጋጀም';
+
+  @override
+  String get systemCheckMissingSummary =>
+      'የመግንባቱ አንቀጽ አንዳንድ ይጠፋል። በፕሮጀክቱ ማውረጃ ውስጥ ይህን ያሂሙ፣ ከዚያም ምርመራውን እንደገና ያሂሙ፦';
+
+  @override
+  String get systemCheckNotSignedIn => 'አልገናኙም';
+
+  @override
+  String get systemCheckOk => 'ዝግጁ';
+
+  @override
+  String get systemCheckProject => 'የ Supabase ፕሮጀክት';
+
+  @override
+  String get systemCheckRestricted => 'ዝግጁ · ገደብ አለው';
+
+  @override
+  String get systemCheckRun => 'ምርመራውን እንደገና አሂም';
+
+  @override
+  String get systemCheckTitle => 'የስርዓት ምርመራ';
+
+  @override
+  String get systemCheckUnreachable => 'አይደረስም';
+
+  @override
+  String get systemCheckUnknown => 'አልታወቀም';
 
   @override
   String get tagline => 'የቅንጦት የአረብ መጅሊስ እና ሶፋዎች፣ ለቤትዎ በእጅ የተሰሩ';

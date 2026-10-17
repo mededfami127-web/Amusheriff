@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../utils/app_logger.dart';
 import 'app_failure.dart';
+import 'backend_asset_status.dart';
 
 /// Translates the exceptions thrown by Supabase, `dart:io` and the platform
 /// into the sealed [AppFailure] hierarchy. Repository implementations call
@@ -26,6 +27,16 @@ abstract final class ErrorMapper {
 
     if (error is PostgrestException) {
       final String code = (error.code ?? '').trim();
+      // The relation does not exist on this project at all — the migrations
+      // were never applied to the backend this build points at. Naming that
+      // fix is far more useful than "service unavailable".
+      if (classifyBackendFailure(error) == SystemAssetStatus.missing) {
+        return ServerFailure(
+          messageKey: 'errorBackendNotSetUp',
+          debugMessage: error.message,
+          cause: error,
+        );
+      }
       // 42501 = insufficient_privilege → a row-level-security policy denied us.
       if (code == '42501') {
         return PermissionFailure(debugMessage: error.message, cause: error);
@@ -60,6 +71,16 @@ abstract final class ErrorMapper {
 
     if (error is StorageException) {
       final int? status = _intOrNull(error.statusCode);
+      // A bucket the storage migration never created is the same story as a
+      // missing table: the backend is not set up yet.
+      if (classifyBackendFailure(error) == SystemAssetStatus.missing) {
+        return StorageFailure(
+          messageKey: 'errorBackendNotSetUp',
+          debugMessage: error.message,
+          cause: error,
+          statusCode: status,
+        );
+      }
       if (status == 403) {
         return PermissionFailure(
           debugMessage: error.message,
@@ -71,6 +92,28 @@ abstract final class ErrorMapper {
         debugMessage: error.message,
         cause: error,
         statusCode: status,
+      );
+    }
+
+    if (error is FunctionException) {
+      // A 404 from the gateway means the function was never deployed.
+      if (classifyBackendFailure(error) == SystemAssetStatus.missing) {
+        return ServerFailure(
+          messageKey: 'errorBackendNotSetUp',
+          debugMessage: error.details?.toString(),
+          cause: error,
+        );
+      }
+      if (error is FunctionsFetchException) {
+        return NetworkFailure(
+          debugMessage: error.details?.toString(),
+          cause: error,
+        );
+      }
+      return ServerFailure(
+        debugMessage: error.details?.toString(),
+        cause: error,
+        statusCode: error.status,
       );
     }
 

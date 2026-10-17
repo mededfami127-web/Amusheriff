@@ -1,5 +1,4 @@
--- ═══════════════════════════════════════════════════════════════════════════
--- 006 · Realtime publication
+-- 006 - Realtime publication
 --
 --   The storefront and the admin gateway both watch tables with `.stream()`,
 --   and Realtime only delivers events for tables that belong to the
@@ -16,7 +15,6 @@
 --   Idempotent: the publication is created when it is missing (on a hosted
 --   project it already exists, created by the platform) and each table is
 --   added only when it is not already a member, so re-applying is a no-op.
--- ═══════════════════════════════════════════════════════════════════════════
 
 do $$
 declare

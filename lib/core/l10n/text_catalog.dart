@@ -1619,6 +1619,16 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
     },
   ),
   AppTextEntry(
+    key: 'adminSystemCheck',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'System check',
+      'am': 'የስርዓት ምርመራ',
+      'ar': 'فحص النظام',
+      'om': 'Miraannee Sistiimii',
+    },
+  ),
+  AppTextEntry(
     key: 'adminTagline',
     sectionKey: 'adminSiteSettings',
     defaults: <String, String>{
@@ -2027,6 +2037,16 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
       'am': 'መግቢያ አልተሳካም።',
       'ar': 'تعذّر تسجيل دخولك.',
       'om': 'Si seenessuu hin dandeenye.',
+    },
+  ),
+  AppTextEntry(
+    key: 'errorBackendNotSetUp',
+    sectionKey: 'groupErrors',
+    defaults: <String, String>{
+      'en': 'The database is not set up on this build\'s server yet. Open the owner gateway\'s system check to see what to run.',
+      'am': 'የዳታቤዝ በዚህ መግንባታ ማውረጃ ላይ አልተዘጋጀም። ምን መሠራት እንዳለብዎት ለማየት የባለቤቱን መግቢያ ይክፈቱ።',
+      'ar': 'قاعدة البيانات غير مجهّزة على خادم هذا البناء بعد. افتح فحص النظام في بوابة المالك لترى ما يجب تشغيله.',
+      'om': 'Daataazeen barniisa kanaaf kabaja keessatti hin qophinamne. Waan firiruu qabu arguuf miraannee abbaa qabeenyaa bani.',
     },
   ),
   AppTextEntry(
@@ -2826,6 +2846,177 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
       'am': 'በመቀመጥ ላይ…',
       'ar': 'جارٍ الحفظ…',
       'om': 'Olkaa\'aa jira…',
+    },
+  ),
+  AppTextEntry(
+    key: 'systemCheckAccount',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'Signed in as',
+      'am': 'የተገናኘው',
+      'ar': 'مسجّل الدخول باسم',
+      'om': 'Itti seeneen',
+    },
+  ),
+  AppTextEntry(
+    key: 'systemCheckAllGood',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'Everything this build needs is present on the backend.',
+      'am': 'ይህ መግንባታ የሚፈልገው ሁሉ በበኋኑ አለ።',
+      'ar': 'كل ما يحتاجه هذا البناء متوفر في الخلفية.',
+      'om': 'Wan barniin iyoobniin hundi baqata keessummatti jira.',
+    },
+  ),
+  AppTextEntry(
+    key: 'systemCheckBuild',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'Build',
+      'am': 'መግንባታ',
+      'ar': 'البناء',
+      'om': 'Barnii',
+    },
+  ),
+  AppTextEntry(
+    key: 'systemCheckFixDatabase',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'supabase db push — applies every table, bucket and policy',
+      'am': 'supabase db push — ሁሉንም ሰንጠረዥ፣ ቅርጫትና ፖሊሲ ይተግብራል',
+      'ar': 'supabase db push — يطبّق كل الجداول والحاويات والسياسات',
+      'om':
+          'supabase db push — gabatee hundi, kurtuu fi polisiin hundi fudhata',
+    },
+  ),
+  AppTextEntry(
+    key: 'systemCheckFixFunction',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'supabase functions deploy inquiry — deploys the contact endpoint',
+      'am': 'supabase functions deploy inquiry — የመገናኛ መጨረሻን ይወስዳል',
+      'ar': 'supabase functions deploy inquiry — ينشر نقطة نهاية التواصل',
+      'om': 'supabase functions deploy inquiry — xixiqqaan walqannaa dabsa',
+    },
+  ),
+  AppTextEntry(
+    key: 'systemCheckFixNetwork',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'Check the Supabase project URL in this build\'s config and your internet connection.',
+      'am': 'በዚህ መግንባታ ማዋቀሪያ ውስጥ ያለውን የ Supabase ፕሮጀክት አድራሻና ኢንተርኔት ግንኙነትዎን ያረጋግጡ።',
+      'ar': 'تحقّق من رابط مشروع Supabase في إعدادات هذا البناء واتصالك بالإنترنت.',
+      'om': 'Teessoo piroojektii Supabase kabaja barnii kanaa fi walqunnaa intarneetii kee mirkaneessaa.',
+    },
+  ),
+  AppTextEntry(
+    key: 'systemCheckFixSeed',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'supabase db seed — adds the starter rows',
+      'am': 'supabase db seed — የመጀመሪያ ርድፍ ይጨምራል',
+      'ar': 'supabase db seed — يضيف الصفوف الابتدائية',
+      'om': 'supabase db seed — gadii deebii\'uu dabalata',
+    },
+  ),
+  AppTextEntry(
+    key: 'systemCheckMissing',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'Not set up',
+      'am': 'አልተዘጋጀም',
+      'ar': 'لم يُجهَّز',
+      'om': 'Hin qophinamne',
+    },
+  ),
+  AppTextEntry(
+    key: 'systemCheckMissingSummary',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'Some of what this build needs is missing on the backend. Run these in the project folder, then run the checks again:',
+      'am': 'የመግንባቱ አንቀጽ አንዳንድ ይጠፋል። በፕሮጀክቱ ማውረጃ ውስጥ ይህን ያሂሙ፣ ከዚያም ምርመራውን እንደገና ያሂሙ፦',
+      'ar': 'بعض ما يحتاجه هذا البناء مفقود. شغّل هذه الأوامر في مجلد المشروع ثم أعد الفحص:',
+      'om': 'Wan barniin iyoobniin qabu muraasa darbii jira. Kun tooroo piroojektii keessaa firiraa, sana booda miraannee irra deebi\'aa firir:',
+    },
+  ),
+  AppTextEntry(
+    key: 'systemCheckNotSignedIn',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'Not signed in',
+      'am': 'አልገናኙም',
+      'ar': 'غير مسجّل',
+      'om': 'Hin seenne',
+    },
+  ),
+  AppTextEntry(
+    key: 'systemCheckOk',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'Ready',
+      'am': 'ዝግጁ',
+      'ar': 'جاهز',
+      'om': 'Qophiina',
+    },
+  ),
+  AppTextEntry(
+    key: 'systemCheckProject',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'Supabase project',
+      'am': 'የ Supabase ፕሮጀክት',
+      'ar': 'مشروع Supabase',
+      'om': 'Piroojektii Supabase',
+    },
+  ),
+  AppTextEntry(
+    key: 'systemCheckRestricted',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'Ready · restricted',
+      'am': 'ዝግጁ · ገደብ አለው',
+      'ar': 'جاهز · مقيّد',
+      'om': 'Qophiina · dandeettii qabata',
+    },
+  ),
+  AppTextEntry(
+    key: 'systemCheckRun',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'Run checks again',
+      'am': 'ምርመራውን እንደገና አሂም',
+      'ar': 'إعادة تشغيل الفحص',
+      'om': 'Miraannee irra deebi\'aa firir',
+    },
+  ),
+  AppTextEntry(
+    key: 'systemCheckTitle',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'System check',
+      'am': 'የስርዓት ምርመራ',
+      'ar': 'فحص النظام',
+      'om': 'Miraannee Sistiimii',
+    },
+  ),
+  AppTextEntry(
+    key: 'systemCheckUnknown',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'Unknown',
+      'am': 'አልታወቀም',
+      'ar': 'غير معروف',
+      'om': 'Tixxifama',
+    },
+  ),
+  AppTextEntry(
+    key: 'systemCheckUnreachable',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'Unreachable',
+      'am': 'አይደረስም',
+      'ar': 'لا يمكن الوصوله',
+      'om': 'Hin ga\'anne',
     },
   ),
   AppTextEntry(

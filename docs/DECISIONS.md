@@ -582,6 +582,43 @@ signed AAB on every push to `main` would be waste. It has been exercised for rea
 once already: the `v1.0.0` tag ran the full `build` workflow to green in 11m42s
 and uploaded the signed APK and AAB.
 
+### D-036 — Diagnosing "every screen shows an error" on the device
+
+The device, on-device integration and promotion tests that Part 2 was hand-to-delivery
+on never got built (D-034, item E.5 above), so nothing ever exercised a shipped APK
+against a real Supabase project. When the owner pulled an APK whose backend was not set
+up behind it, the app could only answer with generic "service unavailable"-style banners
+on every screen with no way to tell the three causes apart − the migrations were never
+applied to the project behind the build, the project could not be reached at all (wrong
+or missing config), or every query hit row-level security and was silently restricted.
+
+What closed the gap on the device the owner actually holds, against the project the binary
+was baked with − which CI cannot see and a device test still does not exist yet:
+
+* A single pure classifier (`lib/core/errors/backend_asset_status.dart`) separates a
+  backend that was never set up (`missing`), one that is merely restricted (`restricted`),
+  and one that cannot be reached at all (`unreachable`) − across PostgREST, the two
+  storage buckets, the Edge Function and network errors.
+* `ErrorMapper` now reports a missing relation, a missing bucket and an undeployed
+  function as `errorBackendNotSetUp`, a shared message that points at the gateway's
+  System check, instead of a generic `errorServer`/`errorStorage`.
+* The gateway adds one screen, `/admin/system-check`, that probes eight tables, the two
+  storage buckets from the app's own constants and the `inquiry` function — read-only, in
+  parallel, with a 12-second cap per probe — then renders, for each asset, its name, the
+  server's own words and the status, plus the build flavour, the project host and the
+  account. When anything is missing the screen shows the exact command to repair it, chosen
+  from what is missing: `supabase db push`, `supabase db seed` and `supabase functions
+  deploy inquiry`.
+
+"Restricted" on `inquiries`/`profiles` for the anon key is expected and rendered as
+*ready · restricted*, never as a fault.
+
+What it does not do: it diagnoses, it does not repair — migrations are never applied from
+inside the app (the service-role key must never reach a client), and it is not a device test.
+Pre-existing behaviour is untouched: a 42501 denial still surfaces as `errorPermission`,
+a dead network still hits the top-level `ErrorStateView`, and the storefront still
+composes as before. It does not close D-010.
+
 ---
 
 ## E. Open items handed to Part 2

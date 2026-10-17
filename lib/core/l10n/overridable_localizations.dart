@@ -607,6 +607,10 @@ class OverridableAppLocalizations extends AppLocalizations {
       _text('adminStrengthWeak', _base.adminStrengthWeak);
 
   @override
+  String get adminSystemCheck =>
+      _text('adminSystemCheck', _base.adminSystemCheck);
+
+  @override
   String get adminTagline => _text('adminTagline', _base.adminTagline);
 
   @override
@@ -751,6 +755,10 @@ class OverridableAppLocalizations extends AppLocalizations {
 
   @override
   String get errorAuth => _text('errorAuth', _base.errorAuth);
+
+  @override
+  String get errorBackendNotSetUp =>
+      _text('errorBackendNotSetUp', _base.errorBackendNotSetUp);
 
   @override
   String get errorCheckViolation =>
@@ -1034,6 +1042,72 @@ class OverridableAppLocalizations extends AppLocalizations {
 
   @override
   String get stateSaving => _text('stateSaving', _base.stateSaving);
+
+  @override
+  String get systemCheckAccount =>
+      _text('systemCheckAccount', _base.systemCheckAccount);
+
+  @override
+  String get systemCheckAllGood =>
+      _text('systemCheckAllGood', _base.systemCheckAllGood);
+
+  @override
+  String get systemCheckBuild =>
+      _text('systemCheckBuild', _base.systemCheckBuild);
+
+  @override
+  String get systemCheckFixDatabase =>
+      _text('systemCheckFixDatabase', _base.systemCheckFixDatabase);
+
+  @override
+  String get systemCheckFixFunction =>
+      _text('systemCheckFixFunction', _base.systemCheckFixFunction);
+
+  @override
+  String get systemCheckFixNetwork =>
+      _text('systemCheckFixNetwork', _base.systemCheckFixNetwork);
+
+  @override
+  String get systemCheckFixSeed =>
+      _text('systemCheckFixSeed', _base.systemCheckFixSeed);
+
+  @override
+  String get systemCheckMissing =>
+      _text('systemCheckMissing', _base.systemCheckMissing);
+
+  @override
+  String get systemCheckMissingSummary =>
+      _text('systemCheckMissingSummary', _base.systemCheckMissingSummary);
+
+  @override
+  String get systemCheckNotSignedIn =>
+      _text('systemCheckNotSignedIn', _base.systemCheckNotSignedIn);
+
+  @override
+  String get systemCheckOk => _text('systemCheckOk', _base.systemCheckOk);
+
+  @override
+  String get systemCheckProject =>
+      _text('systemCheckProject', _base.systemCheckProject);
+
+  @override
+  String get systemCheckRestricted =>
+      _text('systemCheckRestricted', _base.systemCheckRestricted);
+
+  @override
+  String get systemCheckRun => _text('systemCheckRun', _base.systemCheckRun);
+
+  @override
+  String get systemCheckTitle =>
+      _text('systemCheckTitle', _base.systemCheckTitle);
+
+  @override
+  String get systemCheckUnreachable =>
+      _text('systemCheckUnreachable', _base.systemCheckUnreachable);
+
+  @override
+  String get systemCheckUnknown =>
+      _text('systemCheckUnknown', _base.systemCheckUnknown);
 
   @override
   String get tagline => _text('tagline', _base.tagline);

@@ -1,16 +1,14 @@
--- ═══════════════════════════════════════════════════════════════════════════
--- 005 · Storage buckets and object policies
+-- 005 - Storage buckets and object policies
 --
 --   product-media  public read · admin write
 --                  products/{product_id}/{uuid}.{ext}
---                  image/jpeg, image/png, image/webp  → max 5 MB
---                  video/mp4                          → max 40 MB, ≤ 60 s
+--                  image/jpeg, image/png, image/webp  -> max 5 MB
+--                  video/mp4                          -> max 40 MB, less than or equal to 60 s
 --   brand          public read · admin write — logo and category covers
 --
 -- The bucket-level `file_size_limit` / `allowed_mime_types` are the first line
 -- of defence; the per-object policies add the tighter 5 MB image cap that a
 -- bucket can only express once.
--- ═══════════════════════════════════════════════════════════════════════════
 
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values
@@ -33,7 +31,7 @@ on conflict (id) do update
       file_size_limit    = excluded.file_size_limit,
       allowed_mime_types = excluded.allowed_mime_types;
 
--- ── Public read ────────────────────────────────────────────────────────────
+-- Public read
 -- Both buckets are world-readable: everything in them is marketing imagery.
 drop policy if exists "product media public read" on storage.objects;
 create policy "product media public read" on storage.objects
@@ -45,7 +43,7 @@ create policy "brand public read" on storage.objects
   for select to anon, authenticated
   using (bucket_id = 'brand');
 
--- ── Admin write: product-media ─────────────────────────────────────────────
+-- Admin write: product-media
 drop policy if exists "product media admin insert" on storage.objects;
 create policy "product media admin insert" on storage.objects
   for insert to authenticated
@@ -80,7 +78,7 @@ create policy "product media admin delete" on storage.objects
   for delete to authenticated
   using (bucket_id = 'product-media' and public.is_admin());
 
--- ── Admin write: brand ─────────────────────────────────────────────────────
+-- Admin write: brand
 drop policy if exists "brand admin insert" on storage.objects;
 create policy "brand admin insert" on storage.objects
   for insert to authenticated

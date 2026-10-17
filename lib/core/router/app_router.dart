@@ -12,6 +12,7 @@ import '../../features/admin/presentation/pages/admin_inquiries_page.dart';
 import '../../features/admin/presentation/pages/admin_login_page.dart';
 import '../../features/admin/presentation/pages/admin_product_editor_page.dart';
 import '../../features/admin/presentation/pages/admin_products_page.dart';
+import '../../features/admin/presentation/pages/admin_system_check_page.dart';
 import '../../features/admin/presentation/providers/admin_gate_providers.dart';
 import '../../features/auth/presentation/providers/auth_providers.dart';
 import '../../features/settings/presentation/pages/about_page.dart';
@@ -167,6 +168,11 @@ GoRouter appRouter(Ref ref) {
             path: 'gate-password',
             name: 'adminGatePassword',
             builder: (_, __) => const AdminGatePasswordPage(),
+          ),
+          GoRoute(
+            path: 'system-check',
+            name: 'adminSystemCheck',
+            builder: (_, __) => const AdminSystemCheckPage(),
           ),
         ],
       ),

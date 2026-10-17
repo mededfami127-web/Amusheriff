@@ -489,6 +489,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get adminStrengthWeak => 'ضعيفة';
 
   @override
+  String get adminSystemCheck => 'فحص النظام';
+
+  @override
   String get adminTagline => 'الشعار';
 
   @override
@@ -615,6 +618,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get errorAuth => 'تعذّر تسجيل دخولك.';
+
+  @override
+  String get errorBackendNotSetUp =>
+      'قاعدة البيانات غير مجهّزة على خادم هذا البناء بعد. افتح فحص النظام في بوابة المالك لترى ما يجب تشغيله.';
 
   @override
   String get errorCheckViolation => 'إحدى القيم خارج النطاق المسموح.';
@@ -883,6 +890,61 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get stateSaving => 'جارٍ الحفظ…';
+
+  @override
+  String get systemCheckAccount => 'مسجّل الدخول باسم';
+
+  @override
+  String get systemCheckAllGood => 'كل ما يحتاجه هذا البناء متوفر في الخلفية.';
+
+  @override
+  String get systemCheckBuild => 'البناء';
+
+  @override
+  String get systemCheckFixDatabase =>
+      'supabase db push — يطبّق كل الجداول والحاويات والسياسات';
+
+  @override
+  String get systemCheckFixFunction =>
+      'supabase functions deploy inquiry — ينشر نقطة نهاية التواصل';
+
+  @override
+  String get systemCheckFixNetwork =>
+      'تحقّق من رابط مشروع Supabase في إعدادات هذا البناء واتصالك بالإنترنت.';
+
+  @override
+  String get systemCheckFixSeed => 'supabase db seed — يضيف الصفوف الابتدائية';
+
+  @override
+  String get systemCheckMissing => 'لم يُجهَّز';
+
+  @override
+  String get systemCheckMissingSummary =>
+      'بعض ما يحتاجه هذا البناء مفقود. شغّل هذه الأوامر في مجلد المشروع ثم أعد الفحص:';
+
+  @override
+  String get systemCheckNotSignedIn => 'غير مسجّل';
+
+  @override
+  String get systemCheckOk => 'جاهز';
+
+  @override
+  String get systemCheckProject => 'مشروع Supabase';
+
+  @override
+  String get systemCheckRestricted => 'جاهز · مقيّد';
+
+  @override
+  String get systemCheckRun => 'إعادة تشغيل الفحص';
+
+  @override
+  String get systemCheckTitle => 'فحص النظام';
+
+  @override
+  String get systemCheckUnreachable => 'لا يمكن الوصوله';
+
+  @override
+  String get systemCheckUnknown => 'غير معروف';
 
   @override
   String get tagline => 'مجالس وكنب عربية فاخرة، مصنوعة يدويًا لمنزلك';

@@ -1026,6 +1026,12 @@ abstract class AppLocalizations {
   /// **'Weak'**
   String get adminStrengthWeak;
 
+  /// No description provided for @adminSystemCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'System check'**
+  String get adminSystemCheck;
+
   /// No description provided for @adminTagline.
   ///
   /// In en, this message translates to:
@@ -1271,6 +1277,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'We could not sign you in.'**
   String get errorAuth;
+
+  /// No description provided for @errorBackendNotSetUp.
+  ///
+  /// In en, this message translates to:
+  /// **'The database is not set up on this build\'s server yet. Open the owner gateway\'s system check to see what to run.'**
+  String get errorBackendNotSetUp;
 
   /// No description provided for @errorCheckViolation.
   ///
@@ -1745,6 +1757,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Saving…'**
   String get stateSaving;
+
+  /// No description provided for @systemCheckAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in as'**
+  String get systemCheckAccount;
+
+  /// No description provided for @systemCheckAllGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything this build needs is present on the backend.'**
+  String get systemCheckAllGood;
+
+  /// No description provided for @systemCheckBuild.
+  ///
+  /// In en, this message translates to:
+  /// **'Build'**
+  String get systemCheckBuild;
+
+  /// No description provided for @systemCheckFixDatabase.
+  ///
+  /// In en, this message translates to:
+  /// **'supabase db push — applies every table, bucket and policy'**
+  String get systemCheckFixDatabase;
+
+  /// No description provided for @systemCheckFixFunction.
+  ///
+  /// In en, this message translates to:
+  /// **'supabase functions deploy inquiry — deploys the contact endpoint'**
+  String get systemCheckFixFunction;
+
+  /// No description provided for @systemCheckFixNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the Supabase project URL in this build\'s config and your internet connection.'**
+  String get systemCheckFixNetwork;
+
+  /// No description provided for @systemCheckFixSeed.
+  ///
+  /// In en, this message translates to:
+  /// **'supabase db seed — adds the starter rows'**
+  String get systemCheckFixSeed;
+
+  /// No description provided for @systemCheckMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set up'**
+  String get systemCheckMissing;
+
+  /// No description provided for @systemCheckMissingSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Some of what this build needs is missing on the backend. Run these in the project folder, then run the checks again:'**
+  String get systemCheckMissingSummary;
+
+  /// No description provided for @systemCheckNotSignedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Not signed in'**
+  String get systemCheckNotSignedIn;
+
+  /// No description provided for @systemCheckOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get systemCheckOk;
+
+  /// No description provided for @systemCheckProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Supabase project'**
+  String get systemCheckProject;
+
+  /// No description provided for @systemCheckRestricted.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready · restricted'**
+  String get systemCheckRestricted;
+
+  /// No description provided for @systemCheckRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Run checks again'**
+  String get systemCheckRun;
+
+  /// No description provided for @systemCheckTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'System check'**
+  String get systemCheckTitle;
+
+  /// No description provided for @systemCheckUnreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unreachable'**
+  String get systemCheckUnreachable;
+
+  /// No description provided for @systemCheckUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get systemCheckUnknown;
 
   /// No description provided for @tagline.
   ///

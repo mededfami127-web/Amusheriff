@@ -490,6 +490,9 @@ class AppLocalizationsOm extends AppLocalizations {
   String get adminStrengthWeak => 'Laafaa';
 
   @override
+  String get adminSystemCheck => 'Miraannee Sistiimii';
+
+  @override
   String get adminTagline => 'Jecha beeksisaa';
 
   @override
@@ -618,6 +621,10 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get errorAuth => 'Si seenessuu hin dandeenye.';
+
+  @override
+  String get errorBackendNotSetUp =>
+      'Daataazeen barniisa kanaaf kabaja keessatti hin qophinamne. Waan firiruu qabu arguuf miraannee abbaa qabeenyaa bani.';
 
   @override
   String get errorCheckViolation => 'Gatiin sun daangaa hayyamamee ala jira.';
@@ -889,6 +896,63 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get stateSaving => 'Olkaa\'aa jira…';
+
+  @override
+  String get systemCheckAccount => 'Itti seeneen';
+
+  @override
+  String get systemCheckAllGood =>
+      'Wan barniin iyoobniin hundi baqata keessummatti jira.';
+
+  @override
+  String get systemCheckBuild => 'Barnii';
+
+  @override
+  String get systemCheckFixDatabase =>
+      'supabase db push — gabatee hundi, kurtuu fi polisiin hundi fudhata';
+
+  @override
+  String get systemCheckFixFunction =>
+      'supabase functions deploy inquiry — xixiqqaan walqannaa dabsa';
+
+  @override
+  String get systemCheckFixNetwork =>
+      'Teessoo piroojektii Supabase kabaja barnii kanaa fi walqunnaa intarneetii kee mirkaneessaa.';
+
+  @override
+  String get systemCheckFixSeed =>
+      'supabase db seed — gadii deebii\'uu dabalata';
+
+  @override
+  String get systemCheckMissing => 'Hin qophinamne';
+
+  @override
+  String get systemCheckMissingSummary =>
+      'Wan barniin iyoobniin qabu muraasa darbii jira. Kun tooroo piroojektii keessaa firiraa, sana booda miraannee irra deebi\'aa firir:';
+
+  @override
+  String get systemCheckNotSignedIn => 'Hin seenne';
+
+  @override
+  String get systemCheckOk => 'Qophiina';
+
+  @override
+  String get systemCheckProject => 'Piroojektii Supabase';
+
+  @override
+  String get systemCheckRestricted => 'Qophiina · dandeettii qabata';
+
+  @override
+  String get systemCheckRun => 'Miraannee irra deebi\'aa firir';
+
+  @override
+  String get systemCheckTitle => 'Miraannee Sistiimii';
+
+  @override
+  String get systemCheckUnreachable => 'Hin ga\'anne';
+
+  @override
+  String get systemCheckUnknown => 'Tixxifama';
 
   @override
   String get tagline =>

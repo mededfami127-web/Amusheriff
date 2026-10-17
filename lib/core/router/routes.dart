@@ -40,6 +40,10 @@ abstract final class Routes {
   /// [adminChangePassword], which changes the Supabase account password.
   static const String adminGatePassword = '/admin/gate-password';
 
+  /// Probes the backend this build points at and reports which tables,
+  /// buckets and functions are actually set up there.
+  static const String adminSystemCheck = '/admin/system-check';
+
   /// Paths that require a session *and* `profiles.is_admin = true`.
   static bool isGuardedAdminPath(String path) =>
       path.startsWith(adminRoot) && path != adminLogin;

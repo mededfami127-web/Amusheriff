@@ -1,14 +1,13 @@
--- ═══════════════════════════════════════════════════════════════════════════
--- 006 · Live text overrides + Oromo store name
+-- 006 - Live text overrides + Oromo store name
 --
 --   Two additions that travel together because they are the same idea: the
 --   owner can type their own wording, in every language, without a release.
 --
---   1. `store_name_om` — the site-settings row gains the Oromo brand line, so
+--   1. `store_name_om` - the site-settings row gains the Oromo brand line, so
 --      `storeNameFor('om')` has something to render (see
 --      `SiteSettings.storeNameFor`).
 --
---   2. `text_overrides` — one row per (ARB key, locale) the owner has
+--   2. `text_overrides` - one row per (ARB key, locale) the owner has
 --      rewritten. The app renders `override ?? ARB default`, so an empty table
 --      means "ship the built-in wording" and a row means "the owner said
 --      something else".
@@ -24,9 +23,8 @@
 --   Idempotent: safe to re-apply. Realtime membership is added here (not in
 --   005) because group 11 of the RLS suite asserts the publication against the
 --   tables the Dart layer streams.
--- ═══════════════════════════════════════════════════════════════════════════
 
--- ── 1. Oromo in site_settings ───────────────────────────────────────────────
+-- 1. Oromo in site_settings
 
 alter table public.site_settings
   add column if not exists store_name_om text default 'Aamu Sharif Arabiyaan Majlis';
@@ -44,7 +42,7 @@ update public.site_settings
    set store_name_om = coalesce(store_name_om, 'Aamu Sharif Arabiyaan Majlis')
  where id = 1;
 
--- ── 2. text_overrides ──────────────────────────────────────────────────────
+-- 2. text_overrides
 
 create table if not exists public.text_overrides (
   text_key    text        not null check (char_length(text_key) between 1 and 120),
@@ -68,7 +66,7 @@ create trigger text_overrides_set_updated_at
   before update on public.text_overrides
   for each row execute function public.set_updated_at();
 
--- ── 3. Row level security ──────────────────────────────────────────────────
+-- 3. Row level security
 -- Everyone reads (the storefront is anonymous); only the owner writes.
 -- Table privileges first, then policies: a policy on a table the caller has no
 -- grant for is never even consulted.
@@ -109,7 +107,7 @@ create policy text_overrides_admin_delete on public.text_overrides
   to authenticated
   using (public.is_admin());
 
--- ── 4. Realtime ────────────────────────────────────────────────────────────
+-- 4. Realtime
 -- The editor writes, every open device re-renders: the same promise the rest
 -- of the storefront makes.
 
