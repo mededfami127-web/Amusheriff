@@ -18,9 +18,11 @@ every customer device without a restart.
 database schema (RLS + storage policies), seed data and the RLS acceptance
 suite are done and green, and so are the screens: the storefront catalogue and
 the admin gateway (categories, products with media, contact links, branding,
-inquiries, password). What is still open — screen-level integration tests,
-CI/CD promotion gates and release Android/iOS builds — is tracked in
-`docs/DECISIONS.md` → "Open items handed to Part 2".
+inquiries, password). Continuous integration covers all of it — analysis, tests,
+formatting, localization parity, a release compile, an unsigned iOS build, the
+Edge Function and the database. What is still open — device/emulator
+integration tests, CI/CD promotion gates and hardware-verified release builds —
+is tracked in `docs/DECISIONS.md` → "Open items handed to Part 2".
 
 ---
 
@@ -28,17 +30,42 @@ CI/CD promotion gates and release Android/iOS builds — is tracked in
 
 | Check | Command | Result |
 | --- | --- | --- |
-| Code generation | `dart run build_runner build` + `dart run tool/gen_text_overlay.dart` | 0 errors |
-| Static analysis | `flutter analyze` | **No issues found** |
+| Code generation | `dart run build_runner build` + `dart run tool/gen_text_overlay.dart` | 0 errors; `git status` clean afterwards |
+| Formatting | `dart format --output=none --set-exit-if-changed .` | clean (0 of 160 files change) |
+| Static analysis | `flutter analyze --fatal-infos` | **No issues found** |
 | Unit + widget tests | `flutter test` | **101 passed** |
 | Release compile | `flutter build bundle --release` | builds clean |
 | Localization key parity | `dart run tool/check_l10n_parity.dart` | **292 message keys in each of en, am, ar, om** |
+| Edge Function | `deno check` · `deno lint` · `deno fmt --check supabase/functions/inquiry/index.ts` | clean on Deno 2.9.7 |
 | RLS acceptance suite | `bash scripts/run_rls_tests.sh` | **22/22 checks passed** on PostgreSQL 16.15 |
 | Migration runner | `bash scripts/apply_migrations.sh --dry-run`, then `--apply` twice | plan, dry run, apply and re-apply all clean on PostgreSQL 16.15 |
+| Signed release (Android) | `.github/workflows/build.yml` on the `v1.0.0` tag | **success** — signed APK + AAB, 11m42s |
 
-Not yet exercised in this environment: release Android/iOS builds (no Android
-SDK or Xcode available) and the Edge Function under the Edge Runtime. See
-`docs/DECISIONS.md` → "Open items handed to Part 2".
+The signed release has to run on GitHub's runners: this environment has no
+Android SDK or Xcode (and too little RAM for the Gradle daemon), so the three
+platform builds that CI performs — the release APK/AAB on a `v*` tag, the iOS
+release compile and the per-push debug APK — are the ones verified there. What
+remains unverified anywhere is the device: playback, signing for the App Store,
+and the Edge Function's rate limiting under the Edge Runtime. See
+`docs/DECISIONS.md` → D-034, D-035 and "Open items handed to Part 2".
+
+---
+
+## Continuous integration
+
+Four workflows, each with one job to do. Everything below runs on GitHub's
+runners; nothing is deployed from them.
+
+| Workflow | Trigger | What it proves |
+| --- | --- | --- |
+| [`ci.yml`](.github/workflows/ci.yml) | push + PR to `main`, dispatch | generated sources are in sync, code is formatted, every locale has every key, `flutter analyze --fatal-infos` is clean, 101 tests pass, a release bundle compiles, the RLS suite passes on PostgreSQL 16, the Edge Function type-checks, lints and formats, and the iOS app compiles unsigned |
+| [`debug-apk.yml`](.github/workflows/debug-apk.yml) | push to `main`, dispatch | a dev-flavor debug APK, uploaded as the `asm-dev-debug-apk` artifact |
+| [`build.yml`](.github/workflows/build.yml) | `v*` tag, dispatch | verify, then a release APK and a Play-ready **signed** AAB (needs the four signing secrets) |
+| [`supabase-db-push.yml`](.github/workflows/supabase-db-push.yml) | push + PR to `main`, dispatch | migrations plan, dry-run, apply and re-apply cleanly against a throwaway database |
+
+Each gate exists because of a failure it would have caught; per-gate rationale,
+including the one check deliberately left out, is in
+[`docs/DECISIONS.md`](docs/DECISIONS.md) → D-034 and D-035.
 
 ---
 
@@ -228,6 +255,7 @@ The debug build signs with the debug keystore, needs no Play signing secret, and
 ```bash
 flutter analyze                        # must stay clean; CI runs --fatal-infos
 flutter test                           # unit tests
+dart format .                          # CI fails on unformatted Dart
 dart run tool/check_l10n_parity.dart   # every locale carries the same ARB keys
 flutter run --dart-define-from-file=config/dev.json
 ```

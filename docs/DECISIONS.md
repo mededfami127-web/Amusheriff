@@ -531,11 +531,56 @@ one stale command and two holes:
   `flutter build bundle --release` is the cheap compile gate: no Android SDK, no
   signing, and the same asset bundling a device build performs.
 
-**Deliberately not added: a `dart format --set-exit-if-changed` step.** The tree
-predates the tall-style formatter the current stable SDK ships, so the check
+**Deliberately not added here: a `dart format --set-exit-if-changed` step.** The
+tree predates the tall-style formatter the current stable SDK ships, so the check
 reports 99 of 159 hand-written files as unformatted. A gate would be red on
 arrival, and reformatting every feature file is a separate, reviewable change
-rather than something to smuggle into a CI fix.
+rather than something to smuggle into a CI fix. It is added in D-035, together
+with the two other gates this entry leaves open.
+
+### D-035 — The three gates D-034 left out, and how each one is proved
+
+Closing the remaining holes turned the formatting exclusion above into work:
+
+* **Formatting is gated.** `dart format --set-exit-if-changed` runs in `ci.yml`.
+  The one generator whose output was *not* already tall-style —
+  `tool/gen_text_overlay.dart`, which writes `lib/core/l10n/text_catalog.dart`
+  and `overridable_localizations.dart` — now hands its own output to
+  `Platform.resolvedExecutable format` before returning, so the committed
+  snapshot stays byte-identical to a fresh regeneration and the format gate
+  cannot fight the "generated sources are up to date" check. Verified both ways:
+  `dart format --output=none --set-exit-if-changed .` reports 0 changed *after*
+  `flutter gen-l10n`, `dart run build_runner build` and the overlay generator
+  have all run, and `git status` over `*.g.dart`, `*.freezed.dart` and
+  `lib/core/l10n/` is clean. `flutter gen-l10n` and build_runner already emit
+  tall-style code, which is why only the overlay files needed the generator
+  changed rather than a hand-formatted template. The tree-wide reformat is 100
+  files in its own commit (98 hand-written, the two generator outputs and the two
+  `tool/` scripts) so that no feature diff hides inside a whitespace change.
+* **The Edge Function is checked.** `supabase/functions/inquiry` — the only
+  server-side code in the repo, and the only file that runs with the service-role
+  key — was compiled by nothing: the SQL suite covers the database and the Flutter
+  jobs cover the app, so a TypeScript error there would reach production unseen. A
+  Deno job pinned to v2.9.7 (the version this was verified on, and the Edge
+  Runtime's own runtime) runs `deno check`, `deno lint` and `deno fmt --check`.
+  `deno check` also resolves the pinned `esm.sh` import, so a yanked dependency
+  version fails the build here instead of at the first customer request. What this
+  still does not do is *execute* the function under the Edge Runtime (D-010): the
+  rate-limit behaviour itself remains unverified without a Supabase project.
+* **iOS compiles.** `flutter build ios --release --no-codesign` on
+  `macos-latest`. Unsigned, so no Apple certificate or provisioning profile is
+  needed and the job stays secret-free; the committed `config/prod.json.example`
+  supplies the compile-time define. This is what catches a plugin raising the iOS
+  deployment target, a stale or missing Podfile, or a broken `Info.plist` — none
+  of which `flutter analyze` can see. It is a compile gate, not a device test: App
+  Store signing, `chewie`/`video_player` playback and the iOS UI stay unverified
+  in this environment.
+
+Android's release path stays where D-034 put it — `build.yml`, on a `v*` tag or a
+manual dispatch — because Play signing is the entire point of that job and a
+signed AAB on every push to `main` would be waste. It has been exercised for real
+once already: the `v1.0.0` tag ran the full `build` workflow to green in 11m42s
+and uploaded the signed APK and AAB.
 
 ---
 
@@ -567,9 +612,13 @@ Closed since this list was written:
 Still open:
 
 * Replace the generated logo with the supplied master asset (D-006).
-* Verify the Edge Function under the Edge Runtime (D-010).
+* Run the Edge Function under the Edge Runtime (D-010). Its TypeScript, lint and
+  formatting are now gated in CI (D-035), but its rate-limit behaviour needs a
+  Supabase project to observe.
 * Native Android product flavors for side-by-side installs (D-019).
-* Verify release Android/iOS builds (no Android SDK or Xcode in this
-  environment) — `flutter build` was not exercised, and `chewie` /
-  `video_player` playback is therefore unverified on device.
+* Device verification. Both platforms now *compile* in CI — Android's signed
+  release on a `v*` tag (`build.yml`), iOS unsigned on `macos-latest` (D-035) —
+  but no build has been run on hardware here, so `chewie`/`video_player`
+  playback, App Store signing (the iOS bundle id is still
+  `com.amusheriff.amuSharifMajlis`) and iOS UI remain unverified.
 * Screen-level integration tests on a device/emulator and CI/CD promotion gates.

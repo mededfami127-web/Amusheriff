@@ -85,6 +85,17 @@ jobs:
       - name: Check localization key parity
         run: dart run tool/check_l10n_parity.dart
 
+      # The generator above is made to format its own output, so this gate and
+      # that one agree by construction. Kept as its own step because the failure
+      # is a style one with a one-line fix, and because a reformat is a diff the
+      # author should see before merging, not something CI silently applies.
+      - name: Check formatting
+        run: |
+          if ! dart format --output=none --set-exit-if-changed . ; then
+            echo "::error::Dart files are not formatted. Run 'dart format .' and commit the result."
+            exit 1
+          fi
+
       - name: Analyze (fatal on infos)
         run: flutter analyze --fatal-infos
 
@@ -105,6 +116,69 @@ jobs:
           name: coverage
           path: coverage/lcov.info
           if-no-files-found: ignore
+
+  # ── Edge Function: the repo's only server-side code ───────────────────────
+  # The SQL suite below covers the database, and the Flutter jobs above cover
+  # the app, but nothing compiled `supabase/functions/inquiry` — which runs on
+  # Supabase's servers with the service-role key and is the one file where a
+  # type error reaches production without a client noticing. Deno is the Edge
+  # Runtime's own runtime, pinned so the lint and format rules cannot drift out
+  # from under the tree.
+  edge-function:
+    name: edge function check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.9.7
+
+      # `deno check` resolves the esm.sh type definitions the function imports,
+      # so this also proves the dependency version pinned in the import still
+      # exists and still type-checks.
+      - name: Type-check, lint and format-check
+        run: |
+          deno check supabase/functions/inquiry/index.ts
+          deno lint supabase/functions/inquiry/index.ts
+          deno fmt --check supabase/functions/inquiry/index.ts
+
+  # ── iOS: release compile, unsigned ────────────────────────────────────────
+  # Half of the shipped app is iOS, and until this job existed nothing compiled
+  # it: `flutter analyze` reads Dart, not an Xcode project, so a plugin raising
+  # the iOS deployment target, a stale Podfile or a broken Info.plist would only
+  # surface on a Mac. `--no-codesign` keeps the job secret-free — unsigned, no
+  # Apple certificate and no provisioning profile — while a real Xcode release
+  # build of the same sources runs on a macOS simulator-free device target.
+  ios:
+    name: iOS release compile
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate code
+        run: dart run build_runner build
+
+      # The committed example config stands in for the secrets: the build only
+      # needs the define to resolve at compile time, and a red screen at
+      # runtime is not what this job is checking.
+      - name: Build iOS (no codesign)
+        run: >
+          flutter build ios --release --no-codesign
+          --dart-define-from-file=config/prod.json.example
+
+      - name: Show what was built
+        run: ls -ld build/ios/iphoneos/Runner.app
 
   # ── Database: RLS acceptance suite ────────────────────────────────────────
   rls:
