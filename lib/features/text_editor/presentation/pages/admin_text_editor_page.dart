@@ -27,6 +27,8 @@ class AdminTextEditorPage extends ConsumerWidget {
     final String locale = ref.watch(textEditorLocaleProvider);
     final TextEditorStatus status = ref.watch(textEditorControllerProvider);
     final List<AppTextEntry> entries = ref.watch(filteredTextEntriesProvider);
+    final bool gapsOnly = ref.watch(textEditorGapsOnlyProvider);
+    final int gaps = ref.watch(textGapCountProvider(locale));
     final Map<String, String> overrides =
         ref.watch(textOverridesProvider(locale)).value ??
         const <String, String>{};
@@ -47,9 +49,16 @@ class AdminTextEditorPage extends ConsumerWidget {
                     .acknowledge,
               ),
             ),
-          _Intro(l10n: l10n, locale: locale, edits: overrides.length),
+          _Intro(
+            l10n: l10n,
+            locale: locale,
+            edits: overrides.length,
+            gaps: gaps,
+          ),
           const SizedBox(height: 14),
           const _LiveEditToggle(),
+          const SizedBox(height: 14),
+          const _MissingOnlyTile(),
           const SizedBox(height: 14),
           _SearchField(l10n: l10n),
           const SizedBox(height: 12),
@@ -61,7 +70,9 @@ class AdminTextEditorPage extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 40),
               child: Text(
-                l10n.adminTextEditorNoResults,
+                gapsOnly
+                    ? l10n.adminTextEditorMissingDone
+                    : l10n.adminTextEditorNoResults,
                 textAlign: TextAlign.center,
                 style: BrandTypography.bodySmall,
               ),
@@ -101,11 +112,17 @@ class AdminTextEditorPage extends ConsumerWidget {
 }
 
 class _Intro extends StatelessWidget {
-  const _Intro({required this.l10n, required this.locale, required this.edits});
+  const _Intro({
+    required this.l10n,
+    required this.locale,
+    required this.edits,
+    required this.gaps,
+  });
 
   final AppLocalizations l10n;
   final String locale;
   final int edits;
+  final int gaps;
 
   @override
   Widget build(BuildContext context) {
@@ -123,7 +140,8 @@ class _Intro extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             '${kAppTextLocaleNames[locale] ?? locale} · '
-            '${kAppTextEntries.length} · $edits ✓',
+            '${kAppTextEntries.length} · $edits ✓ · $gaps '
+            '${l10n.adminTextEditorMissing.toLowerCase()}',
             style: BrandTypography.labelSmall.copyWith(color: BrandColors.gold),
           ),
         ],
@@ -162,6 +180,48 @@ class _LiveEditToggle extends ConsumerWidget {
   }
 }
 
+/// One switch that narrows the whole catalogue to the strings still missing
+/// owner wording in the selected language.
+///
+/// The count is per language, so the owner can see how much work is left before
+/// opening a single screen.
+class _MissingOnlyTile extends ConsumerWidget {
+  const _MissingOnlyTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final String locale = ref.watch(textEditorLocaleProvider);
+    final bool enabled = ref.watch(textEditorGapsOnlyProvider);
+    final int gaps = ref.watch(textGapCountProvider(locale));
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: enabled ? BrandColors.gold : BrandColors.goldHairline,
+        ),
+      ),
+      child: SwitchListTile(
+        value: enabled,
+        onChanged: ref.read(textEditorGapsOnlyProvider.notifier).set,
+        secondary: Icon(
+          Icons.spellcheck_rounded,
+          color: enabled ? BrandColors.gold : BrandColors.goldHairline,
+        ),
+        title: Text(
+          '${l10n.adminTextEditorMissing} ($gaps)',
+          style: BrandTypography.titleMedium,
+        ),
+        subtitle: Text(
+          l10n.adminTextEditorMissingHint,
+          style: BrandTypography.bodySmall,
+        ),
+      ),
+    );
+  }
+}
+
 class _SearchField extends ConsumerWidget {
   const _SearchField({required this.l10n});
 
@@ -189,6 +249,9 @@ class _SectionChips extends ConsumerWidget {
     final AppLocalizations l10n = AppLocalizations.of(context);
     final List<String> sections = ref.watch(textEditorSectionsProvider);
     final String? selected = ref.watch(textEditorSectionProvider);
+    final Map<String, int> gapCounts = ref.watch(
+      textGapCountsBySectionProvider,
+    );
     final Map<String, String> byKey = <String, String>{
       for (final AppTextEntry entry in kAppTextEntries)
         entry.sectionKey: entry.key,
@@ -216,8 +279,10 @@ class _SectionChips extends ConsumerWidget {
               child: ChoiceChip(
                 label: Text(
                   // The screen name is itself an editable string, so the
-                  // heading follows the language being edited.
-                  _sectionLabel(l10n, byKey[section] ?? section),
+                  // heading follows the language being edited. The trailing
+                  // number is how many words are still missing on that screen.
+                  '${_sectionLabel(l10n, byKey[section] ?? section)}'
+                  '${gapCounts[section] == null ? '' : ' · ${gapCounts[section]}'}',
                 ),
                 selected: selected == section,
                 onSelected: (_) => ref
@@ -267,6 +332,12 @@ class _LanguagePicker extends ConsumerWidget {
     final TextEditorController controller = ref.read(
       textEditorControllerProvider.notifier,
     );
+    // One count per language, so the picker itself says where the work is.
+    final Map<String, int> gapsByLocale = <String, int>{
+      for (final String code in kAppTextLocales)
+        code: ref.watch(textGapCountProvider(code)),
+    };
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -278,7 +349,12 @@ class _LanguagePicker extends ConsumerWidget {
           children: <Widget>[
             for (final String code in kAppTextLocales)
               ChoiceChip(
-                label: Text(kAppTextLocaleNames[code] ?? code),
+                label: Text(
+                  gapsByLocale[code] == 0 || gapsByLocale[code] == null
+                      ? (kAppTextLocaleNames[code] ?? code)
+                      : '${kAppTextLocaleNames[code] ?? code} · '
+                            '${gapsByLocale[code]}',
+                ),
                 selected: code == locale,
                 onSelected: (_) {
                   ref.read(textEditorLocaleProvider.notifier).select(code);

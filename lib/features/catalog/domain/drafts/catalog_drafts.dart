@@ -15,6 +15,7 @@ class CategoryDraft {
     this.nameAm,
     this.nameAr,
     this.coverPath,
+    this.parentId,
     this.sortOrder = 0,
     this.isVisible = true,
   });
@@ -24,6 +25,10 @@ class CategoryDraft {
   final String? nameAm;
   final String? nameAr;
   final String? coverPath;
+
+  /// Set to make this row a subcategory of [parentId]; `null` keeps it
+  /// top-level. The database keeps the tree one level deep.
+  final String? parentId;
   final int sortOrder;
   final bool isVisible;
 
@@ -34,6 +39,11 @@ class CategoryDraft {
     'name_am': _nullIfBlank(nameAm),
     'name_ar': _nullIfBlank(nameAr),
     'cover_path': _nullIfBlank(coverPath),
+    // Sent only when it is set: a project that has not applied
+    // `20260101000700_subcategories.sql` yet keeps creating plain categories
+    // instead of failing on a column it does not have. A subcategory needs the
+    // migration, and says so through the usual Postgres error if it is missing.
+    if (parentId != null) 'parent_id': parentId,
     'sort_order': sortOrder,
     'is_visible': isVisible,
   };

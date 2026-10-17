@@ -128,6 +128,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get adminCategories => 'الفئات';
 
   @override
+  String get adminCategoryAddSubcategory => 'إضافة قسم فرعي';
+
+  @override
   String get adminCategoryCreated => 'تم إنشاء القسم';
 
   @override
@@ -137,6 +140,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String adminCategoryHasProducts(int count) {
     return 'لا يزال هذا القسم يحتوي على $count منتج. انقلها إلى قسم آخر أولاً، أو احذف المنتجات.';
   }
+
+  @override
+  String get adminCategoryHasSubcategories =>
+      'لا يزال هذا القسم يحتوي على أقسام فرعية. احذفها أولاً.';
 
   @override
   String get adminCategoryHidden => 'تم إخفاء القسم';
@@ -506,6 +513,16 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get adminTextEditorHint =>
       'كل كلمات التطبيق، بجميع اللغات. عدّل كلمة فتتغير في كل مكان.';
+
+  @override
+  String get adminTextEditorMissing => 'الكلمات الناقصة';
+
+  @override
+  String get adminTextEditorMissingDone => 'لا يوجد نقص في هذه اللغة';
+
+  @override
+  String get adminTextEditorMissingHint =>
+      'الكلمات التي لا تزال تظهر بالإنجليزية في هذه اللغة فقط — املأها واحدة تلو الأخرى.';
 
   @override
   String get adminTextEditorNoResults => 'لا يوجد نص يطابق بحثك';

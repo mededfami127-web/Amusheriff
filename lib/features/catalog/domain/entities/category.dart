@@ -14,6 +14,7 @@ abstract class Category with _$Category {
     String? nameAr,
     required String slug,
     String? coverPath,
+    String? parentId,
     @Default(0) int sortOrder,
     @Default(true) bool isVisible,
     DateTime? createdAt,

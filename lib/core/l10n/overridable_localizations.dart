@@ -169,6 +169,10 @@ class OverridableAppLocalizations extends AppLocalizations {
   String get adminCategories => _text('adminCategories', _base.adminCategories);
 
   @override
+  String get adminCategoryAddSubcategory =>
+      _text('adminCategoryAddSubcategory', _base.adminCategoryAddSubcategory);
+
+  @override
   String get adminCategoryCreated =>
       _text('adminCategoryCreated', _base.adminCategoryCreated);
 
@@ -181,6 +185,12 @@ class OverridableAppLocalizations extends AppLocalizations {
     'adminCategoryHasProducts',
     _base.adminCategoryHasProducts(count),
     <String, String>{'count': '${count}'},
+  );
+
+  @override
+  String get adminCategoryHasSubcategories => _text(
+    'adminCategoryHasSubcategories',
+    _base.adminCategoryHasSubcategories,
   );
 
   @override
@@ -627,6 +637,18 @@ class OverridableAppLocalizations extends AppLocalizations {
   @override
   String get adminTextEditorHint =>
       _text('adminTextEditorHint', _base.adminTextEditorHint);
+
+  @override
+  String get adminTextEditorMissing =>
+      _text('adminTextEditorMissing', _base.adminTextEditorMissing);
+
+  @override
+  String get adminTextEditorMissingDone =>
+      _text('adminTextEditorMissingDone', _base.adminTextEditorMissingDone);
+
+  @override
+  String get adminTextEditorMissingHint =>
+      _text('adminTextEditorMissingHint', _base.adminTextEditorMissingHint);
 
   @override
   String get adminTextEditorNoResults =>

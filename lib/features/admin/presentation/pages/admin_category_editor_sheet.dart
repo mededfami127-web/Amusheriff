@@ -3,20 +3,31 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/error_localizer.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
+import '../../../../core/theme/brand_colors.dart';
 import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/inline_failure_banner.dart';
 import '../../../catalog/domain/entities/category.dart';
 import '../controllers/admin_editors.dart';
 import '../widgets/admin_text_field.dart';
 
 /// Create/edit sheet for a category.
 ///
-/// The sheet is stateless: [CategoryEditorController] holds the draft, so the
-/// caller seeds it with `load(existing)` before opening and the fields simply
-/// render whatever the controller holds.
+/// The sheet is stateless: [CategoryEditorController] holds the draft, and the
+/// caller seeds it with `load(existing, parentId: …)` before opening. That only
+/// works because the controller is `keepAlive` — an auto-disposed draft is
+/// thrown away before a bottom sheet is first built, which would open an edit
+/// form empty and create a subcategory as a top-level category.
+///
+/// It pops with `true` once the row is saved, so the list page can say which of
+/// the two happened — created or updated — instead of the sheet guessing.
 class CategoryEditorSheet extends ConsumerWidget {
-  const CategoryEditorSheet({super.key, this.existing});
+  const CategoryEditorSheet({super.key, this.existing, this.parent});
 
   final Category? existing;
+
+  /// The mother category when the owner tapped "Add subcategory" on a tile.
+  /// `null` for a top-level category.
+  final Category? parent;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -28,6 +39,9 @@ class CategoryEditorSheet extends ConsumerWidget {
       categoryEditorControllerProvider.notifier,
     );
     final bool saving = state.status.saving;
+    // A local so the null checks below promote it: the field itself cannot be
+    // promoted, and a `parent!` at every use site would be the alternative.
+    final Category? mother = parent;
 
     return Padding(
       padding: EdgeInsets.only(
@@ -43,10 +57,40 @@ class CategoryEditorSheet extends ConsumerWidget {
           children: <Widget>[
             Text(
               existing == null
-                  ? l10n.adminCreateCategory
+                  ? (mother == null
+                        ? l10n.adminCreateCategory
+                        : l10n.adminCategoryAddSubcategory)
                   : l10n.adminEditCategory,
               style: BrandTypography.titleMedium,
             ),
+            if (mother != null) ...<Widget>[
+              const SizedBox(height: 6),
+              Row(
+                children: <Widget>[
+                  const Icon(
+                    Icons.subdirectory_arrow_right_rounded,
+                    size: 18,
+                    color: BrandColors.gold,
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      mother.nameFor(
+                        Localizations.localeOf(context).languageCode,
+                      ),
+                      style: BrandTypography.bodySmall,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            if (state.status.failure != null) ...<Widget>[
+              const SizedBox(height: 14),
+              InlineFailureBanner(
+                failure: state.status.failure!,
+                onDismiss: controller.acknowledge,
+              ),
+            ],
             const SizedBox(height: 18),
             AdminTextField(
               label: l10n.adminCategoryName,
@@ -94,7 +138,7 @@ class CategoryEditorSheet extends ConsumerWidget {
             ),
             const SizedBox(height: 14),
             FilledButton.icon(
-              onPressed: saving ? null : () => _save(context, controller),
+              onPressed: saving ? null : () => _save(context, ref, l10n),
               icon: saving
                   ? const SizedBox(
                       width: 18,
@@ -105,7 +149,7 @@ class CategoryEditorSheet extends ConsumerWidget {
               label: Text(l10n.actionSave),
             ),
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () => Navigator.of(context).pop(false),
               child: Text(l10n.actionCancel),
             ),
           ],
@@ -114,12 +158,41 @@ class CategoryEditorSheet extends ConsumerWidget {
     );
   }
 
+  /// Validates, saves, and explains itself either way.
+  ///
+  /// A rejection used to look exactly like a dead button: the sheet stayed open
+  /// with no message, because the draft's own failure was never rendered. Now a
+  /// validation problem puts the field messages on screen *and* says so, and a
+  /// refused write shows the typed failure in the banner above (and in a
+  /// snackbar, because a bottom sheet can cover the banner).
   Future<void> _save(
     BuildContext context,
-    CategoryEditorController controller,
+    WidgetRef ref,
+    AppLocalizations l10n,
   ) async {
-    if (controller.validate().isNotEmpty) return;
+    final CategoryEditorController controller = ref.read(
+      categoryEditorControllerProvider.notifier,
+    );
+
+    if (controller.validate().isNotEmpty) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.errorValidation)));
+      return;
+    }
+
     final bool saved = await controller.save();
-    if (saved && context.mounted) Navigator.of(context).pop();
+    if (!context.mounted) return;
+
+    if (saved) {
+      Navigator.of(context).pop(true);
+      return;
+    }
+
+    final failure = ref.read(categoryEditorControllerProvider).status.failure;
+    if (failure != null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(localizeFailure(l10n, failure))));
+    }
   }
 }

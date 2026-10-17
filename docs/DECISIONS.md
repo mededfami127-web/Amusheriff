@@ -619,6 +619,89 @@ Pre-existing behaviour is untouched: a 42501 denial still surfaces as `errorPerm
 a dead network still hits the top-level `ErrorStateView`, and the storefront still
 composes as before. It does not close D-010.
 
+### D-037 — Subcategories: one level, and the database enforces it
+
+The owner asked to be able to add optional subcategories when creating a category, have
+them show up in the gateway under their mother category, and be able to add another one
+beside the first at any time. That is a self-reference on `categories`, which the schema
+did not have.
+
+* `categories.parent_id` is a nullable self-FK (`20260101000700_subcategories.sql`), with
+  `(parent_id, sort_order)` indexed because every read is "children of one parent, in
+  order".
+* `guard_category_nesting()` keeps the tree exactly one level deep: a grandchild and a
+  self-parent both raise `23514` (check violation), which the client already renders as a
+  field-level validation message. Enforced in a trigger rather than a CHECK because the
+  rule has to look at another row.
+* `on delete restrict`, not cascade: deleting a parent that still has subcategories fails
+  with `23503` instead of quietly deleting rows the owner never selected, exactly like
+  `products.category_id`. The gateway deletes the child first, then the parent.
+* RLS is untouched. A subcategory is a row in the same table, so the existing
+  `is_visible` / `is_admin()` policies decide who reads and who writes it; the suite in
+  `tests/rls/rls_tests.sql` grew an ok 12 block that proves anon can read a visible
+  subcategory (and a product inside it) but cannot create one, that admin cannot nest
+  deeper than one level, and that deletion order is explicit.
+* In the gateway, subcategories render indented under their parent and never appear in
+  the top-level reorder list, so `reorder_rows` keeps receiving top-level ids only. The
+  storefront home rail shows top-level categories only; the mother category's page lists
+  its subcategories as chips (covered by `test/unit/storefront_subcategory_test.dart`).
+* `CategoryDraft` sends `parent_id` only when it is set. A project that has not applied the
+  new migration yet keeps creating flat categories — the one thing the owner could already
+  do — instead of failing on a column it does not have; creating a subcategory is the only
+  path that needs the migration.
+
+What it does not do: no third level, no drag-reorder *within* a parent (children sort by
+`sort_order`, then name), and no per-subcategory storefront tile of its own — a
+subcategory is reached from its mother category's page.
+
+---
+
+### D-038 — A save that never fails silently
+
+The owner reported that Save did nothing on category and product creation. Two real
+defects were behind it, both about silence rather than about the write itself:
+
+* The category sheet printed neither `state.status.failure` nor any validation summary.
+  A rejected insert (duplicate slug, permission denial) left the sheet open with no
+  message at all — indistinguishable from a dead button. The sheet now renders the typed
+  failure in an `InlineFailureBanner`, and a failed validation says so instead of only
+  tinting a field that may be below the keyboard.
+* `categories.slug` is `not null unique`, but nothing derived it: the form promised
+  "generated from the English name if left empty" while `slugTouched` was never read, so a
+  category with a name and no slug validated as `validateRequired` and refused to save.
+  The controller now slugifies the name while the owner has not typed a slug, and derives
+  one at save time if the field is still empty. The product editor gained the same
+  treatment for its one silently-blocking case: with no categories in the database the
+  category dropdown was empty and Save could never succeed, so it now shows an empty
+  state that links to category creation.
+* The product editor reported every unsuccessful save as `errorServer`, including the
+  validation case that had already put a message on the field. Success and failure now
+  report what actually happened.
+* Catalogue writes carry a timeout (`CatalogRemoteDataSource`), so a hung insert surfaces
+  as `errorTimeout` instead of leaving `saving` true and the Save button disabled forever.
+* `AdminSystemCheckPage` printed each asset's raw server message inline, where a PostgREST
+  string or a Postgres code reads as the error the screen is about. The tile now states the
+  status and keeps the message behind "View details". `localizeFieldKey` follows the same
+  rule: an unrecognised key renders as a localized validation message instead of the key
+  itself (debug builds still see the key).
+
+A third defect surfaced while writing the tests for the above, and it was the same class of
+bug: `CategoryEditorController` was auto-disposed, so the draft seeded just before
+`showModalBottomSheet` was thrown away before the sheet was first built. Editing a category
+opened an empty form, and a new subcategory was saved as a top-level category. The
+controller is now `@Riverpod(keepAlive: true)` and always reseeded through `load(...)` on
+open, which is also what makes the parent-carrying subcategory flow work.
+
+Unchanged: RLS still decides the write, and a denial still reads as `errorPermission`.
+
+Proved with the toolchain rather than by eye: `flutter analyze --fatal-infos` is clean,
+`flutter test` passes 122 tests (including `test/unit/storefront_subcategory_test.dart` and
+six new cases in `test/unit/admin_gateway_test.dart` covering derived slugs, subcategory
+nesting and the save-refusal messages), `flutter build bundle --release` builds, and
+`bash scripts/run_rls_tests.sh` passes 24/24 on PostgreSQL 16. What is still unverified is
+the look on hardware: no emulator or device ran here, so the on-device banners, the
+snackbars and the chip row are checked as widgets, not as a shipped APK.
+
 ---
 
 ## E. Open items handed to Part 2

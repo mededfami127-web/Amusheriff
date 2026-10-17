@@ -986,5 +986,117 @@ end;
 $$;
 \echo 'ok 11 - every table the app streams is in the realtime publication'
 
+-- ═══════════════════════════════════════════════════════════════════════════
+-- 12 · SUBCATEGORIES — one level of nesting, read through the parent
+--
+-- The column is a plain FK on `categories`, so the public policies above
+-- already decide who sees a subcategory. What is new, and asserted here, is
+-- the shape of the tree: exactly one level, a parent cannot be deleted while
+-- children exist, and a product inside a subcategory reads like any other.
+-- ═══════════════════════════════════════════════════════════════════════════
+insert into public.categories (id, name, slug, sort_order, is_visible, parent_id)
+values
+  ('e0000000-0000-4000-8000-000000000010', 'RLS Subcategory', 'rls-test-sub',
+   1, true, 'e0000000-0000-4000-8000-000000000001'),
+  ('e0000000-0000-4000-8000-000000000020', 'RLS Delete Parent', 'rls-test-del-parent',
+   2, true, null),
+  ('e0000000-0000-4000-8000-000000000021', 'RLS Delete Child', 'rls-test-del-child',
+   0, true, 'e0000000-0000-4000-8000-000000000020');
+
+insert into public.products (id, category_id, title, price, is_published, is_available)
+values ('f0000000-0000-4000-8000-000000000004',
+        'e0000000-0000-4000-8000-000000000010',
+        'RLS Subcategory Product', 1500, true, true);
+
+set role anon;
+do $$
+declare
+  v_state text;
+begin
+  perform test.assert_eq(
+    (select count(*) from public.categories
+      where id = 'e0000000-0000-4000-8000-000000000010'),
+    1, 'anon sees a visible subcategory');
+
+  perform test.assert_eq(
+    (select parent_id from public.categories
+      where id = 'e0000000-0000-4000-8000-000000000010'),
+    'e0000000-0000-4000-8000-000000000001'::uuid,
+    'a subcategory keeps its parent link for the storefront');
+
+  perform test.assert_eq(
+    (select count(*) from public.products
+      where id = 'f0000000-0000-4000-8000-000000000004'),
+    1, 'a product inside a visible subcategory is readable by anon');
+
+  begin
+    insert into public.categories (name, slug, parent_id)
+    values ('RLS Anon Subcategory', 'rls-test-anon-sub',
+            'e0000000-0000-4000-8000-000000000001');
+    v_state := 'ok';
+  exception when others then v_state := sqlstate;
+  end;
+  perform test.assert_eq(v_state, '42501',
+    'anon CANNOT create a subcategory');
+end;
+$$;
+reset role;
+\echo 'ok 12a - subcategories follow the category read policies'
+
+set role authenticated;
+select set_config('request.jwt.claim.sub', 'aaaaaaaa-0000-4000-8000-000000000001', false);
+do $$
+declare
+  v_state text;
+begin
+  -- One level only: guard_category_nesting() rejects a grandchild.
+  begin
+    insert into public.categories (name, slug, parent_id)
+    values ('RLS Grandchild', 'rls-test-grandchild',
+            'e0000000-0000-4000-8000-000000000010');
+    v_state := 'ok';
+  exception when others then v_state := sqlstate;
+  end;
+  perform test.assert_eq(v_state, '23514',
+    'a subcategory CANNOT itself become a parent');
+
+  -- Nor may a row be its own parent.
+  begin
+    insert into public.categories (id, name, slug, parent_id)
+    values ('e0000000-0000-4000-8000-000000000011', 'RLS Self Parent',
+            'rls-test-self-parent', 'e0000000-0000-4000-8000-000000000011');
+    v_state := 'ok';
+  exception when others then v_state := sqlstate;
+  end;
+  perform test.assert_eq(v_state, '23514',
+    'a category CANNOT be its own parent');
+
+  -- `on delete restrict`: a parent with children is refused, so the gateway
+  -- never loses subcategories it did not ask to delete.
+  begin
+    delete from public.categories
+     where id = 'e0000000-0000-4000-8000-000000000020';
+    v_state := 'ok';
+  exception when others then v_state := sqlstate;
+  end;
+  perform test.assert_eq(v_state, '23503',
+    'a parent with subcategories CANNOT be deleted');
+
+  -- Deleting the child first is the supported order, and then the parent goes.
+  delete from public.categories
+   where id = 'e0000000-0000-4000-8000-000000000021';
+  delete from public.categories
+   where id = 'e0000000-0000-4000-8000-000000000020';
+  perform test.assert(
+    not exists (
+      select 1 from public.categories
+       where id = 'e0000000-0000-4000-8000-000000000020'
+    ),
+    'deleting a subcategory first lets its parent be deleted');
+end;
+$$;
+reset role;
+\echo 'ok 12b - the tree stays one level deep and deletion is explicit'
+
 \echo ''
 \echo '=== ALL RLS TESTS PASSED ==='

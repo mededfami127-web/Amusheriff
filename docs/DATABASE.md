@@ -13,6 +13,7 @@ erDiagram
     auth_users ||--|| profiles : "1:1 (trigger)"
     profiles }o--o{ audit_log : "actor"
     categories ||--o{ products : "restrict"
+    categories ||--o{ categories : "parent of (one level)"
     products ||--o{ product_media : "cascade"
     products ||--o{ inquiries : "set null"
     categories ||--o{ products : "published in"
@@ -39,6 +40,7 @@ erDiagram
     }
     categories {
         uuid id PK
+        uuid parent_id FK "nullable, subcategories only"
         text name
         text name_am
         text name_ar
@@ -114,6 +116,7 @@ tiktok | youtube | website | location | other`.
 | `20260101000400_storage_buckets.sql` | `product-media` and `brand` buckets + object policies |
 | `20260101000500_realtime_publication.sql` | adds every streamed table to the `supabase_realtime` publication |
 | `20260101000600_text_overrides.sql` | `text_overrides` (owner-authored wording) + `site_settings.store_name_om` + Oromo in the language check |
+| `20260101000700_subcategories.sql` | `categories.parent_id` self-FK (`on delete restrict`), `(parent_id, sort_order)` index, `guard_category_nesting()` + trigger |
 
 Migrations are idempotent — `create table if not exists`, `create or replace
 function` / view, `drop trigger if exists` before every `create trigger`, and

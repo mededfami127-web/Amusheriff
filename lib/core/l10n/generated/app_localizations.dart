@@ -324,6 +324,12 @@ abstract class AppLocalizations {
   /// **'Categories'**
   String get adminCategories;
 
+  /// No description provided for @adminCategoryAddSubcategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Add subcategory'**
+  String get adminCategoryAddSubcategory;
+
   /// No description provided for @adminCategoryCreated.
   ///
   /// In en, this message translates to:
@@ -341,6 +347,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This category still has {count} products. Move them to another category first, or delete the products.'**
   String adminCategoryHasProducts(int count);
+
+  /// No description provided for @adminCategoryHasSubcategories.
+  ///
+  /// In en, this message translates to:
+  /// **'This category still has subcategories. Delete them first.'**
+  String get adminCategoryHasSubcategories;
 
   /// No description provided for @adminCategoryHidden.
   ///
@@ -1061,6 +1073,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Every word of the app, in every language. Edit one and it changes everywhere.'**
   String get adminTextEditorHint;
+
+  /// No description provided for @adminTextEditorMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing words'**
+  String get adminTextEditorMissing;
+
+  /// No description provided for @adminTextEditorMissingDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is missing in this language'**
+  String get adminTextEditorMissingDone;
+
+  /// No description provided for @adminTextEditorMissingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the words still showing English in this language — fill them in one by one.'**
+  String get adminTextEditorMissingHint;
 
   /// No description provided for @adminTextEditorNoResults.
   ///

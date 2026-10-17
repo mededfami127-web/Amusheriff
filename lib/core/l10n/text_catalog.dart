@@ -448,6 +448,16 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
     },
   ),
   AppTextEntry(
+    key: 'adminCategoryAddSubcategory',
+    sectionKey: 'adminCategories',
+    defaults: <String, String>{
+      'en': 'Add subcategory',
+      'am': 'ንዑስ ምድብ ይጨምሩ',
+      'ar': 'إضافة قسم فرعي',
+      'om': 'Ramaddii xiqqaa dabali',
+    },
+  ),
+  AppTextEntry(
     key: 'adminCategoryCreated',
     sectionKey: 'adminCategories',
     defaults: <String, String>{
@@ -477,6 +487,17 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
       'om': 'Ramaddii kana keessatti oomishni {count} hafa. Dura isaan ramaddii biraatti sochoosi, yookaan oomishaalee sana balleessi.',
     },
     placeholders: <String>['count'],
+  ),
+  AppTextEntry(
+    key: 'adminCategoryHasSubcategories',
+    sectionKey: 'adminCategories',
+    defaults: <String, String>{
+      'en': 'This category still has subcategories. Delete them first.',
+      'am': 'ይህ ምድብ እስካሁን ንዑስ ምድቦች አሉት። መጀመሪያ እነሱን ይሰርዙ።',
+      'ar': 'لا يزال هذا القسم يحتوي على أقسام فرعية. احذفها أولاً.',
+      'om':
+          'Ramaddiin kun ammallee ramaddiiwwan xiqqaa qaba. Dursaa isaan haqi.',
+    },
   ),
   AppTextEntry(
     key: 'adminCategoryHidden',
@@ -1676,6 +1697,36 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
       'am': 'የመተግበሪያው ሁሉም ቃላት፣ በሁሉም ቋንቋ። አንዱን ሲቀይሩ በሁሉም ቦታ ይቀየራል።',
       'ar': 'كل كلمات التطبيق، بجميع اللغات. عدّل كلمة فتتغير في كل مكان.',
       'om': 'Jecha hunda appii kanaa, afaan hunda keessatti. Tokko yoo jijjiirte bakka hundatti jijjiirama.',
+    },
+  ),
+  AppTextEntry(
+    key: 'adminTextEditorMissing',
+    sectionKey: 'adminTextEditor',
+    defaults: <String, String>{
+      'en': 'Missing words',
+      'am': 'የጎደሉ ቃላት',
+      'ar': 'الكلمات الناقصة',
+      'om': 'Jechoota hir\'atan',
+    },
+  ),
+  AppTextEntry(
+    key: 'adminTextEditorMissingDone',
+    sectionKey: 'adminTextEditor',
+    defaults: <String, String>{
+      'en': 'Nothing is missing in this language',
+      'am': 'በዚህ ቋንቋ የጎደለ ነገር የለም',
+      'ar': 'لا يوجد نقص في هذه اللغة',
+      'om': 'Afaan kana keessatti homaa hin hir\'anne',
+    },
+  ),
+  AppTextEntry(
+    key: 'adminTextEditorMissingHint',
+    sectionKey: 'adminTextEditor',
+    defaults: <String, String>{
+      'en': 'Only the words still showing English in this language — fill them in one by one.',
+      'am': 'በዚህ ቋንቋ አሁንም በእንግሊዝኛ የሚታዩ ቃላት ብቻ — አንድ በአንድ ይሙሉ።',
+      'ar': 'الكلمات التي لا تزال تظهر بالإنجليزية في هذه اللغة فقط — املأها واحدة تلو الأخرى.',
+      'om': 'Jechoota afaan kana keessatti ammas Ingiliffaan mul\'atan qofa — tokko tokkoon guuti.',
     },
   ),
   AppTextEntry(

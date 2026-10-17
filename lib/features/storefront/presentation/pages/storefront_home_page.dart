@@ -93,13 +93,20 @@ class StorefrontHomePage extends ConsumerWidget {
                     onRetry: () => ref.invalidate(visibleCategoriesProvider),
                   ),
                 ),
-                data: (List<Category> items) => items.isEmpty
-                    ? EmptyState(
-                        title: l10n.stateEmptyTitle,
-                        message: l10n.stateEmptyMessage,
-                        compact: true,
-                      )
-                    : _CategoryRail(categories: items),
+                data: (List<Category> items) {
+                  // Top-level categories only: a subcategory belongs to its
+                  // mother, and is reached from that category's own page.
+                  final List<Category> roots = items
+                      .where((Category c) => c.parentId == null)
+                      .toList(growable: false);
+                  return roots.isEmpty
+                      ? EmptyState(
+                          title: l10n.stateEmptyTitle,
+                          message: l10n.stateEmptyMessage,
+                          compact: true,
+                        )
+                      : _CategoryRail(categories: roots);
+                },
               ),
             ),
             if (featured.value?.isNotEmpty ?? false) ...<Widget>[

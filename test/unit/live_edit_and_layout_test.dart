@@ -106,8 +106,13 @@ void main() {
     // The live-edit switch and the language picker are on screen…
     expect(find.byIcon(Icons.edit_note_rounded), findsOneWidget);
     // …and the catalogue is listed with its per-string edit icons. The
-    // header cards fill a small viewport, so scroll the first string into view
-    // the way the owner would.
+    // header cards fill a small viewport, so scroll each control into view the
+    // way the owner would.
+    await tester.scrollUntilVisible(
+      find.text('Search a word'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Search a word'), findsOneWidget);
     await tester.scrollUntilVisible(
       find.text('a11yOpenCategory'),
@@ -155,9 +160,23 @@ void main() {
   ) async {
     await pumpSmall(tester, const AdminTextEditorPage());
 
-    // Oromo is reachable exactly like English, Amharic and Arabic.
-    expect(find.text('Oromoo'), findsOneWidget);
-    expect(find.text('English'), findsOneWidget);
+    // The picker sits below the header cards on a small phone. Each chip also
+    // carries its missing-word count, so match the language name as a prefix.
+    await tester.scrollUntilVisible(
+      find.textContaining('Oromoo'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+
+    // Oromo is reachable exactly like English, Amharic and Arabic. A chip may
+    // be followed by its missing-word count, so match the name as a prefix.
+    Finder chip(String name) => find.byWidgetPredicate(
+      (Widget widget) => widget is Text && (widget.data ?? '').startsWith(name),
+    );
+    expect(chip('Oromoo'), findsOneWidget);
+    expect(chip('English'), findsOneWidget);
+    expect(chip('አማርኛ'), findsOneWidget);
+    expect(chip('العربي'), findsOneWidget);
   });
 }
 

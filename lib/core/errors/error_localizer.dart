@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/widgets.dart';
 
 import '../l10n/generated/app_localizations.dart';
@@ -46,6 +47,11 @@ String localizeFailure(AppLocalizations l10n, AppFailure failure) {
 }
 
 /// Resolves a validator/field message key (used by form widgets in Part 2).
+///
+/// An unrecognised key is never shown to the owner: a raw `validateFoo` string
+/// sitting under a field reads exactly like the error-code text this app
+/// promises not to show. Debug builds still get the key back, so a typo is
+/// visible while the form is being written.
 String localizeFieldKey(AppLocalizations l10n, String? key) {
   if (key == null || key.isEmpty) return '';
   return switch (key) {
@@ -68,7 +74,7 @@ String localizeFieldKey(AppLocalizations l10n, String? key) {
     'errorConstraintViolation' => l10n.errorConstraintViolation,
     'errorDuplicate' => l10n.errorDuplicate,
     'errorInvalidFormat' => l10n.errorInvalidFormat,
-    _ => key,
+    _ => kDebugMode ? key : l10n.errorValidation,
   };
 }
 

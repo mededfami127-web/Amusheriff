@@ -128,6 +128,9 @@ class AppLocalizationsOm extends AppLocalizations {
   String get adminCategories => 'Ramaddiiwwan';
 
   @override
+  String get adminCategoryAddSubcategory => 'Ramaddii xiqqaa dabali';
+
+  @override
   String get adminCategoryCreated => 'Ramaddiin uumame';
 
   @override
@@ -137,6 +140,10 @@ class AppLocalizationsOm extends AppLocalizations {
   String adminCategoryHasProducts(int count) {
     return 'Ramaddii kana keessatti oomishni $count hafa. Dura isaan ramaddii biraatti sochoosi, yookaan oomishaalee sana balleessi.';
   }
+
+  @override
+  String get adminCategoryHasSubcategories =>
+      'Ramaddiin kun ammallee ramaddiiwwan xiqqaa qaba. Dursaa isaan haqi.';
 
   @override
   String get adminCategoryHidden => 'Ramaddiin dhokate';
@@ -507,6 +514,17 @@ class AppLocalizationsOm extends AppLocalizations {
   @override
   String get adminTextEditorHint =>
       'Jecha hunda appii kanaa, afaan hunda keessatti. Tokko yoo jijjiirte bakka hundatti jijjiirama.';
+
+  @override
+  String get adminTextEditorMissing => 'Jechoota hir\'atan';
+
+  @override
+  String get adminTextEditorMissingDone =>
+      'Afaan kana keessatti homaa hin hir\'anne';
+
+  @override
+  String get adminTextEditorMissingHint =>
+      'Jechoota afaan kana keessatti ammas Ingiliffaan mul\'atan qofa — tokko tokkoon guuti.';
 
   @override
   String get adminTextEditorNoResults =>

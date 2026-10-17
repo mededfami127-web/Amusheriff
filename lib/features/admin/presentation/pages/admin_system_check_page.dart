@@ -277,13 +277,27 @@ class _BuildMetaCard extends ConsumerWidget {
   }
 }
 
-class _CheckTile extends StatelessWidget {
+/// One probed asset.
+///
+/// The server's own words are a bug-report detail, not a headline: the tile
+/// shows the asset name and its status, and keeps the raw message — a
+/// PostgREST error string or a Postgres code — behind "View details", so it
+/// cannot read as the error this screen is telling the owner about.
+class _CheckTile extends StatefulWidget {
   const _CheckTile({required this.check});
 
   final SystemAssetCheck check;
 
   @override
+  State<_CheckTile> createState() => _CheckTileState();
+}
+
+class _CheckTileState extends State<_CheckTile> {
+  bool _showDetail = false;
+
+  @override
   Widget build(BuildContext context) {
+    final SystemAssetCheck check = widget.check;
     final AppLocalizations l10n = AppLocalizations.of(context);
     final bool dark = Theme.of(context).brightness == Brightness.dark;
     final Color surface = dark ? BrandColors.plumSurface : Colors.white;
@@ -343,15 +357,28 @@ class _CheckTile extends StatelessWidget {
                   ),
                 ),
                 if (check.detail case final String detail) ...<Widget>[
-                  const SizedBox(height: 4),
-                  Text(
-                    detail,
-                    style: BrandTypography.bodySmall.copyWith(
-                      color: BrandTypography.mutedOn(
-                        Theme.of(context).brightness,
+                  const SizedBox(height: 6),
+                  if (_showDetail)
+                    Text(
+                      detail,
+                      style: BrandTypography.bodySmall.copyWith(
+                        fontFamily: 'monospace',
+                        color: BrandTypography.mutedOn(
+                          Theme.of(context).brightness,
+                        ),
+                      ),
+                    )
+                  else
+                    TextButton.icon(
+                      onPressed: () => setState(() => _showDetail = true),
+                      icon: const Icon(Icons.info_outline, size: 16),
+                      label: Text(l10n.actionViewDetails),
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                     ),
-                  ),
                 ],
               ],
             ),
@@ -373,7 +400,7 @@ class _CheckTile extends StatelessWidget {
     );
   }
 
-  IconData get _kindIcon => switch (check.kind) {
+  IconData get _kindIcon => switch (widget.check.kind) {
     SystemAssetKind.table => Icons.table_chart_outlined,
     SystemAssetKind.storage => Icons.folder_outlined,
     SystemAssetKind.function => Icons.bolt_outlined,

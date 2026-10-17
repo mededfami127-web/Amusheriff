@@ -2,7 +2,9 @@ import 'package:amu_sharif_majlis/core/l10n/generated/app_localizations.dart';
 import 'package:amu_sharif_majlis/core/l10n/overridable_localizations.dart';
 import 'package:amu_sharif_majlis/core/l10n/text_catalog.dart';
 import 'package:amu_sharif_majlis/core/l10n/text_localizations.dart';
+import 'package:amu_sharif_majlis/features/text_editor/presentation/providers/text_editor_providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Reads a string the same way every screen does.
@@ -71,6 +73,100 @@ void main() {
 
       final AppTextEntry? dashboard = kAppTextByKey['adminDashboard'];
       expect(dashboard?.hasPlaceholders, isFalse);
+    });
+  });
+
+  group('fill the gap', () {
+    const AppTextEntry translated = AppTextEntry(
+      key: 'gapTranslated',
+      sectionKey: 'groupCommon',
+      defaults: <String, String>{
+        'en': 'Products',
+        'am': 'ምርቶች',
+        'ar': 'المنتجات',
+        'om': 'Oomishaalee',
+      },
+    );
+    const AppTextEntry copiedEnglish = AppTextEntry(
+      key: 'gapCopied',
+      sectionKey: 'groupCommon',
+      defaults: <String, String>{
+        'en': 'Order now',
+        'am': 'አሁን ይዘዙ',
+        'ar': 'اطلب الآن',
+        'om': 'Order now',
+      },
+    );
+    const AppTextEntry absent = AppTextEntry(
+      key: 'gapAbsent',
+      sectionKey: 'groupCommon',
+      defaults: <String, String>{'en': 'Search'},
+    );
+
+    test('English is the source language, so it has no gaps', () {
+      expect(isTextGap(copiedEnglish, 'en', const <String, String>{}), isFalse);
+    });
+
+    test('a row still reading English is a gap', () {
+      expect(isTextGap(copiedEnglish, 'om', const <String, String>{}), isTrue);
+      expect(isTextGap(translated, 'om', const <String, String>{}), isFalse);
+    });
+
+    test('a row with no wording for the language is a gap', () {
+      expect(isTextGap(absent, 'om', const <String, String>{}), isTrue);
+      expect(isTextGap(absent, 'am', const <String, String>{}), isTrue);
+    });
+
+    test('an owner rewrite fills the gap for good', () {
+      expect(
+        isTextGap(copiedEnglish, 'om', const <String, String>{
+          'gapCopied': 'Amma ajaja',
+        }),
+        isFalse,
+      );
+    });
+
+    test('plural strings stay read-only, so they are not gaps', () {
+      const AppTextEntry plural = AppTextEntry(
+        key: 'gapPlural',
+        sectionKey: 'groupCommon',
+        defaults: <String, String>{
+          'en': '{count} results',
+          'om': '{count} results',
+        },
+        isPlural: true,
+      );
+      expect(isTextGap(plural, 'om', const <String, String>{}), isFalse);
+    });
+
+    test('missing-words mode narrows the catalogue to the gaps', () {
+      final ProviderContainer container = ProviderContainer(
+        overrides: [
+          textOverridesProvider('om').overrideWith(
+            (Ref ref) => Stream<Map<String, String>>.value(
+              const <String, String>{'navHome': 'Mana koo'},
+            ),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      container.read(textEditorLocaleProvider.notifier).select('om');
+      container.read(textEditorGapsOnlyProvider.notifier).set(true);
+
+      final List<AppTextEntry> entries = container.read(
+        filteredTextEntriesProvider,
+      );
+      final Set<String> gaps = container.read(textGapKeysProvider('om'));
+
+      expect(entries, isNotEmpty);
+      // Every row the editor shows in this mode is a gap, and no gap is hidden.
+      expect(entries.map((AppTextEntry e) => e.key).toSet(), gaps);
+      expect(gaps, isNot(contains('navHome')));
+
+      // English never enters the list, even with the mode on.
+      container.read(textEditorLocaleProvider.notifier).select('en');
+      expect(container.read(filteredTextEntriesProvider), isEmpty);
     });
   });
 

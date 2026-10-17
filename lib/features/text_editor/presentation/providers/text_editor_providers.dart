@@ -81,12 +81,85 @@ List<String> textEditorSections(Ref ref) => <String>[
       section,
 ];
 
-/// The catalogue entries matching the current search and section filter.
+/// A string whose wording is still the English one, or missing entirely, is a
+/// *gap* in [locale].
+///
+/// This is the distinction the owner asked for: a machine-drafted Amharic or
+/// Oromo table is not wrong everywhere, only where the row still reads as
+/// English. A key the owner has already rewritten is never a gap again, so
+/// filling one removes it from the list on the spot.
+bool isTextGap(
+  AppTextEntry entry,
+  String locale,
+  Map<String, String> overrides,
+) {
+  // English is the source language; there is nothing to fill in.
+  if (locale == 'en') return false;
+  if (!entry.isEditable) return false;
+  if (overrides.containsKey(entry.key)) return false;
+
+  final String? translated = entry.defaults[locale];
+  if (translated == null) return true;
+
+  final String english = entry.defaults['en'] ?? entry.anyDefault;
+  return translated.trim().toLowerCase() == english.trim().toLowerCase();
+}
+
+/// Every key still needing owner wording in [locale].
+@riverpod
+Set<String> textGapKeys(Ref ref, String locale) {
+  final Map<String, String> overrides =
+      ref.watch(textOverridesProvider(locale)).value ??
+      const <String, String>{};
+
+  return <String>{
+    for (final AppTextEntry entry in kAppTextEntries)
+      if (isTextGap(entry, locale, overrides)) entry.key,
+  };
+}
+
+/// How many words are still missing in [locale], for the language chips.
+@riverpod
+int textGapCount(Ref ref, String locale) =>
+    ref.watch(textGapKeysProvider(locale)).length;
+
+/// Missing words per screen, for the section chips.
+@riverpod
+Map<String, int> textGapCountsBySection(Ref ref) {
+  final String locale = ref.watch(textEditorLocaleProvider);
+  final Set<String> gaps = ref.watch(textGapKeysProvider(locale));
+
+  final Map<String, int> counts = <String, int>{};
+  for (final AppTextEntry entry in kAppTextEntries) {
+    if (!gaps.contains(entry.key)) continue;
+    counts[entry.sectionKey] = (counts[entry.sectionKey] ?? 0) + 1;
+  }
+  return counts;
+}
+
+/// "Fill the gap" mode: show only the strings that still need wording.
+///
+/// Kept in its own provider so switching language or screen never loses the
+/// mode, which is what makes filling a whole language a single pass.
+@Riverpod(keepAlive: true)
+class TextEditorGapsOnly extends _$TextEditorGapsOnly {
+  @override
+  bool build() => false;
+
+  void set(bool value) => state = value;
+  void toggle() => state = !state;
+}
+
+/// The catalogue entries matching the current search, section and gap filter.
 @riverpod
 List<AppTextEntry> filteredTextEntries(Ref ref) {
   final String query = ref.watch(textEditorQueryProvider).trim().toLowerCase();
   final String? section = ref.watch(textEditorSectionProvider);
   final String locale = ref.watch(textEditorLocaleProvider);
+  final bool gapsOnly = ref.watch(textEditorGapsOnlyProvider);
+  final Set<String> gaps = gapsOnly
+      ? ref.watch(textGapKeysProvider(locale))
+      : const <String>{};
   final Map<String, String> overrides =
       ref.watch(textOverridesProvider(locale)).value ??
       const <String, String>{};
@@ -94,6 +167,7 @@ List<AppTextEntry> filteredTextEntries(Ref ref) {
   return <AppTextEntry>[
     for (final AppTextEntry entry in kAppTextEntries)
       if ((section == null || entry.sectionKey == section) &&
+          (!gapsOnly || gaps.contains(entry.key)) &&
           (query.isEmpty ||
               entry.key.toLowerCase().contains(query) ||
               overrides[entry.key]?.toLowerCase().contains(query) == true ||
@@ -178,6 +252,10 @@ class TextEditorController extends _$TextEditorController {
     state = const TextEditorStatus(saving: true);
     try {
       await _repo.save(textKey: textKey, locale: locale, value: value);
+      // A realtime subscription usually pushes the new row back, but a project
+      // without the `text_overrides` publication never would: refetching here
+      // means the new wording appears on every screen even then.
+      ref.invalidate(textOverridesProvider(locale));
       state = const TextEditorStatus(saved: true);
       return true;
     } on AppFailure catch (failure) {
@@ -198,6 +276,7 @@ class TextEditorController extends _$TextEditorController {
     state = const TextEditorStatus(saving: true);
     try {
       await _repo.remove(textKey: textKey, locale: locale);
+      ref.invalidate(textOverridesProvider(locale));
       state = const TextEditorStatus(saved: true);
       return true;
     } on AppFailure catch (failure) {

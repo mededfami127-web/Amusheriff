@@ -128,6 +128,9 @@ class AppLocalizationsAm extends AppLocalizations {
   String get adminCategories => 'ምድቦች';
 
   @override
+  String get adminCategoryAddSubcategory => 'ንዑስ ምድብ ይጨምሩ';
+
+  @override
   String get adminCategoryCreated => 'ምድብ ተፈጥሯል';
 
   @override
@@ -137,6 +140,10 @@ class AppLocalizationsAm extends AppLocalizations {
   String adminCategoryHasProducts(int count) {
     return 'ይህ ምድብ እስካሁን $count ምርቶች አሉት። በመጀመሪያ ወደ ሌላ ምድብ ያስተካክሉ ወይም ምርቶቹን ይሰርዙ።';
   }
+
+  @override
+  String get adminCategoryHasSubcategories =>
+      'ይህ ምድብ እስካሁን ንዑስ ምድቦች አሉት። መጀመሪያ እነሱን ይሰርዙ።';
 
   @override
   String get adminCategoryHidden => 'ምድብ ተደብቋል';
@@ -499,6 +506,16 @@ class AppLocalizationsAm extends AppLocalizations {
   @override
   String get adminTextEditorHint =>
       'የመተግበሪያው ሁሉም ቃላት፣ በሁሉም ቋንቋ። አንዱን ሲቀይሩ በሁሉም ቦታ ይቀየራል።';
+
+  @override
+  String get adminTextEditorMissing => 'የጎደሉ ቃላት';
+
+  @override
+  String get adminTextEditorMissingDone => 'በዚህ ቋንቋ የጎደለ ነገር የለም';
+
+  @override
+  String get adminTextEditorMissingHint =>
+      'በዚህ ቋንቋ አሁንም በእንግሊዝኛ የሚታዩ ቃላት ብቻ — አንድ በአንድ ይሙሉ።';
 
   @override
   String get adminTextEditorNoResults => 'ከፍለጋዎ ጋር የሚመሳሰል ጽሑፍ የለም';

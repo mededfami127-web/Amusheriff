@@ -128,6 +128,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminCategories => 'Categories';
 
   @override
+  String get adminCategoryAddSubcategory => 'Add subcategory';
+
+  @override
   String get adminCategoryCreated => 'Category created';
 
   @override
@@ -137,6 +140,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String adminCategoryHasProducts(int count) {
     return 'This category still has $count products. Move them to another category first, or delete the products.';
   }
+
+  @override
+  String get adminCategoryHasSubcategories =>
+      'This category still has subcategories. Delete them first.';
 
   @override
   String get adminCategoryHidden => 'Category hidden';
@@ -505,6 +512,17 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get adminTextEditorHint =>
       'Every word of the app, in every language. Edit one and it changes everywhere.';
+
+  @override
+  String get adminTextEditorMissing => 'Missing words';
+
+  @override
+  String get adminTextEditorMissingDone =>
+      'Nothing is missing in this language';
+
+  @override
+  String get adminTextEditorMissingHint =>
+      'Only the words still showing English in this language — fill them in one by one.';
 
   @override
   String get adminTextEditorNoResults => 'No text matches your search';

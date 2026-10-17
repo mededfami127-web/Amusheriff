@@ -13,6 +13,7 @@ _Category _$CategoryFromJson(Map<String, dynamic> json) => _Category(
   nameAr: json['name_ar'] as String?,
   slug: json['slug'] as String,
   coverPath: json['cover_path'] as String?,
+  parentId: json['parent_id'] as String?,
   sortOrder: (json['sort_order'] as num?)?.toInt() ?? 0,
   isVisible: json['is_visible'] as bool? ?? true,
   createdAt: json['created_at'] == null
@@ -31,6 +32,7 @@ Map<String, dynamic> _$CategoryToJson(_Category instance) => <String, dynamic>{
   'name_ar': ?instance.nameAr,
   'slug': instance.slug,
   'cover_path': ?instance.coverPath,
+  'parent_id': ?instance.parentId,
   'sort_order': instance.sortOrder,
   'is_visible': instance.isVisible,
   'created_at': ?instance.createdAt?.toIso8601String(),

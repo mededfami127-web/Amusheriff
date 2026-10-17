@@ -579,12 +579,306 @@ final class TextEditorSectionsProvider
 String _$textEditorSectionsHash() =>
     r'be085ab725bbcfeead67f37b4f5c3e4d4e68bbc8';
 
-/// The catalogue entries matching the current search and section filter.
+/// Every key still needing owner wording in [locale].
+
+@ProviderFor(textGapKeys)
+final textGapKeysProvider = TextGapKeysFamily._();
+
+/// Every key still needing owner wording in [locale].
+
+final class TextGapKeysProvider
+    extends $FunctionalProvider<Set<String>, Set<String>, Set<String>>
+    with $Provider<Set<String>> {
+  /// Every key still needing owner wording in [locale].
+  TextGapKeysProvider._({
+    required TextGapKeysFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'textGapKeysProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$textGapKeysHash();
+
+  @override
+  String toString() {
+    return r'textGapKeysProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<Set<String>> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  Set<String> create(Ref ref) {
+    final argument = this.argument as String;
+    return textGapKeys(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Set<String> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Set<String>>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is TextGapKeysProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$textGapKeysHash() => r'50116833ce5d4bee27c6a71e4c4ed9cd2e477170';
+
+/// Every key still needing owner wording in [locale].
+
+final class TextGapKeysFamily extends $Family
+    with $FunctionalFamilyOverride<Set<String>, String> {
+  TextGapKeysFamily._()
+    : super(
+        retry: null,
+        name: r'textGapKeysProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Every key still needing owner wording in [locale].
+
+  TextGapKeysProvider call(String locale) =>
+      TextGapKeysProvider._(argument: locale, from: this);
+
+  @override
+  String toString() => r'textGapKeysProvider';
+}
+
+/// How many words are still missing in [locale], for the language chips.
+
+@ProviderFor(textGapCount)
+final textGapCountProvider = TextGapCountFamily._();
+
+/// How many words are still missing in [locale], for the language chips.
+
+final class TextGapCountProvider extends $FunctionalProvider<int, int, int>
+    with $Provider<int> {
+  /// How many words are still missing in [locale], for the language chips.
+  TextGapCountProvider._({
+    required TextGapCountFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'textGapCountProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$textGapCountHash();
+
+  @override
+  String toString() {
+    return r'textGapCountProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<int> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  int create(Ref ref) {
+    final argument = this.argument as String;
+    return textGapCount(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(int value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<int>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is TextGapCountProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$textGapCountHash() => r'dc25aacb7f432eab6cf457ab89201c6f71d05ed1';
+
+/// How many words are still missing in [locale], for the language chips.
+
+final class TextGapCountFamily extends $Family
+    with $FunctionalFamilyOverride<int, String> {
+  TextGapCountFamily._()
+    : super(
+        retry: null,
+        name: r'textGapCountProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// How many words are still missing in [locale], for the language chips.
+
+  TextGapCountProvider call(String locale) =>
+      TextGapCountProvider._(argument: locale, from: this);
+
+  @override
+  String toString() => r'textGapCountProvider';
+}
+
+/// Missing words per screen, for the section chips.
+
+@ProviderFor(textGapCountsBySection)
+final textGapCountsBySectionProvider = TextGapCountsBySectionProvider._();
+
+/// Missing words per screen, for the section chips.
+
+final class TextGapCountsBySectionProvider
+    extends
+        $FunctionalProvider<
+          Map<String, int>,
+          Map<String, int>,
+          Map<String, int>
+        >
+    with $Provider<Map<String, int>> {
+  /// Missing words per screen, for the section chips.
+  TextGapCountsBySectionProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'textGapCountsBySectionProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$textGapCountsBySectionHash();
+
+  @$internal
+  @override
+  $ProviderElement<Map<String, int>> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  Map<String, int> create(Ref ref) {
+    return textGapCountsBySection(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Map<String, int> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Map<String, int>>(value),
+    );
+  }
+}
+
+String _$textGapCountsBySectionHash() =>
+    r'cc0b849565e89cc6e360a0840620655fede723dd';
+
+/// "Fill the gap" mode: show only the strings that still need wording.
+///
+/// Kept in its own provider so switching language or screen never loses the
+/// mode, which is what makes filling a whole language a single pass.
+
+@ProviderFor(TextEditorGapsOnly)
+final textEditorGapsOnlyProvider = TextEditorGapsOnlyProvider._();
+
+/// "Fill the gap" mode: show only the strings that still need wording.
+///
+/// Kept in its own provider so switching language or screen never loses the
+/// mode, which is what makes filling a whole language a single pass.
+final class TextEditorGapsOnlyProvider
+    extends $NotifierProvider<TextEditorGapsOnly, bool> {
+  /// "Fill the gap" mode: show only the strings that still need wording.
+  ///
+  /// Kept in its own provider so switching language or screen never loses the
+  /// mode, which is what makes filling a whole language a single pass.
+  TextEditorGapsOnlyProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'textEditorGapsOnlyProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$textEditorGapsOnlyHash();
+
+  @$internal
+  @override
+  TextEditorGapsOnly create() => TextEditorGapsOnly();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$textEditorGapsOnlyHash() =>
+    r'd4674655d2060ff71d879fc556a094a9af9058bf';
+
+/// "Fill the gap" mode: show only the strings that still need wording.
+///
+/// Kept in its own provider so switching language or screen never loses the
+/// mode, which is what makes filling a whole language a single pass.
+
+abstract class _$TextEditorGapsOnly extends $Notifier<bool> {
+  bool build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<bool, bool>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<bool, bool>,
+              bool,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+/// The catalogue entries matching the current search, section and gap filter.
 
 @ProviderFor(filteredTextEntries)
 final filteredTextEntriesProvider = FilteredTextEntriesProvider._();
 
-/// The catalogue entries matching the current search and section filter.
+/// The catalogue entries matching the current search, section and gap filter.
 
 final class FilteredTextEntriesProvider
     extends
@@ -594,7 +888,7 @@ final class FilteredTextEntriesProvider
           List<AppTextEntry>
         >
     with $Provider<List<AppTextEntry>> {
-  /// The catalogue entries matching the current search and section filter.
+  /// The catalogue entries matching the current search, section and gap filter.
   FilteredTextEntriesProvider._()
     : super(
         from: null,
@@ -630,7 +924,7 @@ final class FilteredTextEntriesProvider
 }
 
 String _$filteredTextEntriesHash() =>
-    r'dac8460e2940f23b0107be2b9d26c3a9959fd817';
+    r'49dcac6043dee6336f9f506d8e63552adeae4c42';
 
 /// Live edit mode: pencil icons over every editable string.
 ///
@@ -750,7 +1044,7 @@ final class TextEditorControllerProvider
 }
 
 String _$textEditorControllerHash() =>
-    r'764d10c99796b70f987b180d9adc023871598df6';
+    r'37f9fa2000e8d00792db43e2e08efc1f3d9e192c';
 
 /// Saves and restores the owner's wording.
 ///

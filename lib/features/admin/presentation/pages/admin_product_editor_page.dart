@@ -150,6 +150,20 @@ class _AdminProductEditorPageState
                 onDismiss: controller.acknowledge,
               ),
             ),
+          if (categories.isEmpty) ...<Widget>[
+            EmptyState(
+              title: l10n.adminCategories,
+              message: l10n.adminNoCategories,
+              icon: Icons.category_outlined,
+              compact: true,
+              action: FilledButton.icon(
+                onPressed: () => context.go(Routes.adminCategories),
+                icon: const Icon(Icons.add),
+                label: Text(l10n.adminCreateCategory),
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
           DropdownButtonFormField<String>(
             initialValue: state.categoryId.isEmpty ? null : state.categoryId,
             decoration: InputDecoration(
@@ -297,15 +311,38 @@ class _AdminProductEditorPageState
     );
   }
 
+  /// Saves, and reports what actually happened.
+  ///
+  /// A blocked validation used to answer `errorServer` — "the service is
+  /// temporarily unavailable" — for a product whose only problem was a missing
+  /// category, and a refused write answered nothing at all.
   Future<void> _save(
     ProductEditorController controller,
     AppLocalizations l10n,
   ) async {
+    if (controller.validate().isNotEmpty) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.errorValidation)));
+      return;
+    }
+
     final bool ok = await controller.save();
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(ok ? l10n.adminProductSaved : l10n.errorServer)),
-    );
+
+    final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
+    if (ok) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.adminProductSaved)));
+      return;
+    }
+
+    // The typed failure is already in the banner above the form; the snackbar
+    // repeats it because the banner can sit off-screen when the keyboard is up.
+    final failure = ref.read(productEditorControllerProvider).status.failure;
+    if (failure != null) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(localizeFailure(l10n, failure))),
+      );
+    }
   }
 }
 

@@ -306,6 +306,16 @@ void main() {
       expect(find.text(l10n.systemCheckFixNetwork), findsOneWidget);
       expect(find.text(l10n.systemCheckFixDatabase), findsNothing);
       expect(find.text(l10n.systemCheckUnreachable), findsOneWidget);
+
+      // The server's own words are a bug-report detail, not the headline: the
+      // tile states the status, and the raw message is one tap away, so a
+      // PostgREST string cannot be read as the error the screen is about.
+      expect(
+        find.text('Failed host lookup: example.supabase.co'),
+        findsNothing,
+      );
+      await tester.tap(find.text(l10n.actionViewDetails));
+      await settle(tester);
       expect(
         find.text('Failed host lookup: example.supabase.co'),
         findsOneWidget,

@@ -8,7 +8,7 @@ wired-together experiences:
 | Surface | Route | Access |
 | --- | --- | --- |
 | **Storefront** — browse the catalogue, open a product, contact the owner on WhatsApp / Telegram / phone | `/` | public, no login |
-| **Admin gateway** — categories, products, media, prices, contact links, branding and password | `/admin/**` | valid session **and** `profiles.is_admin = true` |
+| **Admin gateway** — categories with optional one-level subcategories, products, media, prices, contact links, branding and password | `/admin/**` | valid session **and** `profiles.is_admin = true` |
 
 Both surfaces share one catalogue and one contact-link repository, and the store
 front subscribes to Supabase Realtime — so anything the owner changes is live on
@@ -31,13 +31,13 @@ is tracked in `docs/DECISIONS.md` → "Open items handed to Part 2".
 | Check | Command | Result |
 | --- | --- | --- |
 | Code generation | `dart run build_runner build` + `dart run tool/gen_text_overlay.dart` | 0 errors; `git status` clean afterwards |
-| Formatting | `dart format --output=none --set-exit-if-changed .` | clean (0 of 166 files change) |
+| Formatting | `dart format --output=none --set-exit-if-changed .` | clean (0 of 167 files change) |
 | Static analysis | `flutter analyze --fatal-infos` | **No issues found** |
-| Unit + widget tests | `flutter test` | **114 passed** |
+| Unit + widget tests | `flutter test` | **122 passed** |
 | Release compile | `flutter build bundle --release` | builds clean |
-| Localization key parity | `dart run tool/check_l10n_parity.dart` | **311 message keys in each of en, am, ar, om** |
+| Localization key parity | `dart run tool/check_l10n_parity.dart` | **313 message keys in each of en, am, ar, om** |
 | Edge Function | `deno check` · `deno lint` · `deno fmt --check supabase/functions/inquiry/index.ts` | clean on Deno 2.9.7 |
-| RLS acceptance suite | `bash scripts/run_rls_tests.sh` | **22/22 checks passed** on PostgreSQL 16.15 |
+| RLS acceptance suite | `bash scripts/run_rls_tests.sh` | **24/24 checks passed** on PostgreSQL 16.15 |
 | Migration runner | `bash scripts/apply_migrations.sh --dry-run`, then `--apply` twice | plan, dry run, apply and re-apply all clean on PostgreSQL 16.15 |
 | Signed release (Android) | `.github/workflows/build.yml` on the `v1.0.0` tag | **success** — signed APK + AAB, 11m42s |
 

@@ -8,22 +8,43 @@ part of 'admin_editors.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Create / edit a category.
+/// Create / edit a category, including its optional place under a mother
+/// category.
+///
+/// `keepAlive` on purpose: the category sheet is a bottom sheet, which Riverpod
+/// builds one frame after `load()` seeds this draft — an auto-disposed state is
+/// already gone by then, so an edit form would open empty and a subcategory
+/// would be created as a top-level category. Every open calls [load], so the
+/// state can never go stale between openings.
 
 @ProviderFor(CategoryEditorController)
 final categoryEditorControllerProvider = CategoryEditorControllerProvider._();
 
-/// Create / edit a category.
+/// Create / edit a category, including its optional place under a mother
+/// category.
+///
+/// `keepAlive` on purpose: the category sheet is a bottom sheet, which Riverpod
+/// builds one frame after `load()` seeds this draft — an auto-disposed state is
+/// already gone by then, so an edit form would open empty and a subcategory
+/// would be created as a top-level category. Every open calls [load], so the
+/// state can never go stale between openings.
 final class CategoryEditorControllerProvider
     extends $NotifierProvider<CategoryEditorController, CategoryEditorState> {
-  /// Create / edit a category.
+  /// Create / edit a category, including its optional place under a mother
+  /// category.
+  ///
+  /// `keepAlive` on purpose: the category sheet is a bottom sheet, which Riverpod
+  /// builds one frame after `load()` seeds this draft — an auto-disposed state is
+  /// already gone by then, so an edit form would open empty and a subcategory
+  /// would be created as a top-level category. Every open calls [load], so the
+  /// state can never go stale between openings.
   CategoryEditorControllerProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'categoryEditorControllerProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -45,9 +66,16 @@ final class CategoryEditorControllerProvider
 }
 
 String _$categoryEditorControllerHash() =>
-    r'ffcf91ee3c832b72c6b39141f4011cd4aa0b1171';
+    r'4e2dbe81514aace5ac6b195b8dae09fc4cb6085f';
 
-/// Create / edit a category.
+/// Create / edit a category, including its optional place under a mother
+/// category.
+///
+/// `keepAlive` on purpose: the category sheet is a bottom sheet, which Riverpod
+/// builds one frame after `load()` seeds this draft — an auto-disposed state is
+/// already gone by then, so an edit form would open empty and a subcategory
+/// would be created as a top-level category. Every open calls [load], so the
+/// state can never go stale between openings.
 
 abstract class _$CategoryEditorController
     extends $Notifier<CategoryEditorState> {

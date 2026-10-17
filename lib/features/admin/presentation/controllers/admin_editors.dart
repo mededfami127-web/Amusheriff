@@ -61,6 +61,7 @@ class CategoryEditorState {
     this.nameAr = '',
     this.slug = '',
     this.coverPath,
+    this.parentId,
     this.isVisible = true,
     this.sortOrder = 0,
     this.isNew = true,
@@ -75,6 +76,9 @@ class CategoryEditorState {
   final String nameAr;
   final String slug;
   final String? coverPath;
+
+  /// Mother category when this row is a subcategory; `null` when top-level.
+  final String? parentId;
   final bool isVisible;
   final int sortOrder;
   final bool isNew;
@@ -89,6 +93,7 @@ class CategoryEditorState {
     String? nameAr,
     String? slug,
     String? coverPath,
+    String? parentId,
     bool? isVisible,
     int? sortOrder,
     bool? isNew,
@@ -102,6 +107,7 @@ class CategoryEditorState {
     nameAr: nameAr ?? this.nameAr,
     slug: slug ?? this.slug,
     coverPath: coverPath ?? this.coverPath,
+    parentId: parentId ?? this.parentId,
     isVisible: isVisible ?? this.isVisible,
     sortOrder: sortOrder ?? this.sortOrder,
     isNew: isNew ?? this.isNew,
@@ -111,15 +117,22 @@ class CategoryEditorState {
   );
 }
 
-/// Create / edit a category.
-@riverpod
+/// Create / edit a category, including its optional place under a mother
+/// category.
+///
+/// `keepAlive` on purpose: the category sheet is a bottom sheet, which Riverpod
+/// builds one frame after `load()` seeds this draft — an auto-disposed state is
+/// already gone by then, so an edit form would open empty and a subcategory
+/// would be created as a top-level category. Every open calls [load], so the
+/// state can never go stale between openings.
+@Riverpod(keepAlive: true)
 class CategoryEditorController extends _$CategoryEditorController {
   @override
   CategoryEditorState build() => const CategoryEditorState();
 
-  void load(Category? existing) {
+  void load(Category? existing, {String? parentId}) {
     if (existing == null) {
-      state = const CategoryEditorState();
+      state = CategoryEditorState(parentId: parentId);
       return;
     }
     state = CategoryEditorState(
@@ -129,17 +142,35 @@ class CategoryEditorController extends _$CategoryEditorController {
       nameAr: existing.nameAr ?? '',
       slug: existing.slug,
       coverPath: existing.coverPath,
+      parentId: existing.parentId,
       isVisible: existing.isVisible,
       sortOrder: existing.sortOrder,
       isNew: false,
     );
   }
 
-  void setName(String v) => state = state.copyWith(name: v);
+  /// The slug the form should hold for [name].
+  ///
+  /// The English name is the preferred source. An Amharic- or Arabic-only name
+  /// slugifies to nothing, so it falls back to a short unique suffix: a slug the
+  /// owner can see and edit beats a save that silently refuses.
+  static String deriveSlug(String name) {
+    final String slug = Validators.slugify(name);
+    if (slug.isNotEmpty) return slug;
+    return 'category-${DateTime.now().millisecondsSinceEpoch.toRadixString(36)}';
+  }
+
+  /// Typing a name fills the slug while the owner has not written one of their
+  /// own, which is what the "generated from the English name" hint promises.
+  void setName(String v) => state = state.copyWith(
+    name: v,
+    slug: state.slugTouched ? null : deriveSlug(v),
+  );
   void setNameAm(String v) => state = state.copyWith(nameAm: v);
   void setNameAr(String v) => state = state.copyWith(nameAr: v);
   void setSlug(String v) => state = state.copyWith(slug: v);
   void setCoverPath(String? v) => state = state.copyWith(coverPath: v);
+  void setParentId(String? v) => state = state.copyWith(parentId: v);
   void setVisible(bool v) => state = state.copyWith(isVisible: v);
   void setSortOrder(int v) => state = state.copyWith(sortOrder: v);
   void toggleSlugTouched() => state = state.copyWith(slugTouched: true);
@@ -148,6 +179,12 @@ class CategoryEditorController extends _$CategoryEditorController {
     final FieldErrors errors = <String, String>{};
     final String? nameKey = Validators.categoryName(state.name);
     if (nameKey != null) errors['name'] = nameKey;
+    // A name with no slug is the common case, not an error: the column is
+    // NOT NULL UNIQUE, and the draft is happier carrying a derived slug than
+    // the form is refusing to explain itself.
+    if (state.slug.trim().isEmpty) {
+      state = state.copyWith(slug: deriveSlug(state.name));
+    }
     final String? slugKey = Validators.slug(state.slug);
     if (slugKey != null) errors['slug'] = slugKey;
     state = state.copyWith(fieldErrors: errors);
@@ -166,6 +203,7 @@ class CategoryEditorController extends _$CategoryEditorController {
       nameAm: state.nameAm.trim(),
       nameAr: state.nameAr.trim(),
       coverPath: state.coverPath,
+      parentId: state.parentId,
       sortOrder: state.sortOrder,
       isVisible: state.isVisible,
     );

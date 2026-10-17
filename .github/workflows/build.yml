@@ -1,6 +1,16 @@
-name: build
+name: flutter ci
 
-# Manual dispatch (choose a flavor) or a version tag.
+# One button, both artifacts.
+#
+#   Actions → flutter ci → Run workflow → flavor
+#
+# always produces a debug APK for device testing, plus an AAB for the store.
+# When the upload keystore secrets are configured the AAB is release-signed and
+# Play-ready; without them the workflow still delivers a debug-signed AAB for
+# internal testing and says so in the summary, instead of failing the run.
+#
+# Also runs on a version tag (`v1.2.3`), where the flavor is always `prod`.
+
 on:
   workflow_dispatch:
     inputs:
@@ -17,14 +27,14 @@ permissions:
   contents: read
 
 concurrency:
-  group: build-${{ github.ref }}
+  group: flutter-ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   verify:
     name: Verify Flutter app
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
 
@@ -46,10 +56,10 @@ jobs:
         run: flutter test
 
   android:
-    name: Android APK + AAB
+    name: Android debug APK + AAB
     runs-on: ubuntu-latest
     needs: verify
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
@@ -111,34 +121,46 @@ jobs:
             and (.SUPABASE_URL | type == "string" and test("^https://[^[:space:]]+$") and (contains("your-") | not))
             and (.SUPABASE_ANON_KEY | type == "string" and (test("^eyJ") or test("^sb_publishable_")) and (contains("paste-your") | not))
           ' "config/${FLAVOR}.json" > /dev/null || {
-            echo "::error::Flavor config is invalid or still contains example values."
+            echo "::error::Flavor config is invalid or still contains example values. Set the repository secrets SUPABASE_URL and SUPABASE_ANON_KEY (Settings → Secrets and variables → Actions) — or CONFIG_BASE64 with a base64-encoded config/${FLAVOR}.json. See README → First debug run."
             exit 1
           }
 
       # `ANDROID_KEYSTORE_BASE64` is the base64 of the upload keystore (.jks).
       # Decoding it here is what lets the release AAB be signed without ever
       # committing the keystore; `android/key.properties` is gitignored too.
-      # A debug-signed AAB cannot be uploaded to Play, so release builds fail
-      # closed when the upload key is unavailable.
-      - name: Decode the upload keystore
+      #
+      # The keystore is optional for this workflow: with it the AAB is Play-ready
+      # and signed with the upload key, without it the run still delivers a
+      # debug-signed AAB plus the debug APK, so the artifacts are always usable.
+      - name: Check release signing
+        id: signing
         env:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          if [ -z "$KEYSTORE_BASE64" ]; then
-            echo "::error::ANDROID_KEYSTORE_BASE64 is required for a release build. See README → Release signing."
-            exit 1
+          missing=""
+          if [ -z "$KEYSTORE_BASE64" ]; then missing="$missing ANDROID_KEYSTORE_BASE64"; fi
+          if [ -z "$KEYSTORE_PASSWORD" ]; then missing="$missing KEYSTORE_PASSWORD"; fi
+          if [ -z "$KEY_ALIAS" ]; then missing="$missing KEY_ALIAS"; fi
+          if [ -z "$KEY_PASSWORD" ]; then missing="$missing KEY_PASSWORD"; fi
+
+          if [ -n "$missing" ]; then
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Release signing is not configured (missing:$missing). The AAB in this run will be debug-signed for internal testing, and no Play upload will be possible. See README → Release signing."
+          else
+            echo "release=true" >> "$GITHUB_OUTPUT"
           fi
 
-          for name in KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
-            if [ -z "${!name}" ]; then
-              echo "::error::$name must be set alongside ANDROID_KEYSTORE_BASE64."
-              exit 1
-            fi
-          done
-
+      - name: Decode the upload keystore
+        if: steps.signing.outputs.release == 'true'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
           printf '%s' "$KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
 
           # A truncated or mistyped secret decodes to a file that is not a
@@ -156,27 +178,89 @@ jobs:
           storeFile=$GITHUB_WORKSPACE/android/app/upload-keystore.jks
           PROPS
 
-          echo "Release keystore decoded — the AAB will be signed with alias '$KEY_ALIAS'."
+          echo "Upload keystore decoded — the AAB will be signed with alias '$KEY_ALIAS'."
 
-      - name: Build APK
+      - name: Build debug APK
+        run: >
+          flutter build apk --debug
+          --dart-define-from-file=config/${{ steps.flavor.outputs.name }}.json
+
+      - name: Build release APK
+        if: steps.signing.outputs.release == 'true'
         run: >
           flutter build apk --release
           --dart-define-from-file=config/${{ steps.flavor.outputs.name }}.json
 
-      - name: Build App Bundle
+      - name: Build release App Bundle (signed)
+        if: steps.signing.outputs.release == 'true'
         run: >
           flutter build appbundle --release
           --dart-define-from-file=config/${{ steps.flavor.outputs.name }}.json
 
+      - name: Build debug-signed App Bundle
+        if: steps.signing.outputs.release != 'true'
+        run: >
+          flutter build appbundle --debug
+          --dart-define-from-file=config/${{ steps.flavor.outputs.name }}.json
+
       - name: Record which key signed the bundle
+        if: steps.signing.outputs.release == 'true'
         run: |
           AAB=build/app/outputs/bundle/release/app-release.aab
           keytool -printcert -jarfile "$AAB" | grep -E "Owner|SHA256"
 
-      - uses: actions/upload-artifact@v4
+      - name: Show what was built
+        shell: bash
+        run: |
+          ls -lh build/app/outputs/flutter-apk/app-debug.apk
+          if [ "${{ steps.signing.outputs.release }}" = "true" ]; then
+            ls -lh build/app/outputs/flutter-apk/app-release.apk \
+                  build/app/outputs/bundle/release/app-release.aab
+          else
+            ls -lh build/app/outputs/bundle/debug/app-debug.aab
+          fi
+
+      # Three separate artifacts so a device build and a store build never have
+      # to be downloaded together.
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
         with:
-          name: asm-${{ steps.flavor.outputs.name }}
+          name: asm-${{ steps.flavor.outputs.name }}-debug-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
+
+      - name: Upload release APK + AAB
+        if: steps.signing.outputs.release == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: asm-${{ steps.flavor.outputs.name }}-release
           path: |
             build/app/outputs/flutter-apk/app-release.apk
             build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error
+
+      - name: Upload debug-signed AAB
+        if: steps.signing.outputs.release != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: asm-${{ steps.flavor.outputs.name }}-debug-aab
+          path: build/app/outputs/bundle/debug/app-debug.aab
+          if-no-files-found: error
+
+      - name: Summarise the run
+        if: always()
+        run: |
+          {
+            echo "## flutter ci — ${FLAVOR}"
+            echo ""
+            echo "| Artifact | Ready to use |"
+            echo "| --- | --- |"
+            echo "| Debug APK | yes — install on a device |"
+            if [ "${{ steps.signing.outputs.release }}" = "true" ]; then
+              echo "| Release AAB | yes — signed with the upload key, upload to Play |"
+            else
+              echo "| Debug AAB | internal testing only — configure the keystore secrets for a Play-ready bundle |"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+        env:
+          FLAVOR: ${{ steps.flavor.outputs.name }}

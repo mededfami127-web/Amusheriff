@@ -15,6 +15,14 @@ class CatalogRemoteDataSource {
   static const String productsTable = 'products';
   static const String mediaTable = 'product_media';
 
+  /// Deadline on every write this datasource issues.
+  ///
+  /// A write with no deadline can hang on a half-open connection, and the editor
+  /// that awaits it stays in its `saving` state — a Save button that is disabled
+  /// and spinning forever, which reads as "the button does nothing". A visible
+  /// `errorTimeout` is the better failure.
+  static const Duration writeTimeout = Duration(seconds: 20);
+
   /// Columns shared by every product read, so the entity always decodes.
   static const String productColumns =
       'id, category_id, title, title_am, title_ar, description, '
@@ -60,7 +68,8 @@ class CatalogRemoteDataSource {
         .from(categoriesTable)
         .insert(row)
         .select()
-        .single();
+        .single()
+        .timeout(writeTimeout);
     return created;
   }
 
@@ -73,12 +82,13 @@ class CatalogRemoteDataSource {
         .update(row)
         .eq('id', id)
         .select()
-        .single();
+        .single()
+        .timeout(writeTimeout);
     return updated;
   }
 
   Future<void> deleteCategory(String id) =>
-      _client.from(categoriesTable).delete().eq('id', id);
+      _client.from(categoriesTable).delete().eq('id', id).timeout(writeTimeout);
 
   // ── Products ──────────────────────────────────────────────────────────────
 
@@ -147,7 +157,8 @@ class CatalogRemoteDataSource {
         .from(productsTable)
         .insert(row)
         .select()
-        .single();
+        .single()
+        .timeout(writeTimeout);
     return created;
   }
 
@@ -160,16 +171,20 @@ class CatalogRemoteDataSource {
         .update(row)
         .eq('id', id)
         .select()
-        .single();
+        .single()
+        .timeout(writeTimeout);
     return updated;
   }
 
   /// Partial update used by the toggles (publish / feature / availability).
-  Future<void> patchProduct(String id, Map<String, dynamic> patch) =>
-      _client.from(productsTable).update(patch).eq('id', id);
+  Future<void> patchProduct(String id, Map<String, dynamic> patch) => _client
+      .from(productsTable)
+      .update(patch)
+      .eq('id', id)
+      .timeout(writeTimeout);
 
   Future<void> deleteProduct(String id) =>
-      _client.from(productsTable).delete().eq('id', id);
+      _client.from(productsTable).delete().eq('id', id).timeout(writeTimeout);
 
   // ── Product media ─────────────────────────────────────────────────────────
 
@@ -201,7 +216,8 @@ class CatalogRemoteDataSource {
         .from(mediaTable)
         .insert(row)
         .select()
-        .single();
+        .single()
+        .timeout(writeTimeout);
     return created;
   }
 
@@ -214,32 +230,36 @@ class CatalogRemoteDataSource {
         .update(row)
         .eq('id', id)
         .select()
-        .single();
+        .single()
+        .timeout(writeTimeout);
     return updated;
   }
 
   Future<void> deleteMedia(String id) =>
-      _client.from(mediaTable).delete().eq('id', id);
+      _client.from(mediaTable).delete().eq('id', id).timeout(writeTimeout);
 
   /// Clears the cover flag for a product. Required before setting a new cover,
   /// because `one_cover_per_product` is a *unique* partial index.
   Future<void> clearCover(String productId) => _client
       .from(mediaTable)
       .update(<String, dynamic>{'is_cover': false})
-      .eq('product_id', productId);
+      .eq('product_id', productId)
+      .timeout(writeTimeout);
 
   Future<void> setCover(String mediaId) => _client
       .from(mediaTable)
       .update(<String, dynamic>{'is_cover': true})
-      .eq('id', mediaId);
+      .eq('id', mediaId)
+      .timeout(writeTimeout);
 
   // ── Ordering ──────────────────────────────────────────────────────────────
 
   /// Persists a whole ordering in one transaction through the
   /// `reorder_rows` RPC (admin-only, whitelisted tables).
-  Future<void> reorderRows(String table, List<String> orderedIds) =>
-      _client.rpc<void>(
+  Future<void> reorderRows(String table, List<String> orderedIds) => _client
+      .rpc<void>(
         'reorder_rows',
         params: <String, dynamic>{'p_table': table, 'p_ids': orderedIds},
-      );
+      )
+      .timeout(writeTimeout);
 }

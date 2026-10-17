@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/errors/app_failure.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
+import '../../../../core/router/routes.dart';
 import '../../../../core/theme/brand_colors.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/app_scaffold.dart';
@@ -35,6 +37,20 @@ class CategoryPage extends ConsumerWidget {
     final AsyncValue<List<Product>> products = categoryId == null
         ? const AsyncValue<List<Product>>.loading()
         : ref.watch(storefrontProductsProvider(categoryId: categoryId));
+    // Subcategories of this page's category. Read from the same visible
+    // categories stream the home rail uses, so a hidden subcategory stays
+    // hidden here too — RLS already decided what this visitor can see.
+    final List<Category> subcategories =
+        ref
+            .watch(visibleCategoriesProvider)
+            .value
+            ?.where(
+              (Category candidate) =>
+                  candidate.parentId != null &&
+                  candidate.parentId == categoryId,
+            )
+            .toList(growable: false) ??
+        const <Category>[];
 
     return AppScaffold(
       showLockup: false,
@@ -73,6 +89,33 @@ class CategoryPage extends ConsumerWidget {
                     ),
                     const SizedBox(height: 10),
                     const SizedBox(width: 72, child: GoldDivider()),
+                    if (subcategories.isNotEmpty) ...<Widget>[
+                      const SizedBox(height: 14),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: <Widget>[
+                          for (final Category child in subcategories)
+                            ActionChip(
+                              avatar: const Icon(
+                                Icons.subdirectory_arrow_right_rounded,
+                                size: 16,
+                                color: BrandColors.gold,
+                              ),
+                              backgroundColor: dark
+                                  ? BrandColors.plumSurface
+                                  : BrandColors.ivory,
+                              side: const BorderSide(
+                                color: BrandColors.goldHairline,
+                              ),
+                              label: Text(child.nameFor(language)),
+                              labelStyle: BrandTypography.labelLarge,
+                              onPressed: () =>
+                                  context.go(Routes.category(child.slug)),
+                            ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),

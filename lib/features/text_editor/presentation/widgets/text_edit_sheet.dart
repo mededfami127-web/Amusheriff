@@ -6,6 +6,7 @@ import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/l10n/text_catalog.dart';
 import '../../../../core/theme/brand_colors.dart';
 import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/inline_failure_banner.dart';
 import '../providers/text_editor_providers.dart';
 
 /// Opens the editing sheet for one string.
@@ -170,6 +171,18 @@ class _TextEditSheetState extends ConsumerState<_TextEditSheet> {
               entry == null ? widget.textKey : l10n.adminTextEditor,
               style: BrandTypography.bodySmall,
             ),
+            // A refused write used to pop nothing and say nothing, which read
+            // exactly like a dead Save button. The typed failure now sits in
+            // the sheet, above the field it belongs to.
+            if (status.failure != null) ...<Widget>[
+              const SizedBox(height: 12),
+              InlineFailureBanner(
+                failure: status.failure!,
+                onDismiss: ref
+                    .read(textEditorControllerProvider.notifier)
+                    .acknowledge,
+              ),
+            ],
             const SizedBox(height: 14),
 
             // Every language is reachable from here, so one sheet can rewrite

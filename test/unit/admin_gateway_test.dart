@@ -159,6 +159,42 @@ void main() {
     expect(products.saved.single.price, 18500);
   });
 
+  testWidgets('a new product saves once a category and title are given', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(harness(location: Routes.adminProductNew));
+    await settle(tester);
+
+    final AppLocalizations l10n = await AppLocalizations.delegate.load(
+      const Locale('en'),
+    );
+
+    // Creating a product is the flow the owner reported as a dead Save button:
+    // pick the category from the dropdown, then name the product.
+    await tester.tap(find.byType(DropdownButtonFormField<String>));
+    await settle(tester);
+    await tester.tap(find.text('Majlis').last);
+    await settle(tester);
+
+    // The title is the first free-text field; the dropdown above it is not one.
+    await tester.enterText(find.byType(TextField).first, 'Aleppo Bench');
+    await settle(tester);
+
+    await tester.scrollUntilVisible(
+      find.text(l10n.actionSave),
+      240,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await settle(tester);
+    await tester.tap(find.text(l10n.actionSave));
+    await settle(tester);
+
+    expect(products.saved, hasLength(1));
+    expect(products.saved.single.title, 'Aleppo Bench');
+    expect(products.saved.single.categoryId, 'c1');
+    expect(find.text(l10n.adminProductSaved), findsOneWidget);
+  });
+
   testWidgets('category sheet blocks an invalid slug and saves a valid one', (
     WidgetTester tester,
   ) async {
@@ -193,6 +229,183 @@ void main() {
     expect(categories.saved.single.slug, 'chaise-longue');
     expect(categories.saved.single.name, 'Chaise');
   });
+
+  testWidgets('a category created with a name only saves with a derived slug', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(harness(location: Routes.adminCategories));
+    await settle(tester);
+
+    await tester.tap(find.byType(FloatingActionButton));
+    await settle(tester);
+
+    final AppLocalizations l10n = await AppLocalizations.delegate.load(
+      const Locale('en'),
+    );
+
+    // The hint under the slug field promises this: a name and nothing else is
+    // enough, because `categories.slug` is NOT NULL and a form that refuses to
+    // explain itself is the failure the owner reported.
+    await tester.enterText(find.byType(TextField).first, 'Majlis Sofas');
+    await settle(tester);
+    expect(find.text('majlis-sofas'), findsOneWidget);
+
+    await tester.ensureVisible(find.text(l10n.actionSave));
+    await settle(tester);
+    await tester.tap(find.text(l10n.actionSave));
+    await settle(tester);
+
+    expect(categories.saved, hasLength(1));
+    expect(categories.saved.single.name, 'Majlis Sofas');
+    expect(categories.saved.single.slug, 'majlis-sofas');
+    // The sheet closed and the list page said what happened.
+    expect(find.text(l10n.adminCategoryCreated), findsOneWidget);
+  });
+
+  testWidgets('a typed slug is never overwritten by the derived one', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(harness(location: Routes.adminCategories));
+    await settle(tester);
+
+    await tester.tap(find.byType(FloatingActionButton));
+    await settle(tester);
+
+    final AppLocalizations l10n = await AppLocalizations.delegate.load(
+      const Locale('en'),
+    );
+
+    await tester.enterText(find.byType(TextField).first, 'Majlis Sofas');
+    await tester.enterText(find.byType(TextField).at(3), 'sofas-majlis');
+    await settle(tester);
+
+    await tester.ensureVisible(find.text(l10n.actionSave));
+    await settle(tester);
+    await tester.tap(find.text(l10n.actionSave));
+    await settle(tester);
+
+    expect(categories.saved.single.slug, 'sofas-majlis');
+  });
+
+  testWidgets('subcategories nest under their mother and carry its id', (
+    WidgetTester tester,
+  ) async {
+    categories = _FakeCategoryRepository(<Category>[
+      const Category(id: 'c1', name: 'Majlis', slug: 'majlis'),
+      const Category(
+        id: 'c2',
+        name: 'Corner Units',
+        slug: 'corner-units',
+        parentId: 'c1',
+        sortOrder: 1,
+      ),
+      const Category(id: 'c3', name: 'Bedrooms', slug: 'bedrooms'),
+    ]);
+    await tester.pumpWidget(harness(location: Routes.adminCategories));
+    await settle(tester);
+
+    final AppLocalizations l10n = await AppLocalizations.delegate.load(
+      const Locale('en'),
+    );
+
+    // Both levels render, and the child is marked as one.
+    expect(find.text('Majlis'), findsOneWidget);
+    expect(find.text('Corner Units'), findsOneWidget);
+    expect(find.text('Bedrooms'), findsOneWidget);
+    expect(find.byIcon(Icons.subdirectory_arrow_right_rounded), findsOneWidget);
+    // Only the two top-level rows offer the action.
+    expect(find.text(l10n.adminCategoryAddSubcategory), findsNWidgets(2));
+
+    // Adding one from the mother's row presets the parent on the draft.
+    await tester.tap(find.text(l10n.adminCategoryAddSubcategory).first);
+    await settle(tester);
+    expect(find.text(l10n.adminCategoryAddSubcategory), findsWidgets);
+
+    await tester.enterText(find.byType(TextField).first, 'Sectionals');
+    await settle(tester);
+    await tester.ensureVisible(find.text(l10n.actionSave));
+    await settle(tester);
+    await tester.tap(find.text(l10n.actionSave).last);
+    await settle(tester);
+
+    expect(categories.saved, hasLength(1));
+    expect(categories.saved.single.parentId, 'c1');
+    expect(categories.saved.single.slug, 'sectionals');
+  });
+
+  testWidgets('a mother with subcategories is not deleted silently', (
+    WidgetTester tester,
+  ) async {
+    categories = _FakeCategoryRepository(<Category>[
+      const Category(id: 'c1', name: 'Majlis', slug: 'majlis'),
+      const Category(
+        id: 'c2',
+        name: 'Corner Units',
+        slug: 'corner-units',
+        parentId: 'c1',
+      ),
+    ]);
+    await tester.pumpWidget(harness(location: Routes.adminCategories));
+    await settle(tester);
+
+    final AppLocalizations l10n = await AppLocalizations.delegate.load(
+      const Locale('en'),
+    );
+
+    await tester.tap(find.byIcon(Icons.delete_outline_rounded).first);
+    await settle(tester);
+
+    expect(find.text(l10n.adminCategoryHasSubcategories), findsOneWidget);
+  });
+
+  testWidgets(
+    'the product editor offers category creation when there are none',
+    (WidgetTester tester) async {
+      categories = _FakeCategoryRepository(const <Category>[]);
+      await tester.pumpWidget(harness(location: Routes.adminProductNew));
+      await settle(tester);
+
+      final AppLocalizations l10n = await AppLocalizations.delegate.load(
+        const Locale('en'),
+      );
+
+      // A product needs a category, so an empty catalogue explains the gate and
+      // offers the way through it instead of an empty dropdown.
+      expect(find.text(l10n.adminCreateCategory), findsOneWidget);
+
+      await tester.tap(find.text(l10n.adminCreateCategory));
+      await settle(tester);
+      expect(find.byType(AdminCategoriesPage), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'a product without a category says so instead of failing quietly',
+    (WidgetTester tester) async {
+      categories = _FakeCategoryRepository(const <Category>[]);
+      await tester.pumpWidget(harness(location: Routes.adminProductNew));
+      await settle(tester);
+
+      final AppLocalizations l10n = await AppLocalizations.delegate.load(
+        const Locale('en'),
+      );
+
+      // Save sits at the end of a lazy list, so scroll to it first.
+      await tester.scrollUntilVisible(
+        find.text(l10n.actionSave),
+        240,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await settle(tester);
+      await tester.tap(find.text(l10n.actionSave));
+      await settle(tester);
+
+      // Nothing was written, and the reason is on screen: an unexplained no-op
+      // is what the owner reported as "the Save button does nothing".
+      expect(products.saved, isEmpty);
+      expect(find.text(l10n.errorValidation), findsOneWidget);
+    },
+  );
 }
 
 class _FakeCategoryRepository implements CategoryRepository {
