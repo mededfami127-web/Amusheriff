@@ -73,6 +73,9 @@ jobs:
             echo "::error::Generated sources are stale. Run 'flutter gen-l10n', 'dart run build_runner build' and 'dart run tool/gen_text_overlay.dart', then commit the output."
             git status --short -- "${paths[@]}"
             git --no-pager diff --stat -- "${paths[@]}"
+            # The full diff, so the regenerated output can be committed without
+            # running the generators on a developer machine.
+            git --no-pager diff -- "${paths[@]}"
             exit 1
           fi
 
