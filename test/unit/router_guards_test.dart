@@ -106,14 +106,13 @@ void main() {
       expect(uri.path, Routes.adminLogin);
       expect(uri.queryParameters[Routes.returnToParam], Routes.adminProducts);
 
-      final Uri textEditor = Uri.parse(
-        resolveAdminRedirect(
-          location: Routes.adminTextEditor,
-          isSignedIn: false,
-          adminStatus: notAdmin,
-        )!,
+      final String? textTarget = resolveAdminRedirect(
+        location: Routes.adminTextEditor,
+        isSignedIn: false,
+        adminStatus: notAdmin,
       );
-      expect(textEditor.path, Routes.adminLogin);
+      expect(textTarget, isNotNull);
+      expect(Uri.parse(textTarget!).path, Routes.adminLogin);
     });
 
     test('the sign-in page stays reachable so the owner can sign in', () {
