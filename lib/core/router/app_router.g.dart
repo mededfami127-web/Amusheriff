@@ -12,7 +12,8 @@ part of 'app_router.dart';
 ///
 /// One decision point — [resolveAdminRedirect] — decides whether a path lands
 /// on the public storefront or the guarded admin gateway, so the two
-/// experiences can never disagree about who is allowed where.
+/// experiences can never disagree about who is allowed where. The owner panel
+/// is the only key: there is no second sign-in step after it.
 
 @ProviderFor(appRouter)
 final appRouterProvider = AppRouterProvider._();
@@ -21,7 +22,8 @@ final appRouterProvider = AppRouterProvider._();
 ///
 /// One decision point — [resolveAdminRedirect] — decides whether a path lands
 /// on the public storefront or the guarded admin gateway, so the two
-/// experiences can never disagree about who is allowed where.
+/// experiences can never disagree about who is allowed where. The owner panel
+/// is the only key: there is no second sign-in step after it.
 
 final class AppRouterProvider
     extends $FunctionalProvider<GoRouter, GoRouter, GoRouter>
@@ -30,7 +32,8 @@ final class AppRouterProvider
   ///
   /// One decision point — [resolveAdminRedirect] — decides whether a path lands
   /// on the public storefront or the guarded admin gateway, so the two
-  /// experiences can never disagree about who is allowed where.
+  /// experiences can never disagree about who is allowed where. The owner panel
+  /// is the only key: there is no second sign-in step after it.
   AppRouterProvider._()
     : super(
         from: null,
@@ -64,4 +67,4 @@ final class AppRouterProvider
   }
 }
 
-String _$appRouterHash() => r'27a70b31cc3d7905e1203bf00870aecf30b74d9b';
+String _$appRouterHash() => r'756ccb1e5a0aac2a9a308ce3a2b6af05e1230546';
