@@ -286,37 +286,6 @@ class AdminBrandHeader extends ConsumerWidget {
   }
 }
 
-/// Offers the sign-in the owner still needs in order to *save* anything.
-///
-/// The five-tap panel opens the gateway on this device, but RLS decides every
-/// write: wording, photos and prices only stick once the owner's Supabase
-/// session exists. Rather than let a save fail with "permission denied" and no
-/// explanation, the gateway says so and links straight to the sign-in page.
-class _SignInToSaveTile extends ConsumerWidget {
-  const _SignInToSaveTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final AppLocalizations l10n = AppLocalizations.of(context);
-    final bool unlocked = ref.watch(adminGateUnlockedProvider);
-    final bool signedIn = ref.watch(currentSessionProvider) != null;
-    if (!unlocked || signedIn) return const SizedBox.shrink();
-
-    return ListTile(
-      dense: true,
-      minTileHeight: 48,
-      leading: const Icon(
-        Icons.login_rounded,
-        size: 20,
-        color: BrandColors.gold,
-      ),
-      title: Text(l10n.adminSignIn, style: BrandTypography.bodyMedium),
-      subtitle: Text(l10n.errorPermission, style: BrandTypography.bodySmall),
-      onTap: () => context.go(Routes.adminLogin),
-    );
-  }
-}
-
 /// Live edit mode switch, shown in both the rail and the drawer.
 class _LiveEditTile extends ConsumerWidget {
   const _LiveEditTile();
@@ -383,7 +352,6 @@ class _AdminRail extends ConsumerWidget {
             thickness: 1,
             color: BrandColors.goldHairline,
           ),
-          const _SignInToSaveTile(),
           const _LiveEditTile(),
           _AdminActionTile(
             label: l10n.adminViewStore,
@@ -444,7 +412,6 @@ class _AdminDrawer extends ConsumerWidget {
               ),
             ),
             const Divider(height: 1, thickness: 1),
-            const _SignInToSaveTile(),
             const _LiveEditTile(),
             _AdminActionTile(
               label: l10n.adminViewStore,

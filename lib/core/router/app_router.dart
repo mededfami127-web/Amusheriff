@@ -13,7 +13,7 @@ import '../../features/admin/presentation/pages/admin_login_page.dart';
 import '../../features/admin/presentation/pages/admin_product_editor_page.dart';
 import '../../features/admin/presentation/pages/admin_products_page.dart';
 import '../../features/admin/presentation/pages/admin_system_check_page.dart';
-import '../../features/auth/presentation/providers/auth_providers.dart';
+import '../../features/admin/presentation/providers/admin_gate_providers.dart';
 import '../../features/settings/presentation/pages/about_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/storefront/presentation/pages/category_page.dart';
@@ -23,7 +23,6 @@ import '../../features/storefront/presentation/pages/search_page.dart';
 import '../../features/storefront/presentation/pages/favourites_page.dart';
 import '../../features/storefront/presentation/pages/storefront_home_page.dart';
 import '../../features/text_editor/presentation/pages/admin_text_editor_page.dart';
-import '../network/supabase_client_provider.dart';
 import 'guards.dart';
 import 'routes.dart';
 
@@ -33,25 +32,23 @@ part 'app_router.g.dart';
 ///
 /// One decision point — [resolveAdminRedirect] — decides whether a path lands
 /// on the public storefront or the guarded admin gateway, so the two
-/// experiences can never disagree about who is allowed where.
+/// experiences can never disagree about who is allowed where. The owner panel
+/// is the only key: there is no second sign-in step after it.
 @Riverpod(keepAlive: true)
 GoRouter appRouter(Ref ref) {
   final RouterRefreshNotifier refresher = RouterRefreshNotifier();
 
-  ref.listen(currentSessionProvider, (_, __) => refresher.refresh());
-  ref.listen(adminStatusProvider, (_, __) => refresher.refresh());
+  ref.listen(adminGateUnlockedProvider, (_, __) => refresher.refresh());
   ref.onDispose(refresher.dispose);
 
   return GoRouter(
     initialLocation: Routes.storefront,
     refreshListenable: refresher,
     redirect: (BuildContext context, GoRouterState state) {
-      final bool signedIn = ref.read(currentSessionProvider) != null;
-      final AsyncValue<bool> adminStatus = ref.read(adminStatusProvider);
+      final bool gateUnlocked = ref.read(adminGateUnlockedProvider);
       return resolveAdminRedirect(
         location: state.matchedLocation,
-        isSignedIn: signedIn,
-        adminStatus: adminStatus,
+        gateUnlocked: gateUnlocked,
       );
     },
     routes: <RouteBase>[

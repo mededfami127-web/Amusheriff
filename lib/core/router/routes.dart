@@ -44,7 +44,8 @@ abstract final class Routes {
   /// buckets and functions are actually set up there.
   static const String adminSystemCheck = '/admin/system-check';
 
-  /// Paths that require a session *and* `profiles.is_admin = true`.
+  /// Paths that require the five-tap owner panel to be unlocked on this
+  /// device. The panel is the whole login: there is no second sign-in step.
   static bool isGuardedAdminPath(String path) =>
       path.startsWith(adminRoot) && path != adminLogin;
 

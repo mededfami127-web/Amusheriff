@@ -8,7 +8,7 @@ wired-together experiences:
 | Surface | Route | Access |
 | --- | --- | --- |
 | **Storefront** — browse the catalogue, open a product, contact the owner on WhatsApp / Telegram / phone | `/` | public, no login |
-| **Admin gateway** — categories with optional one-level subcategories, products, media, prices, contact links, branding and password | `/admin/**` | valid session **and** `profiles.is_admin = true` |
+| **Admin gateway** — categories with optional one-level subcategories, products, media, prices, contact links, branding and password | `/admin/**` | the owner panel unlocked (five taps on the logo, then username + password) |
 
 Both surfaces share one catalogue and one contact-link repository, and the store
 front subscribes to Supabase Realtime — so anything the owner changes is live on
@@ -310,17 +310,19 @@ are `admin` / `admin123`, and *Gateway password* (`/admin/gate-password`) in the
 sidebar changes them. The password is stored as a salted SHA-256 digest in the
 encrypted keystore.
 
-This panel is a **convenience lock, not the security boundary**: it keeps the
-gateway out of a customer's way on a shared device. Everything behind it is
-still governed by Supabase Auth and RLS, exactly as before — the panel grants no
-new database access.
+The panel is the **whole login**. Unlocking it opens `/admin/**` on that device
+with nothing else to fill in — no e-mail/password screen in between — and the
+sidebar, every editor and the text editor are immediately usable. The unlocked
+flag lives in the encrypted keystore, so it survives a restart until the owner
+uses *Sign out* in the sidebar. A locked device that deep-links into `/admin/**`
+lands on the storefront instead of on a form a customer has never seen.
 
-Because of that, the panel signs nobody in and no longer carries an unlocked
-device past the `/admin/**` guard: it forwards to the admin sign-in page with
-`returnTo` preserved. Sign in once and every save (wording, photos, prices) is
-issued with the owner's session attached; RLS still decides each write, so an
-anonymous request is rejected with PostgreSQL 42501, which the app renders as
-*You do not have permission to do that*.
+It is a device-local lock: it stores a salted hash, never the password, and it
+grants no new database access. Reads use the public key; every write is still
+decided by row-level security, which admits only the owner's Supabase account
+(`public.is_admin()`). If a Save ever reports *You do not have permission to do
+that* (PostgreSQL 42501), the device has no owner session — that is a database
+rule, not something the panel can grant.
 
 ### Database changes
 
@@ -389,6 +391,7 @@ Every deviation from the brief, with its rationale:
   path-prefix check enforced by policy.
 * `text_overrides` is public-read by necessity (the anonymous storefront renders
   the owner's wording) and admin-only on write, like every other content table.
-* The five-tap gateway is client-side convenience only. It stores a salted hash,
-  never the password, and unlocking it does not widen what any request may read
-  or write — RLS still decides that.
+* The five-tap gateway is client-side only. It stores a salted hash, never the
+  password, and unlocking it does not widen what any request may read or write —
+  RLS still decides that, which is why a Save can still come back as 42501 on a
+  device with no owner session.

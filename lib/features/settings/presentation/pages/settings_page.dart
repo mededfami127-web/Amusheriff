@@ -9,6 +9,8 @@ import '../../../../core/theme/gradients.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/app_scaffold.dart';
 import '../../../../core/widgets/gold_divider.dart';
+import '../../../admin/presentation/providers/admin_gate_providers.dart';
+import '../../../admin/presentation/widgets/admin_gate_sheet.dart';
 import '../../../contacts/domain/entities/contact_link.dart';
 import '../../../contacts/presentation/providers/contact_providers.dart';
 import '../../domain/entities/site_settings.dart';
@@ -133,10 +135,14 @@ class SettingsPage extends ConsumerWidget {
             onTap: () => context.push(Routes.about),
           ),
           const SizedBox(height: 26),
-          // Discreet owner entry — a single line, no promotion.
+          // Discreet owner entry — the same username/password panel the logo's
+          // five taps open, so there is one door and one set of credentials.
           Center(
             child: TextButton.icon(
-              onPressed: () => context.push(Routes.adminLogin),
+              onPressed: () => showAdminGateSheet(
+                context,
+                alreadyUnlocked: ref.read(adminGateProvider).unlocked,
+              ),
               icon: const Icon(Icons.lock_outline_rounded, size: 17),
               label: Text(
                 '${l10n.settingsAdminEntry} · ${l10n.settingsAdminHint}',
