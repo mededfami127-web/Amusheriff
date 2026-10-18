@@ -92,7 +92,7 @@ void main() {
   });
 
   group('the five-tap owner gate is not an authorisation boundary', () {
-    test('unlocking without a session routes to sign-in with returnTo kept', () {
+    test('unlocking without a session goes to sign-in', () {
       // The regression: an unlocked panel used to admit an anonymous visitor,
       // so every Save went to Postgres as `anon` and came back 42501 ("you do
       // not have permission to do that").

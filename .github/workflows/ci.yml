@@ -96,6 +96,9 @@ jobs:
         run: |
           if ! dart format --output=none --set-exit-if-changed . ; then
             echo "::error::Dart files are not formatted. Run 'dart format .' and commit the result."
+            # The diff, so the formatted result can be committed verbatim.
+            dart format . >/dev/null
+            git --no-pager diff
             exit 1
           fi
 
