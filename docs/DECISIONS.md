@@ -465,8 +465,12 @@ lock, so it is implemented that way and labelled that way:
 
 * `AdminGateStore` keeps a per-device random salt and a SHA-256 digest in the
   same encrypted store as the session material — never the password itself.
-* `resolveAdminRedirect` accepts the unlocked flag, which is what lets an owner
-  who has never signed in reach the gateway.
+* `resolveAdminRedirect` deliberately does **not** accept the unlocked flag as
+  a bypass for `/admin/**`: it used to, and that is precisely how a Save could
+  be issued anonymously and come back as PostgreSQL 42501 ("you do not have
+  permission to do that"). Unlocking now forwards to `/admin/login` with
+  `returnTo` preserved, so the owner signs in once and every write carries
+  their session.
 * It grants **no** new database access. RLS still decides every read and write,
   so a customer who somehow unlocked the panel would still be denied by the
   database. The README's security section says exactly this, so nobody mistakes

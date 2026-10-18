@@ -13,7 +13,6 @@ import '../../features/admin/presentation/pages/admin_login_page.dart';
 import '../../features/admin/presentation/pages/admin_product_editor_page.dart';
 import '../../features/admin/presentation/pages/admin_products_page.dart';
 import '../../features/admin/presentation/pages/admin_system_check_page.dart';
-import '../../features/admin/presentation/providers/admin_gate_providers.dart';
 import '../../features/auth/presentation/providers/auth_providers.dart';
 import '../../features/settings/presentation/pages/about_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
@@ -41,9 +40,6 @@ GoRouter appRouter(Ref ref) {
 
   ref.listen(currentSessionProvider, (_, __) => refresher.refresh());
   ref.listen(adminStatusProvider, (_, __) => refresher.refresh());
-  // Unlocking the five-tap panel has to re-run the redirect, or the owner would
-  // land back on the sign-in page they just avoided.
-  ref.listen(adminGateUnlockedProvider, (_, __) => refresher.refresh());
   ref.onDispose(refresher.dispose);
 
   return GoRouter(
@@ -56,7 +52,6 @@ GoRouter appRouter(Ref ref) {
         location: state.matchedLocation,
         isSignedIn: signedIn,
         adminStatus: adminStatus,
-        gateUnlocked: ref.read(adminGateUnlockedProvider),
       );
     },
     routes: <RouteBase>[

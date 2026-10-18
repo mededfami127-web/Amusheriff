@@ -163,7 +163,8 @@ refuses to build unless the production config is valid and the upload key is
 present, then verifies that the AAB is signed. Only that signed artifact is
 suitable for Play upload.
 
-The package Play sees is the `applicationId`, **`com.amusheriff.myapp`**. The
+The package Play sees is the `applicationId`, **`com.Amusheriff.myapp`** (the
+capital `A` is the Play listing's exact, case-sensitive package name). The
 Android `namespace` deliberately stays `com.amusheriff.amu_sharif_majlis` — it
 is only the package of `MainActivity` and the generated `R` class — so changing
 the store identity never moves the Kotlin source tree. iOS still carries
@@ -314,11 +315,12 @@ gateway out of a customer's way on a shared device. Everything behind it is
 still governed by Supabase Auth and RLS, exactly as before — the panel grants no
 new database access.
 
-Because of that, the panel opens the *screens* but does not sign anyone in:
-RLS decides writes, so saving wording, photos or prices still needs the owner's
-Supabase session. The sidebar shows a **Sign in** row (with that explanation)
-whenever the panel is unlocked but no session exists, and the sign-in page stays
-reachable in that state rather than redirecting away.
+Because of that, the panel signs nobody in and no longer carries an unlocked
+device past the `/admin/**` guard: it forwards to the admin sign-in page with
+`returnTo` preserved. Sign in once and every save (wording, photos, prices) is
+issued with the owner's session attached; RLS still decides each write, so an
+anonymous request is rejected with PostgreSQL 42501, which the app renders as
+*You do not have permission to do that*.
 
 ### Database changes
 

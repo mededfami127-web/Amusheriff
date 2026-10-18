@@ -91,59 +91,48 @@ void main() {
     });
   });
 
-  group('the five-tap owner gate', () {
-    test('unlocking admits a visitor with no Supabase session', () {
-      expect(
-        resolveAdminRedirect(
-          location: Routes.adminProducts,
-          isSignedIn: false,
-          adminStatus: notAdmin,
-          gateUnlocked: true,
-        ),
-        isNull,
+  group('the five-tap owner gate is not an authorisation boundary', () {
+    test('unlocking without a session routes to sign-in with returnTo kept', () {
+      // The regression: an unlocked panel used to admit an anonymous visitor,
+      // so every Save went to Postgres as `anon` and came back 42501 ("you do
+      // not have permission to do that").
+      final String? target = resolveAdminRedirect(
+        location: Routes.adminProducts,
+        isSignedIn: false,
+        adminStatus: notAdmin,
       );
-      expect(
+      expect(target, isNotNull);
+      final Uri uri = Uri.parse(target!);
+      expect(uri.path, Routes.adminLogin);
+      expect(uri.queryParameters[Routes.returnToParam], Routes.adminProducts);
+
+      final Uri textEditor = Uri.parse(
         resolveAdminRedirect(
           location: Routes.adminTextEditor,
           isSignedIn: false,
           adminStatus: notAdmin,
-          gateUnlocked: true,
-        ),
-        isNull,
+        )!,
       );
+      expect(textEditor.path, Routes.adminLogin);
     });
 
-    test('the sign-in page stays reachable, because saving needs a session', () {
-      // Unlocking the panel opens the gateway; it does not sign anyone in, and
-      // every write is still decided by RLS.
+    test('the sign-in page stays reachable so the owner can sign in', () {
       expect(
         resolveAdminRedirect(
           location: Routes.adminLogin,
           isSignedIn: false,
           adminStatus: notAdmin,
-          gateUnlocked: true,
         ),
         isNull,
       );
     });
 
-    test('a locked gate leaves the existing rules untouched', () {
-      final String? target = resolveAdminRedirect(
-        location: Routes.adminRoot,
-        isSignedIn: true,
-        adminStatus: notAdmin,
-        gateUnlocked: false,
-      );
-      expect(Uri.parse(target!).path, Routes.adminLogin);
-    });
-
-    test('the storefront stays public either way', () {
+    test('the storefront stays public', () {
       expect(
         resolveAdminRedirect(
           location: Routes.favourites,
           isSignedIn: false,
           adminStatus: notAdmin,
-          gateUnlocked: true,
         ),
         isNull,
       );

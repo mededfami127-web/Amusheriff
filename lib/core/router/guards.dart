@@ -15,17 +15,19 @@ import 'routes.dart';
 /// * While the admin check is still in flight we allow the route through and
 ///   let the page render a loader, which avoids a login flash on cold start.
 /// * A confirmed admin visiting the login page is sent to the dashboard.
-/// * Unlocking the five-tap owner panel ([gateUnlocked]) opens the gateway
-///   itself; it is a device-local convenience lock, not the authorisation
-///   boundary — RLS still decides what any request may actually read or write.
-///   The sign-in page therefore stays *reachable* even with the panel
-///   unlocked, because saving anything (wording, photos, prices) needs the
-///   owner's Supabase session to satisfy RLS.
+/// * The five-tap owner panel is a device-local convenience lock and **not**
+///   an authorisation boundary, so unlocking it grants no route access on its
+///   own. Every admin write is decided by row-level security, which only
+///   admits a signed-in owner (`public.is_admin()`); letting an unlocked but
+///   anonymous visitor into `/admin/**` could therefore only ever end in a
+///   save rejected with PostgreSQL 42501 — the "you do not have permission to
+///   do that" the owner saw when creating a category or a product. The panel
+///   now routes to the sign-in page (which keeps `returnTo`) instead of past
+///   it, so every Save is issued with the owner's session attached.
 String? resolveAdminRedirect({
   required String location,
   required bool isSignedIn,
   required AsyncValue<bool> adminStatus,
-  bool gateUnlocked = false,
 }) {
   final bool isLoginRoute = location == Routes.adminLogin;
 
@@ -37,10 +39,6 @@ String? resolveAdminRedirect({
   }
 
   if (!Routes.isGuardedAdminPath(location)) return null;
-
-  // The owner opened the panel on this device: let the gateway through without
-  // a Supabase session.
-  if (gateUnlocked) return null;
 
   if (!isSignedIn) {
     return Uri(
