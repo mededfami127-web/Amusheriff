@@ -4,16 +4,7 @@
     "placeholders": {
       "name": {
         "type": "String"
-      "adminSiteContent": "Site content",
-"adminSiteContentHint": "Rewrite the words customers see on the home screen before the built-in wording.",
-"adminSiteContentValue": "Value",
-"heroTitle": "Welcome home",
-"heroTagline": "A quiet place to gather.",
-"heroButtonLabel": "Shop · Contact · Settings",
-"sectionTitleBrowse by category": "Browse by category",
-"sectionTitleFeatured": "Featured",
-"sectionTitleAll products": "All products",
-}
+      }
     }
   },
   "@a11yProductImage": {
@@ -417,5 +408,8 @@
   "validateTooShort": "This value is too short",
   "validateUrl": "Enter a valid link starting with https://",
   "validateVideoTooLong": "Videos must be 60 seconds or shorter",
-  "validateVideoUnreadable": "That video could not be read"
+  "validateVideoUnreadable": "That video could not be read",
+  "adminSiteContent": "Site content",
+  "adminSiteContentHint": "Rewrite the words customers see on the home screen before the built-in wording.",
+  "adminSiteContentValue": "Value"
 }

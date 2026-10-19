@@ -74,6 +74,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get actionFavourite => 'أضف إلى المفضلة';
 
   @override
+  String get actionLoadMore => 'عرض المزيد';
+
+  @override
   String get actionMove => 'نقل';
 
   @override
@@ -1040,4 +1043,14 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get validateVideoUnreadable => 'تعذّر قراءة ذلك الفيديو';
+
+  @override
+  String get adminSiteContent => 'محتوى الموقع';
+
+  @override
+  String get adminSiteContentHint =>
+      'إعادة كتابة الكلمات التي يراها الزبائن على الشاشة الرئيسية قبل الصياغة المدمجة.';
+
+  @override
+  String get adminSiteContentValue => 'قيمة';
 }

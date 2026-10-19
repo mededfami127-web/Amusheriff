@@ -1,5 +1,3 @@
-import '../entities/site_content_entry.dart';
-
 /// Live-editable home copy: one row per (key, locale).
 ///
 /// Reads are public (the storefront is anonymous and must render the owner's

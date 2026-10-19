@@ -9,6 +9,7 @@ import 'package:amu_sharif_majlis/features/catalog/presentation/providers/catalo
 import 'package:amu_sharif_majlis/features/settings/domain/entities/site_settings.dart';
 import 'package:amu_sharif_majlis/features/settings/presentation/providers/site_settings_providers.dart';
 import 'package:amu_sharif_majlis/features/storefront/presentation/pages/category_page.dart';
+import 'package:amu_sharif_majlis/features/storefront/presentation/widgets/category_subcategory_line.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -79,7 +80,7 @@ void main() {
     await tester.pumpWidget(harness());
     await settle(tester);
 
-    expect(find.byType(ActionChip), findsOneWidget);
+    expect(find.byType(CategorySubcategoryLine), findsOneWidget);
     expect(find.text('Corner Units'), findsOneWidget);
     // A top-level category is not a chip, and neither is another mother's child.
     expect(find.text('Bedrooms'), findsNothing);
@@ -102,7 +103,7 @@ void main() {
     // The subcategory page has no children of its own and no products yet, so
     // no chips are left and the empty state is what remains.
     expect(find.byType(CategoryPage), findsOneWidget);
-    expect(find.byType(ActionChip), findsNothing);
+    expect(find.byType(CategorySubcategoryLine), findsNothing);
     expect(find.text(l10n.stateEmptyTitle), findsOneWidget);
     expect(find.text('Corner Units'), findsWidgets);
   });

@@ -111,6 +111,9 @@ class OverridableAppLocalizations extends AppLocalizations {
   String get actionFavourite => _text('actionFavourite', _base.actionFavourite);
 
   @override
+  String get actionLoadMore => _text('actionLoadMore', _base.actionLoadMore);
+
+  @override
   String get actionMove => _text('actionMove', _base.actionMove);
 
   @override
@@ -1215,4 +1218,16 @@ class OverridableAppLocalizations extends AppLocalizations {
   @override
   String get validateVideoUnreadable =>
       _text('validateVideoUnreadable', _base.validateVideoUnreadable);
+
+  @override
+  String get adminSiteContent =>
+      _text('adminSiteContent', _base.adminSiteContent);
+
+  @override
+  String get adminSiteContentHint =>
+      _text('adminSiteContentHint', _base.adminSiteContentHint);
+
+  @override
+  String get adminSiteContentValue =>
+      _text('adminSiteContentValue', _base.adminSiteContentValue);
 }

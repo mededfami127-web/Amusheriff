@@ -41,14 +41,8 @@ class StorefrontHomePage extends ConsumerWidget {
       siteContentValueProvider(language),
     );
 
-    String heroTitle(String fallback) =>
-        siteContent['heroTitle'] ?? fallback;
-    String heroTagline(String fallback) =>
-        siteContent['heroTagline'] ?? fallback;
-    String heroButtonLabel(String fallback) =>
-        siteContent['heroButtonLabel'] ?? fallback;
-    String sectionTitle(String fallback) =>
-        siteContent['sectionTitle:${fallback}'] ?? fallback;
+    String sectionTitle(String key, String fallback) =>
+        siteContent['sectionTitle:$key'] ?? fallback;
 
     final AsyncValue<List<Category>> categories = ref.watch(
       visibleCategoriesProvider,
@@ -98,7 +92,10 @@ class StorefrontHomePage extends ConsumerWidget {
             ),
             SliverToBoxAdapter(
               child: _SectionHeader(
-                title: l10n.sectionBrowseCategories,
+                title: sectionTitle(
+                  'browseCategories',
+                  l10n.sectionBrowseCategories,
+                ),
                 textKey: 'sectionBrowseCategories',
                 onSeeAll: null,
               ),
@@ -145,7 +142,7 @@ class StorefrontHomePage extends ConsumerWidget {
             if (featured.value?.isNotEmpty ?? false) ...<Widget>[
               SliverToBoxAdapter(
                 child: _SectionHeader(
-                  title: l10n.sectionFeatured,
+                  title: sectionTitle('featured', l10n.sectionFeatured),
                   textKey: 'sectionFeatured',
                 ),
               ),
@@ -159,7 +156,7 @@ class StorefrontHomePage extends ConsumerWidget {
             ],
             SliverToBoxAdapter(
               child: _SectionHeader(
-                title: l10n.sectionAllProducts,
+                title: sectionTitle('allProducts', l10n.sectionAllProducts),
                 textKey: 'sectionAllProducts',
               ),
             ),
@@ -189,11 +186,20 @@ class _Hero extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final AppLocalizations l10n = AppLocalizations.of(context);
     final String? primary = ref.watch(primaryContactLinkProvider)?.displayValue;
+    final Map<String, String> siteContent = ref.watch(
+      siteContentValueProvider(language),
+    );
+
+    String heroTitle(String fallback) => siteContent['heroTitle'] ?? fallback;
+    String heroTagline(String fallback) =>
+        siteContent['heroTagline'] ?? fallback;
+    String heroButtonLabel(String fallback) =>
+        siteContent['heroButtonLabel'] ?? fallback;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 6),
       child: Container(
-          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+        padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
         decoration: BoxDecoration(
           gradient: BrandGradients.brandVertical,
           borderRadius: BorderRadius.circular(20),
@@ -286,6 +292,32 @@ class _Hero extends ConsumerWidget {
   }
 }
 
+/// Shown when the packaged logo asset cannot be decoded, so the hero still
+/// carries the shop's mark instead of a broken-image box.
+class _HeroFallbackLogo extends StatelessWidget {
+  const _HeroFallbackLogo();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 34,
+      width: 34,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: BrandColors.goldLight),
+      ),
+      child: Text(
+        AppLocalizations.of(context).brandMonogram,
+        style: BrandTypography.labelSmall.copyWith(
+          color: BrandColors.goldLight,
+          letterSpacing: 1,
+        ),
+      ),
+    );
+  }
+}
+
 class _HeroAction extends StatelessWidget {
   const _HeroAction({
     required this.icon,
@@ -309,7 +341,8 @@ class _HeroAction extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
-        child: Padding(              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[

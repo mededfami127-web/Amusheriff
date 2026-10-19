@@ -123,12 +123,12 @@ class AdminDashboardPage extends ConsumerWidget {
           ),
           const SizedBox(height: 10),
           _QuickAction(
-          _QuickAction(
             label: l10n.adminSiteContent,
             textKey: 'adminSiteContent',
             icon: Icons.article_outlined,
             route: Routes.adminSiteContent,
           ),
+          _QuickAction(
             label: l10n.adminProducts,
             textKey: 'adminProducts',
             icon: Icons.chair_outlined,

@@ -8,7 +8,7 @@ wired-together experiences:
 | Surface | Route | Access |
 | --- | --- | --- |
 | **Storefront** — browse the catalogue, open a product, contact the owner on WhatsApp / Telegram / phone | `/` | public, no login |
-| **Admin gateway** — categories with optional one-level subcategories, products, media, prices, contact links, branding and password | `/admin/**` | the owner panel unlocked (five taps on the logo, then username + password) |
+| **Admin gateway** — categories with optional one-level subcategories, products, media, prices, contact links, home copy per locale, branding and password | `/admin/**` | the owner panel unlocked (five taps on the logo, then username + password) |
 
 Both surfaces share one catalogue and one contact-link repository, and the store
 front subscribes to Supabase Realtime — so anything the owner changes is live on
@@ -31,13 +31,14 @@ is tracked in `docs/DECISIONS.md` → "Open items handed to Part 2".
 | Check | Command | Result |
 | --- | --- | --- |
 | Code generation | `dart run build_runner build` + `dart run tool/gen_text_overlay.dart` | 0 errors; `git status` clean afterwards |
-| Formatting | `dart format --output=none --set-exit-if-changed .` | clean (0 of 167 files change) |
+| Formatting | `dart format --output=none --set-exit-if-changed .` | clean (0 of 188 files change) |
 | Static analysis | `flutter analyze --fatal-infos` | **No issues found** |
-| Unit + widget tests | `flutter test` | **122 passed** |
+| Unit + widget tests | `flutter test` | **170 passed** |
+| Layout overflow matrix | `flutter test test/layout` | **46 screens × 12 layouts, 0 overflows** |
 | Release compile | `flutter build bundle --release` | builds clean |
-| Localization key parity | `dart run tool/check_l10n_parity.dart` | **313 message keys in each of en, am, ar, om** |
+| Localization key parity | `dart run tool/check_l10n_parity.dart` | **326 message keys in each of en, am, ar, om** |
 | Edge Function | `deno check` · `deno lint` · `deno fmt --check supabase/functions/inquiry/index.ts` | clean on Deno 2.9.7 |
-| RLS acceptance suite | `bash scripts/run_rls_tests.sh` | **24/24 checks passed** on PostgreSQL 16.15 |
+| RLS acceptance suite | `bash scripts/run_rls_tests.sh` | **25/25 checks passed** on PostgreSQL 16.15 |
 | Migration runner | `bash scripts/apply_migrations.sh --dry-run`, then `--apply` twice | plan, dry run, apply and re-apply all clean on PostgreSQL 16.15 |
 | Signed release (Android) | `.github/workflows/build.yml` on the `v1.0.0` tag | **success** — signed APK + AAB, 11m42s |
 
@@ -59,7 +60,7 @@ runners; nothing is deployed from them.
 | Workflow | Trigger | What it proves |
 | --- | --- | --- |
 | [`ci.yml`](.github/workflows/ci.yml) | push + PR to `main`, dispatch |generated sources are in sync, code is formatted, every locale has every key,
-`flutter analyze --fatal-infos` is clean, 114 tests pass, a release bundle compiles, the RLS suite passes on PostgreSQL 16, the Edge Function type-checks, lints and formats, and the iOS app compiles unsigned |
+`flutter analyze --fatal-infos` is clean, 170 tests pass, a release bundle compiles, the RLS suite passes on PostgreSQL 16, the Edge Function type-checks, lints and formats, and the iOS app compiles unsigned |
 | [`debug-apk.yml`](.github/workflows/debug-apk.yml) | push to `main`, dispatch | a dev-flavor debug APK, uploaded as the `asm-dev-debug-apk` artifact |
 | [`build.yml`](.github/workflows/build.yml) | `v*` tag, dispatch | verify, then a release APK and a Play-ready **signed** AAB (needs the four signing secrets) |
 | [`supabase-db-push.yml`](.github/workflows/supabase-db-push.yml) | push + PR to `main`, dispatch | migrations plan, dry-run, apply and re-apply cleanly against a throwaway database |

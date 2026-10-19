@@ -28,8 +28,10 @@ class SiteContentDataSource {
   }
 
   Future<Map<String, String>> fetchAll() async {
-    final List<Map<String, dynamic>> rows =
-        await _client.from(table).select('key, locale, value').order('locale');
+    final List<Map<String, dynamic>> rows = await _client
+        .from(table)
+        .select('key, locale, value')
+        .order('locale');
     return _toMapAll(rows);
   }
 
@@ -49,8 +51,8 @@ class SiteContentDataSource {
   static Map<String, String> _toMapAll(List<Map<String, dynamic>> rows) {
     final Map<String, String> map = <String, String>{};
     for (final Map<String, dynamic> row in rows) {
-      final String key = row['key'] as String?;
-      final String value = row['value'] as String?;
+      final String? key = row['key'] as String?;
+      final String? value = row['value'] as String?;
       if (key != null && value != null) {
         final String locale = row['locale'] as String? ?? '';
         map['$key|$locale'] = value;

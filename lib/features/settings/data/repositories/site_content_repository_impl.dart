@@ -11,7 +11,7 @@ import '../datasources/site_content_datasource.dart';
 /// RLS, never by this class.
 class SiteContentRepositoryImpl implements SiteContentRepository {
   SiteContentRepositoryImpl(this._client)
-      : _remote = SiteContentDataSource(_client);
+    : _remote = SiteContentDataSource(_client);
 
   final SupabaseClient _client;
   final SiteContentDataSource _remote;
@@ -32,15 +32,14 @@ class SiteContentRepositoryImpl implements SiteContentRepository {
     required String key,
     required String locale,
     required String value,
-  }) =>
-      ErrorMapper.guard(() async {
-        final SiteContentEntry entry = SiteContentEntry(
-          key: key,
-          locale: locale,
-          value: value,
-        );
-        await _remote.upsert(entry.toRow(_client.auth.currentUser?.id));
-      });
+  }) => ErrorMapper.guard(() async {
+    final SiteContentEntry entry = SiteContentEntry(
+      key: key,
+      locale: locale,
+      value: value,
+    );
+    await _remote.upsert(entry.toRow(_client.auth.currentUser?.id));
+  });
 
   @override
   Future<void> remove({required String key, required String locale}) =>

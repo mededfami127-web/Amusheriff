@@ -74,6 +74,9 @@ class AppLocalizationsOm extends AppLocalizations {
   String get actionFavourite => 'Filannoo keetti galchi';
 
   @override
+  String get actionLoadMore => 'Dabalata agarsiisi';
+
+  @override
   String get actionMove => 'Sochoosi';
 
   @override
@@ -1052,4 +1055,13 @@ class AppLocalizationsOm extends AppLocalizations {
   @override
   String get validateVideoUnreadable =>
       'Viidiyoon sun dubbifamuu hin dandeenye';
+
+  @override
+  String get adminSiteContent => 'ትርጉም መግቢያ';
+
+  @override
+  String get adminSiteContentHint => 'የቤት ሳህነቴን ለማስተዳድር በሚያገግሙ ቃላትን ይቀይሩ።';
+
+  @override
+  String get adminSiteContentValue => 'ተግባር';
 }

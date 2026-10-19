@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../../core/errors/app_failure.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
-import '../../../../core/router/routes.dart';
 import '../../../../core/theme/brand_colors.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/app_scaffold.dart';
@@ -15,7 +13,6 @@ import '../../../../core/widgets/shimmer_card.dart';
 import '../../../catalog/domain/entities/category.dart';
 import '../../../catalog/domain/entities/product.dart';
 import '../../../catalog/presentation/providers/catalog_providers.dart';
-import '../providers/selected_category_slug.dart' show selectedCategorySlug, currentCategorySlugFromGoRouter;
 import '../providers/storefront_providers.dart';
 import '../widgets/category_subcategory_line.dart';
 import '../widgets/product_card.dart';
@@ -56,14 +53,6 @@ class CategoryPage extends ConsumerWidget {
             )
             .toList(growable: false) ??
         const <Category>[];
-
-    final String? selectedSlug = ref.watch(
-      selectedCategorySlugProvider,
-    ).value;
-
-    // If the URL did not give us a slug, fall back to the page's own slug so
-    // the chips still reflect the page the customer is looking at.
-    final String? effectiveSelectedSlug = selectedSlug ?? slug;
 
     return AppScaffold(
       showLockup: false,
@@ -109,10 +98,10 @@ class CategoryPage extends ConsumerWidget {
                             const SizedBox(height: 10),
                             const SizedBox(width: 72, child: GoldDivider()),
                             if (subcategories.isNotEmpty) ...<Widget>[
-                              _SubcategoryLine(
+                              CategorySubcategoryLine(
                                 categories: subcategories,
                                 language: language,
-                                selectedSlug: effectiveSelectedSlug,
+                                selectedSlug: slug,
                               ),
                               const SizedBox(height: 10),
                             ],

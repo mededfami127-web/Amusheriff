@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/l10n/generated/app_localizations.dart';
+import '../../../../core/router/routes.dart';
 import '../../../../core/theme/brand_colors.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../catalog/domain/entities/category.dart';
@@ -20,7 +22,8 @@ class CategorySubcategoryLine extends StatelessWidget {
   });
 
   final List<Category> categories;
-  final String language;    final String? selectedSlug;
+  final String language;
+  final String? selectedSlug;
 
   @override
   Widget build(BuildContext context) {
@@ -40,8 +43,8 @@ class CategorySubcategoryLine extends StatelessWidget {
               icon: Icons.category_outlined,
               isSelected: selectedSlug == null,
               onTap: selectedSlug == null
-                    ? null
-                    : () => context.go(Routes.category(categories.first.slug)),
+                  ? null
+                  : () => context.go(Routes.category(categories.first.slug)),
             );
           }
 
@@ -80,9 +83,7 @@ class _Chip extends StatelessWidget {
     return Semantics(
       button: true,
       selected: isSelected,
-      label: isSelected
-          ? '${label} (selected)'
-          : label,
+      label: isSelected ? '$label (selected)' : label,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(999),
@@ -92,9 +93,7 @@ class _Chip extends StatelessWidget {
           decoration: BoxDecoration(
             color: isSelected
                 ? BrandColors.gold
-                : (dark
-                    ? BrandColors.plumSurface
-                    : BrandColors.ivory),
+                : (dark ? BrandColors.plumSurface : BrandColors.ivory),
             borderRadius: BorderRadius.circular(999),
             border: Border.all(
               color: isSelected ? BrandColors.gold : BrandColors.goldHairline,
@@ -106,9 +105,7 @@ class _Chip extends StatelessWidget {
               Icon(
                 icon,
                 size: 16,
-                color: isSelected
-                    ? BrandColors.charcoal
-                    : BrandColors.gold,
+                color: isSelected ? BrandColors.charcoal : BrandColors.gold,
               ),
               const SizedBox(width: 6),
               Text(
@@ -116,9 +113,7 @@ class _Chip extends StatelessWidget {
                 style: BrandTypography.labelLarge.copyWith(
                   color: isSelected
                       ? BrandColors.charcoal
-                      : (dark
-                          ? BrandColors.goldLight
-                          : BrandColors.charcoal),
+                      : (dark ? BrandColors.goldLight : BrandColors.charcoal),
                 ),
               ),
             ],
@@ -133,4 +128,3 @@ class _Chip extends StatelessWidget {
   /// of the context. No extra flip is needed here.
   bool get debugRtlScrollOk => true;
 }
-

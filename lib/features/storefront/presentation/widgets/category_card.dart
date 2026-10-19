@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/network/storage_urls.dart' show storageUrlsProvider;
+import '../../../../core/network/storage_urls.dart';
 import '../../../../core/theme/brand_colors.dart';
 import '../../../../core/theme/gradients.dart';
 import '../../../../core/theme/typography.dart';
@@ -26,7 +27,6 @@ class CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool dark = Theme.of(context).brightness == Brightness.dark;
-    final AppLocalizations l10n = AppLocalizations.of(context);
     final String language = Localizations.localeOf(context).languageCode;
 
     return SizedBox(
@@ -57,31 +57,32 @@ class CategoryCard extends StatelessWidget {
   }
 }
 
-class _CategoryThumb extends StatelessWidget {
+class _CategoryThumb extends ConsumerWidget {
   const _CategoryThumb({required this.category, required this.dark});
 
   final Category category;
   final bool dark;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final StorageUrls urls = ref.watch(storageUrlsProvider);
     final Widget image = category.hasCover
         ? ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: Image.network(
-              storageUrlsProvider.categoryCover(category.coverPath!),
+              urls.categoryCover(category.coverPath!),
               width: 40,
               height: 40,
               fit: BoxFit.cover,
               errorBuilder: (_, __, ___) => _CategoryThumbFallback(dark: dark),
-              loadingBuilder: (
-                BuildContext context,
-                ImageProvider provider,
-                ImageChunkEvent? progress,
-              ) {
-                if (progress == null) return SizedBox.shrink();
-                return _CategoryThumbFallback(dark: true);
-              },
+              loadingBuilder:
+                  (
+                    BuildContext context,
+                    Widget child,
+                    ImageChunkEvent? progress,
+                  ) => progress == null
+                  ? child
+                  : _CategoryThumbFallback(dark: dark),
             ),
           )
         : _CategoryThumbFallback(dark: dark);

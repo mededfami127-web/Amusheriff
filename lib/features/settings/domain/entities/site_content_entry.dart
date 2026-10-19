@@ -22,11 +22,11 @@ class SiteContentEntry {
 
   /// Row payload for an upsert against `public.site_content`.
   Map<String, dynamic> toRow(String? userId) => <String, dynamic>{
-        'key': key,
-        'locale': locale,
-        'value': value.trim(),
-        if (userId != null) 'updated_by': userId,
-      };
+    'key': key,
+    'locale': locale,
+    'value': value.trim(),
+    if (userId != null) 'updated_by': userId,
+  };
 
   @override
   bool operator ==(Object other) =>

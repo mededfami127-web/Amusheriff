@@ -216,6 +216,12 @@ abstract class AppLocalizations {
   /// **'Save to favourites'**
   String get actionFavourite;
 
+  /// No description provided for @actionLoadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get actionLoadMore;
+
   /// No description provided for @actionMove.
   ///
   /// In en, this message translates to:
@@ -2033,6 +2039,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'That video could not be read'**
   String get validateVideoUnreadable;
+
+  /// No description provided for @adminSiteContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Site content'**
+  String get adminSiteContent;
+
+  /// No description provided for @adminSiteContentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Rewrite the words customers see on the home screen before the built-in wording.'**
+  String get adminSiteContentHint;
+
+  /// No description provided for @adminSiteContentValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Value'**
+  String get adminSiteContentValue;
 }
 
 class _AppLocalizationsDelegate

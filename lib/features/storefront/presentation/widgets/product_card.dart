@@ -57,11 +57,6 @@ class ProductCard extends ConsumerWidget {
                         placeholder: (_, __) => _Placeholder(dark: dark),
                         errorWidget: (_, __, ___) =>
                             _Placeholder(dark: dark, failed: true),
-                        imageBuilder: (_, ImageProvider provider) => Semantics(
-                          label: l10n.a11yProductImage(title),
-                          image: true,
-                          child: Image(image: provider, fit: BoxFit.cover),
-                        ),
                         // Helps screen readers and keeps a11y labels localized.
                         imageBuilder: (_, ImageProvider provider) => Semantics(
                           label: l10n.a11yProductImage(title),

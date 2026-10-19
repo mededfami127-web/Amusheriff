@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/router/routes.dart';
 import '../../../../core/theme/brand_colors.dart';
 import '../../../../core/theme/typography.dart';
-import '../../../../core/widgets/app_scaffold.dart';
 import '../../../../core/widgets/empty_state.dart';
-import '../../../settings/domain/repositories/site_content_repository.dart';
 import '../../../settings/presentation/providers/site_content_providers.dart';
 import '../controllers/site_content_editor_controller.dart';
 import '../pages/admin_site_content_editor_sheet.dart';
@@ -26,9 +23,9 @@ class AdminSiteContentEditorPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final AppLocalizations l10n = AppLocalizations.of(context);
     final String locale = ref.watch(siteContentEditorLocaleProvider);
-    final Map<String, String> values = ref.watch(
-      siteContentProvider(locale),
-    ).value ?? const <String, String>{};
+    final Map<String, String> values =
+        ref.watch(siteContentProvider(locale)).value ??
+        const <String, String>{};
     final Set<String> keys = ref.watch(siteContentKeysProvider(locale));
 
     final List<String> allKeys = kSiteContentKeys.toList()
@@ -37,13 +34,15 @@ class AdminSiteContentEditorPage extends ConsumerWidget {
     final List<SiteContentViewRow> rows = <SiteContentViewRow>[];
     for (final String key in allKeys) {
       final String current = values[key] ?? '';
-      rows.add(SiteContentViewRow(
-        key: key,
-        locale: locale,
-        current: current,
-        isOverride: keys.contains(key),
-        onEdit: () => _openSheet(context, ref, key, locale, current),
-      ));
+      rows.add(
+        SiteContentViewRow(
+          textKey: key,
+          locale: locale,
+          current: current,
+          isOverride: keys.contains(key),
+          onEdit: () => _openSheet(context, ref, key, locale, current),
+        ),
+      );
     }
 
     if (rows.isEmpty) {
@@ -70,12 +69,15 @@ class AdminSiteContentEditorPage extends ConsumerWidget {
               spacing: 8,
               runSpacing: 8,
               children: <Widget>[
-                ChoiceChip(
-                  label: Text(kAppTextLocaleNames[locale] ?? locale),
-                  selected: true,
-                  onSelected: (_) {},
-                ),
-                const Chip(
+                for (final String code in kAppTextLocales)
+                  ChoiceChip(
+                    label: Text(kAppTextLocaleNames[code] ?? code),
+                    selected: code == locale,
+                    onSelected: (_) => ref
+                        .read(siteContentEditorLocaleProvider.notifier)
+                        .set(code),
+                  ),
+                Chip(
                   label: Text('${keys.length} edited'),
                   visualDensity: VisualDensity.compact,
                 ),
@@ -88,22 +90,24 @@ class AdminSiteContentEditorPage extends ConsumerWidget {
     );
   }
 
-  void _openSheet(
+  Future<void> _openSheet(
     BuildContext context,
     WidgetRef ref,
     String key,
     String locale,
     String current,
-  ) {
-    ref.read(siteContentEditorControllerProvider.notifier).load(key, locale, current);
-    final bool? saved = showModalBottomSheet<bool>(
+  ) async {
+    ref
+        .read(siteContentEditorControllerProvider.notifier)
+        .load(key, locale, current);
+    final bool? saved = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (_) => AdminSiteContentEditorSheet(
-        key: key,
+        textKey: key,
         locale: locale,
         initialValue: current,
       ),
@@ -118,14 +122,14 @@ class AdminSiteContentEditorPage extends ConsumerWidget {
 class SiteContentViewRow extends ConsumerWidget {
   const SiteContentViewRow({
     super.key,
-    required this.key,
+    required this.textKey,
     required this.locale,
     required this.current,
     required this.isOverride,
     required this.onEdit,
   });
 
-  final String key;
+  final String textKey;
   final String locale;
   final String current;
   final bool isOverride;
@@ -153,7 +157,7 @@ class SiteContentViewRow extends ConsumerWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       Text(
-                        key,
+                        textKey,
                         style: BrandTypography.labelSmall.copyWith(
                           color: BrandColors.gold,
                         ),
@@ -162,7 +166,9 @@ class SiteContentViewRow extends ConsumerWidget {
                       SelectableText(
                         current.isEmpty ? l10n.adminSiteContentValue : current,
                         style: BrandTypography.bodyMedium.copyWith(
-                          color: dark ? BrandColors.ivory : BrandColors.charcoal,
+                          color: dark
+                              ? BrandColors.ivory
+                              : BrandColors.charcoal,
                         ),
                       ),
                     ],

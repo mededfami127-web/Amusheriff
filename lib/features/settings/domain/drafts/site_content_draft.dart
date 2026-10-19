@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 /// Write-side DTO for `public.site_content`.
 @immutable
 class SiteContentDraft {
@@ -12,9 +14,9 @@ class SiteContentDraft {
   final String value;
 
   Map<String, dynamic> toRow(String? userId) => <String, dynamic>{
-        'key': key.trim(),
-        'locale': locale.trim(),
-        'value': value.trim(),
-        if (userId != null) 'updated_by': userId,
-      };
+    'key': key.trim(),
+    'locale': locale.trim(),
+    'value': value.trim(),
+    if (userId != null) 'updated_by': userId,
+  };
 }

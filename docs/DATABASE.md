@@ -117,6 +117,8 @@ tiktok | youtube | website | location | other`.
 | `20260101000500_realtime_publication.sql` | adds every streamed table to the `supabase_realtime` publication |
 | `20260101000600_text_overrides.sql` | `text_overrides` (owner-authored wording) + `site_settings.store_name_om` + Oromo in the language check |
 | `20260101000700_subcategories.sql` | `categories.parent_id` self-FK (`on delete restrict`), `(parent_id, sort_order)` index, `guard_category_nesting()` + trigger |
+| `20260101000800_site_content.sql` | `site_content` (`key`, `locale`) → owner-editable home copy, public read |
+| `20260101000900_admin_contact_settings.sql` | single-row `admin_contact_settings` for the owner's private contact channels, public read |
 
 Migrations are idempotent — `create table if not exists`, `create or replace
 function` / view, `drop trigger if exists` before every `create trigger`, and
@@ -153,6 +155,8 @@ Three independent layers protect it:
 | `contact_links` | SELECT `is_visible` | SELECT `is_visible` | all rows, full CRUD |
 | `inquiries` | INSERT only | INSERT only | SELECT, DELETE |
 | `text_overrides` | SELECT | SELECT | SELECT, INSERT, UPDATE, DELETE |
+| `site_content` | SELECT | SELECT | SELECT, INSERT, UPDATE, DELETE |
+| `admin_contact_settings` | SELECT | SELECT | SELECT, INSERT, UPDATE, DELETE |
 | `audit_log` | — | — | SELECT |
 | `storage.objects` | SELECT public buckets | SELECT public buckets | SELECT + write |
 

@@ -74,6 +74,9 @@ class AppLocalizationsAm extends AppLocalizations {
   String get actionFavourite => 'ወደ ተወዳጆች አስቀምጥ';
 
   @override
+  String get actionLoadMore => 'ተጨማሪ አሳይ';
+
+  @override
   String get actionMove => 'አስቀይጥ';
 
   @override
@@ -1020,4 +1023,13 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get validateVideoUnreadable => 'ያ ቪዲዮ ሊነበብ አልቻለም';
+
+  @override
+  String get adminSiteContent => 'ቁጥር የሚያስተዳድ';
+
+  @override
+  String get adminSiteContentHint => 'ቤት ሳህነቴን ለማስተዳድር በሚያገግሙ ቃላትን ይቀይሩ።';
+
+  @override
+  String get adminSiteContentValue => 'አረፍተ ነገር';
 }

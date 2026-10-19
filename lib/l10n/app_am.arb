@@ -323,5 +323,8 @@
   "groupErrors": "ስህተቶችና ሁኔታዎች",
   "groupStorefront": "የመሸጫ ገጾች",
   "groupValidation": "የማረጋገጫ መልዕክቶች",
-  "navFavourites": "ተወዳጆች"
-"adminSiteContent": "ቁጥር የሚያስተዳድ","adminSiteContentHint": "ቤት ሳህነቴን ለማስተዳድር በሚያገግሙ ቃላትን ይቀይሩ።","adminSiteContentValue": "አረፍተ ነገር","heroTitle": "እንኳን ደህን አደሩ","heroTagline": "ሰላምተኛ ቦታ ማድረግ።","heroButtonLabel": "ገቢ · ድጋፍ · አሰራር","sectionTitleBrowse by category": "በ ክፍል መስመር","sectionTitleFeatured": "ተመረጡ","sectionTitleAll products": "ሁሉም ምርቶች",}
+  "navFavourites": "ተወዳጆች",
+  "adminSiteContent": "ቁጥር የሚያስተዳድ",
+  "adminSiteContentHint": "ቤት ሳህነቴን ለማስተዳድር በሚያገግሙ ቃላትን ይቀይሩ።",
+  "adminSiteContentValue": "አረፍተ ነገር"
+}

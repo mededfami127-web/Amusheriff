@@ -268,6 +268,16 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
     },
   ),
   AppTextEntry(
+    key: 'actionLoadMore',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'Load more',
+      'am': 'ተጨማሪ አሳይ',
+      'ar': 'عرض المزيد',
+      'om': 'Dabalata agarsiisi',
+    },
+  ),
+  AppTextEntry(
     key: 'actionMove',
     sectionKey: 'groupCommon',
     defaults: <String, String>{
@@ -1487,6 +1497,36 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
       'am': 'ሌሎች ክፍለ ጊዜዎችን ይውጣ',
       'ar': 'تسجيل الخروج من الجلسات الأخرى',
       'om': 'Seensaalee biroo baasi',
+    },
+  ),
+  AppTextEntry(
+    key: 'adminSiteContent',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'Site content',
+      'am': 'ቁጥር የሚያስተዳድ',
+      'ar': 'محتوى الموقع',
+      'om': 'ትርጉም መግቢያ',
+    },
+  ),
+  AppTextEntry(
+    key: 'adminSiteContentHint',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'Rewrite the words customers see on the home screen before the built-in wording.',
+      'am': 'ቤት ሳህነቴን ለማስተዳድር በሚያገግሙ ቃላትን ይቀይሩ።',
+      'ar': 'إعادة كتابة الكلمات التي يراها الزبائن على الشاشة الرئيسية قبل الصياغة المدمجة.',
+      'om': 'የቤት ሳህነቴን ለማስተዳድር በሚያገግሙ ቃላትን ይቀይሩ።',
+    },
+  ),
+  AppTextEntry(
+    key: 'adminSiteContentValue',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'Value',
+      'am': 'አረፍተ ነገር',
+      'ar': 'قيمة',
+      'om': 'ተግባር',
     },
   ),
   AppTextEntry(

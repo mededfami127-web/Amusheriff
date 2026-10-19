@@ -74,6 +74,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actionFavourite => 'Save to favourites';
 
   @override
+  String get actionLoadMore => 'Load more';
+
+  @override
   String get actionMove => 'Move';
 
   @override
@@ -1040,4 +1043,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get validateVideoUnreadable => 'That video could not be read';
+
+  @override
+  String get adminSiteContent => 'Site content';
+
+  @override
+  String get adminSiteContentHint =>
+      'Rewrite the words customers see on the home screen before the built-in wording.';
+
+  @override
+  String get adminSiteContentValue => 'Value';
 }

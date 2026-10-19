@@ -36,7 +36,7 @@ class _FallbackBadge extends StatelessWidget {
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         shape: BoxShape.circle,
         gradient: BrandGradients.brand,
       ),

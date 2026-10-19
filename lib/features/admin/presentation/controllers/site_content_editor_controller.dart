@@ -4,6 +4,7 @@ import '../../../../core/errors/app_failure.dart';
 import '../../../../core/errors/error_mapper.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../settings/domain/repositories/site_content_repository.dart';
+import '../../../settings/presentation/providers/site_content_providers.dart';
 
 part 'site_content_editor_controller.g.dart';
 
@@ -29,21 +30,24 @@ class SiteContentEditorState {
     String? value,
     FieldErrors? fieldErrors,
     AdminFormStatus? status,
-  }) =>
-      SiteContentEditorState(
-        key: key ?? this.key,
-        locale: locale ?? this.locale,
-        value: value ?? this.value,
-        fieldErrors: fieldErrors ?? this.fieldErrors,
-        status: status ?? this.status,
-      );
+  }) => SiteContentEditorState(
+    key: key ?? this.key,
+    locale: locale ?? this.locale,
+    value: value ?? this.value,
+    fieldErrors: fieldErrors ?? this.fieldErrors,
+    status: status ?? this.status,
+  );
 }
 
 typedef FieldErrors = Map<String, String>;
 
 /// Status shared with the other admin editors: saving, saved, typed failure.
 class AdminFormStatus {
-  const AdminFormStatus({this.saving = false, this.saved = false, this.failure});
+  const AdminFormStatus({
+    this.saving = false,
+    this.saved = false,
+    this.failure,
+  });
 
   final bool saving;
   final bool saved;
@@ -54,12 +58,11 @@ class AdminFormStatus {
     bool? saved,
     AppFailure? failure,
     bool clearFailure = false,
-  }) =>
-      AdminFormStatus(
-        saving: saving ?? this.saving,
-        saved: saved ?? this.saved,
-        failure: clearFailure ? null : (failure ?? this.failure),
-      );
+  }) => AdminFormStatus(
+    saving: saving ?? this.saving,
+    saved: saved ?? this.saved,
+    failure: clearFailure ? null : (failure ?? this.failure),
+  );
 }
 
 /// Edits one [site_content] key.
@@ -101,8 +104,9 @@ class SiteContentEditorController extends _$SiteContentEditorController {
     state = state.copyWith(status: const AdminFormStatus(saving: true));
 
     try {
-      final SiteContentRepository repo =
-          ref.read(siteContentRepositoryProvider);
+      final SiteContentRepository repo = ref.read(
+        siteContentRepositoryProvider,
+      );
       await repo.save(
         key: state.key.trim(),
         locale: state.locale.trim(),
@@ -127,8 +131,9 @@ class SiteContentEditorController extends _$SiteContentEditorController {
   Future<bool> restore() async {
     state = state.copyWith(status: const AdminFormStatus(saving: true));
     try {
-      final SiteContentRepository repo =
-          ref.read(siteContentRepositoryProvider);
+      final SiteContentRepository repo = ref.read(
+        siteContentRepositoryProvider,
+      );
       await repo.remove(key: state.key.trim(), locale: state.locale.trim());
       ref.invalidate(siteContentProvider(state.locale));
       state = state.copyWith(status: const AdminFormStatus(saved: true));
@@ -150,4 +155,18 @@ class SiteContentEditorController extends _$SiteContentEditorController {
 }
 
 /// The locales the owner can edit.
+/// Locale the site-content page is currently showing.
+///
+/// `keepAlive` like the draft controller: the page and its sheet share this
+/// selection, and a bottom-sheet rebuild must not reset it.
+@Riverpod(keepAlive: true)
+class SiteContentEditorLocale extends _$SiteContentEditorLocale {
+  @override
+  String build() => 'en';
+
+  void set(String code) {
+    if (kAppTextLocales.contains(code)) state = code;
+  }
+}
+
 const List<String> kAppTextLocales = <String>['en', 'am', 'ar', 'om'];
