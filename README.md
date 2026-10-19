@@ -317,12 +317,20 @@ flag lives in the encrypted keystore, so it survives a restart until the owner
 uses *Sign out* in the sidebar. A locked device that deep-links into `/admin/**`
 lands on the storefront instead of on a form a customer has never seen.
 
-It is a device-local lock: it stores a salted hash, never the password, and it
-grants no new database access. Reads use the public key; every write is still
-decided by row-level security, which admits only the owner's Supabase account
-(`public.is_admin()`). If a Save ever reports *You do not have permission to do
-that* (PostgreSQL 42501), the device has no owner session — that is a database
-rule, not something the panel can grant.
+The panel is a device-local lock: it stores a salted hash, never the panel
+password, and on its own it grants nothing in the database. Reads use the public
+key; every write is decided by row-level security, which admits only the owner's
+Supabase account (`public.is_admin()`).
+
+So the panel opens that account too. When the device holds no Supabase session
+the panel shows an extra **Owner database account** block (the owner's e-mail and
+password) and signs in with it; once signed in, later unlocks simply refresh the
+session. That is why the empty-state error is specific: with no session the app
+says *The owner database account is not connected* (`errorNotSignedIn`) instead
+of a bare *You do not have permission to do that*, and a signed-in account whose
+`profiles.is_admin` is not true reports `errorNotAdmin` with the exact SQL to fix
+it. Nothing about this widens what a request may read or write: a device with no
+owner session is still denied by the same policies.
 
 ### Database changes
 
@@ -391,7 +399,9 @@ Every deviation from the brief, with its rationale:
   path-prefix check enforced by policy.
 * `text_overrides` is public-read by necessity (the anonymous storefront renders
   the owner's wording) and admin-only on write, like every other content table.
-* The five-tap gateway is client-side only. It stores a salted hash, never the
-  password, and unlocking it does not widen what any request may read or write —
-  RLS still decides that, which is why a Save can still come back as 42501 on a
-  device with no owner session.
+* The five-tap gateway is a device-local lock. It stores a salted hash, never
+  the panel password, and it decides nothing in Postgres by itself: the panel
+  signs the owner's Supabase account in (once per device) so admin writes carry
+  a JWT, and RLS still decides every read and write with `public.is_admin()`.
+  Without a session the app now says so (`errorNotSignedIn`) rather than showing
+  the generic permission text.

@@ -30,16 +30,23 @@ class AdminGateStore {
   static const String _saltKey = 'asm.admin.salt';
   static const String _hashKey = 'asm.admin.passwordHash';
   static const String _unlockedKey = 'asm.admin.unlocked';
+  static const String _ownerEmailKey = 'asm.admin.ownerEmail';
 
   String _username = defaultUsername;
   String _salt = '';
   String _hash = '';
   bool _unlocked = false;
+  String _ownerEmail = '';
 
   String get username => _username;
 
   /// Whether the owner has already entered the gateway on this device.
   bool get unlocked => _unlocked;
+
+  /// The shop owner's Supabase e-mail, remembered so the panel does not have to
+  /// be retyped on every re-link. The password is never stored here: the
+  /// session Supabase keeps is what carries the JWT.
+  String get ownerEmail => _ownerEmail;
 
   /// Called once from `bootstrap()`. Never throws: an unreadable keystore falls
   /// back to the shipped credentials with the gate closed.
@@ -49,6 +56,7 @@ class AdminGateStore {
       _salt = await _storage.read(key: _saltKey) ?? '';
       _hash = await _storage.read(key: _hashKey) ?? '';
       _unlocked = (await _storage.read(key: _unlockedKey)) == 'true';
+      _ownerEmail = await _storage.read(key: _ownerEmailKey) ?? '';
 
       if (_salt.isEmpty || _hash.isEmpty) await _seedDefaults();
     } catch (_) {
@@ -95,6 +103,13 @@ class AdminGateStore {
 
   /// Whether [candidate] is the current password.
   bool matches(String candidate) => digest(candidate, _salt) == _hash;
+
+  /// Remembers the owner account that was just signed in, so the next re-link
+  /// only needs its password.
+  Future<void> saveOwnerEmail(String email) async {
+    _ownerEmail = email.trim();
+    await _write(_ownerEmailKey, _ownerEmail);
+  }
 
   Future<void> _seedDefaults() async {
     _username = defaultUsername;

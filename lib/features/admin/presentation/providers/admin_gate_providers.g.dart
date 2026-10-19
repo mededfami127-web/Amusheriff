@@ -151,7 +151,7 @@ final class AdminGateProvider
   }
 }
 
-String _$adminGateHash() => r'9c75f7d164e035118a645093580f08fb472ee647';
+String _$adminGateHash() => r'2f9238135f3171a37defe7b99e71472e5e870e62';
 
 /// Drives the five-tap panel and the gateway-password screen.
 

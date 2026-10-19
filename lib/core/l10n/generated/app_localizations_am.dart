@@ -675,7 +675,15 @@ class AppLocalizationsAm extends AppLocalizations {
   String get errorNetwork => 'ሱቁን ማግኘት አልቻልንም። ግንኙነትዎን ያረጋግጡ።';
 
   @override
+  String get errorNotAdmin =>
+      'ይህ መለያ ገብቷል ግን የሱቁ ባለቤት ተብሎ አልተመዘገበም። ይህን ያሂዱ፦ update public.profiles set is_admin = true where id = \'<የተጠቃሚ መለያ>\';';
+
+  @override
   String get errorNotFound => 'የፈለጉትን ማግኘት አልቻልንም።';
+
+  @override
+  String get errorNotSignedIn =>
+      'የባለቤት የውሂብ ጎታ መለያ አልተገናኘም። የባለቤት ፓነሉን ይክፈቱ (ሎጎውን አምስት ጊዜ ይንኩ) እና ይግቡ።';
 
   @override
   String get errorPermission => 'ይህን ለማድረግ ፈቃድ የለዎትም።';
@@ -722,6 +730,19 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get gateLocked => 'የመግቢያ ስም ወይም የይለፍ ቃል ትክክል አይደለም።';
+
+  @override
+  String get gateOwnerEmail => 'የባለቤት ኢሜይል';
+
+  @override
+  String get gateOwnerHint =>
+      'በእያንዳንዱ መሣሪያ አንድ ጊዜ ያስፈልጋል፦ የፓነሉ የይለፍ ቃል ብቻውን በውሂብ ጎታ ውስጥ ለመጻፍ ፈቃድ አይሰጥም። በባለቤቱ ኢሜይል እና የይለፍ ቃል ይግቡ።';
+
+  @override
+  String get gateOwnerPassword => 'የባለቤት የይለፍ ቃል';
+
+  @override
+  String get gateOwnerTitle => 'የባለቤት የውሂብ ጎታ መለያ';
 
   @override
   String get gateTitle => 'የባለቤት መግቢያ';

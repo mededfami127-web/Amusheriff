@@ -834,7 +834,14 @@ class OverridableAppLocalizations extends AppLocalizations {
   String get errorNetwork => _text('errorNetwork', _base.errorNetwork);
 
   @override
+  String get errorNotAdmin => _text('errorNotAdmin', _base.errorNotAdmin);
+
+  @override
   String get errorNotFound => _text('errorNotFound', _base.errorNotFound);
+
+  @override
+  String get errorNotSignedIn =>
+      _text('errorNotSignedIn', _base.errorNotSignedIn);
 
   @override
   String get errorPermission => _text('errorPermission', _base.errorPermission);
@@ -884,6 +891,19 @@ class OverridableAppLocalizations extends AppLocalizations {
 
   @override
   String get gateLocked => _text('gateLocked', _base.gateLocked);
+
+  @override
+  String get gateOwnerEmail => _text('gateOwnerEmail', _base.gateOwnerEmail);
+
+  @override
+  String get gateOwnerHint => _text('gateOwnerHint', _base.gateOwnerHint);
+
+  @override
+  String get gateOwnerPassword =>
+      _text('gateOwnerPassword', _base.gateOwnerPassword);
+
+  @override
+  String get gateOwnerTitle => _text('gateOwnerTitle', _base.gateOwnerTitle);
 
   @override
   String get gateTitle => _text('gateTitle', _base.gateTitle);

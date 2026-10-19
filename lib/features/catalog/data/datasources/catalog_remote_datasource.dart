@@ -1,5 +1,8 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/errors/app_failure.dart';
+import '../../../../core/utils/app_logger.dart';
+
 /// Thin, entity-agnostic wrapper over the four catalogue tables.
 ///
 /// It returns raw `Map<String, dynamic>` rows so that JSON decoding, error
@@ -22,6 +25,54 @@ class CatalogRemoteDataSource {
   /// and spinning forever, which reads as "the button does nothing". A visible
   /// `errorTimeout` is the better failure.
   static const Duration writeTimeout = Duration(seconds: 20);
+
+  /// Runs one write, logging the real PostgREST error before rethrowing it.
+  ///
+  /// A denied save reaches the owner as the localised `PermissionFailure`,
+  /// which deliberately names no table. This is the other half of that
+  /// message: operation, table, SQLSTATE, error text, the columns actually
+  /// sent, and whether a JWT was attached. `42501` is a policy denial,
+  /// `PGRST301` a missing/expired token, `23505`/`23514` a constraint — three
+  /// different fixes that otherwise all read "You do not have permission to do
+  /// that." on screen.
+  Future<T> _write<T>({
+    required String operation,
+    required String table,
+    required Future<T> Function() body,
+    Map<String, dynamic>? row,
+    String? id,
+  }) async {
+    final Session? session = _client.auth.currentSession;
+    if (session == null) {
+      // With no session there is no `Authorization: Bearer`, so Postgres sees
+      // `auth.uid()` as NULL, `public.is_admin()` as false, and answers 42501
+      // for every admin write. Naming that here saves a round trip and the
+      // three hours of guessing a generic banner causes.
+      AppLog.error(
+        'WRITE BLOCKED op=$operation table=public.$table: no Supabase session '
+        '(auth.uid() will be NULL, is_admin() false, policies answer 42501)',
+      );
+      throw PermissionFailure(
+        messageKey: 'errorNotSignedIn',
+        debugMessage:
+            'no session for $operation on public.$table '
+            '(columns: ${(row?.keys ?? const <String>[]).join(', ')})',
+      );
+    }
+
+    try {
+      return await body();
+    } on PostgrestException catch (error) {
+      AppLog.error(
+        'WRITE FAILED op=$operation table=public.$table id=${id ?? '-'} '
+        'sqlstate=${error.code ?? '-'} message="${error.message}" '
+        'details=${error.details ?? '-'} hint=${error.hint ?? '-'} '
+        'uid=${session.user.id} columns=[${(row?.keys ?? const <String>[]).join(',')}]',
+        error,
+      );
+      rethrow;
+    }
+  }
 
   /// Columns shared by every product read, so the entity always decodes.
   static const String productColumns =
@@ -63,32 +114,48 @@ class CatalogRemoteDataSource {
   Future<Map<String, dynamic>?> categoryBySlug(String slug) =>
       _client.from(categoriesTable).select().eq('slug', slug).maybeSingle();
 
-  Future<Map<String, dynamic>> insertCategory(Map<String, dynamic> row) async {
-    final Map<String, dynamic> created = await _client
-        .from(categoriesTable)
-        .insert(row)
-        .select()
-        .single()
-        .timeout(writeTimeout);
-    return created;
-  }
+  Future<Map<String, dynamic>> insertCategory(Map<String, dynamic> row) =>
+      _write<Map<String, dynamic>>(
+        operation: 'insert',
+        table: categoriesTable,
+        row: row,
+        body: () => _client
+            .from(categoriesTable)
+            .insert(row)
+            .select()
+            .single()
+            .timeout(writeTimeout),
+      );
 
   Future<Map<String, dynamic>> updateCategory(
     String id,
     Map<String, dynamic> row,
-  ) async {
-    final Map<String, dynamic> updated = await _client
+  ) => _write<Map<String, dynamic>>(
+    operation: 'update',
+    table: categoriesTable,
+    row: row,
+    id: id,
+    body: () => _client
         .from(categoriesTable)
         .update(row)
         .eq('id', id)
         .select()
         .single()
-        .timeout(writeTimeout);
-    return updated;
-  }
+        .timeout(writeTimeout),
+  );
 
-  Future<void> deleteCategory(String id) =>
-      _client.from(categoriesTable).delete().eq('id', id).timeout(writeTimeout);
+  Future<void> deleteCategory(String id) => _write<void>(
+    operation: 'delete',
+    table: categoriesTable,
+    id: id,
+    body: () async {
+      await _client
+          .from(categoriesTable)
+          .delete()
+          .eq('id', id)
+          .timeout(writeTimeout);
+    },
+  );
 
   // ── Products ──────────────────────────────────────────────────────────────
 
@@ -152,39 +219,64 @@ class CatalogRemoteDataSource {
     );
   }
 
-  Future<Map<String, dynamic>> insertProduct(Map<String, dynamic> row) async {
-    final Map<String, dynamic> created = await _client
-        .from(productsTable)
-        .insert(row)
-        .select()
-        .single()
-        .timeout(writeTimeout);
-    return created;
-  }
+  Future<Map<String, dynamic>> insertProduct(Map<String, dynamic> row) =>
+      _write<Map<String, dynamic>>(
+        operation: 'insert',
+        table: productsTable,
+        row: row,
+        body: () => _client
+            .from(productsTable)
+            .insert(row)
+            .select()
+            .single()
+            .timeout(writeTimeout),
+      );
 
   Future<Map<String, dynamic>> updateProduct(
     String id,
     Map<String, dynamic> row,
-  ) async {
-    final Map<String, dynamic> updated = await _client
+  ) => _write<Map<String, dynamic>>(
+    operation: 'update',
+    table: productsTable,
+    row: row,
+    id: id,
+    body: () => _client
         .from(productsTable)
         .update(row)
         .eq('id', id)
         .select()
         .single()
-        .timeout(writeTimeout);
-    return updated;
-  }
+        .timeout(writeTimeout),
+  );
 
   /// Partial update used by the toggles (publish / feature / availability).
-  Future<void> patchProduct(String id, Map<String, dynamic> patch) => _client
-      .from(productsTable)
-      .update(patch)
-      .eq('id', id)
-      .timeout(writeTimeout);
+  Future<void> patchProduct(String id, Map<String, dynamic> patch) =>
+      _write<void>(
+        operation: 'patch',
+        table: productsTable,
+        row: patch,
+        id: id,
+        body: () async {
+          await _client
+              .from(productsTable)
+              .update(patch)
+              .eq('id', id)
+              .timeout(writeTimeout);
+        },
+      );
 
-  Future<void> deleteProduct(String id) =>
-      _client.from(productsTable).delete().eq('id', id).timeout(writeTimeout);
+  Future<void> deleteProduct(String id) => _write<void>(
+    operation: 'delete',
+    table: productsTable,
+    id: id,
+    body: () async {
+      await _client
+          .from(productsTable)
+          .delete()
+          .eq('id', id)
+          .timeout(writeTimeout);
+    },
+  );
 
   // ── Product media ─────────────────────────────────────────────────────────
 
@@ -211,55 +303,98 @@ class CatalogRemoteDataSource {
     return rows;
   }
 
-  Future<Map<String, dynamic>> insertMedia(Map<String, dynamic> row) async {
-    final Map<String, dynamic> created = await _client
-        .from(mediaTable)
-        .insert(row)
-        .select()
-        .single()
-        .timeout(writeTimeout);
-    return created;
-  }
+  Future<Map<String, dynamic>> insertMedia(Map<String, dynamic> row) =>
+      _write<Map<String, dynamic>>(
+        operation: 'insert',
+        table: mediaTable,
+        row: row,
+        body: () => _client
+            .from(mediaTable)
+            .insert(row)
+            .select()
+            .single()
+            .timeout(writeTimeout),
+      );
 
   Future<Map<String, dynamic>> updateMedia(
     String id,
     Map<String, dynamic> row,
-  ) async {
-    final Map<String, dynamic> updated = await _client
+  ) => _write<Map<String, dynamic>>(
+    operation: 'update',
+    table: mediaTable,
+    row: row,
+    id: id,
+    body: () => _client
         .from(mediaTable)
         .update(row)
         .eq('id', id)
         .select()
         .single()
-        .timeout(writeTimeout);
-    return updated;
-  }
+        .timeout(writeTimeout),
+  );
 
-  Future<void> deleteMedia(String id) =>
-      _client.from(mediaTable).delete().eq('id', id).timeout(writeTimeout);
+  Future<void> deleteMedia(String id) => _write<void>(
+    operation: 'delete',
+    table: mediaTable,
+    id: id,
+    body: () async {
+      await _client
+          .from(mediaTable)
+          .delete()
+          .eq('id', id)
+          .timeout(writeTimeout);
+    },
+  );
 
   /// Clears the cover flag for a product. Required before setting a new cover,
   /// because `one_cover_per_product` is a *unique* partial index.
-  Future<void> clearCover(String productId) => _client
-      .from(mediaTable)
-      .update(<String, dynamic>{'is_cover': false})
-      .eq('product_id', productId)
-      .timeout(writeTimeout);
+  Future<void> clearCover(String productId) => _write<void>(
+    operation: 'update',
+    table: mediaTable,
+    row: const <String, dynamic>{'is_cover': false},
+    id: productId,
+    body: () async {
+      await _client
+          .from(mediaTable)
+          .update(<String, dynamic>{'is_cover': false})
+          .eq('product_id', productId)
+          .timeout(writeTimeout);
+    },
+  );
 
-  Future<void> setCover(String mediaId) => _client
-      .from(mediaTable)
-      .update(<String, dynamic>{'is_cover': true})
-      .eq('id', mediaId)
-      .timeout(writeTimeout);
+  Future<void> setCover(String mediaId) => _write<void>(
+    operation: 'update',
+    table: mediaTable,
+    row: const <String, dynamic>{'is_cover': true},
+    id: mediaId,
+    body: () async {
+      await _client
+          .from(mediaTable)
+          .update(<String, dynamic>{'is_cover': true})
+          .eq('id', mediaId)
+          .timeout(writeTimeout);
+    },
+  );
 
   // ── Ordering ──────────────────────────────────────────────────────────────
 
   /// Persists a whole ordering in one transaction through the
   /// `reorder_rows` RPC (admin-only, whitelisted tables).
-  Future<void> reorderRows(String table, List<String> orderedIds) => _client
-      .rpc<void>(
-        'reorder_rows',
-        params: <String, dynamic>{'p_table': table, 'p_ids': orderedIds},
-      )
-      .timeout(writeTimeout);
+  Future<void> reorderRows(String table, List<String> orderedIds) =>
+      _write<void>(
+        operation: 'rpc.reorder_rows',
+        table: table,
+        row: <String, dynamic>{'p_ids': orderedIds},
+        body: () async {
+          await _client
+              .rpc<void>(
+                'reorder_rows',
+                params: <String, dynamic>{
+                  'p_table': table,
+                  'p_ids': orderedIds,
+                },
+              )
+              .timeout(writeTimeout);
+        },
+      );
 }

@@ -470,10 +470,11 @@ lock, so it is implemented that way and labelled that way:
   panel; the owner never had those credentials and it locked them out of their
   own sidebar, so the step is gone. Unlocking the panel opens the gateway, and a
   locked device that deep-links into `/admin/**` is sent to the storefront.
-* It grants **no** new database access. RLS still decides every read and write,
-  so a customer who somehow unlocked the panel would still be denied by the
-  database. The README's security section says exactly this, so nobody mistakes
-  the panel for a second factor.
+* It grants **no** database access by itself. RLS still decides every read and
+  write. What the panel *does* now is open the owner's Supabase session
+  (D-039), because a device-local password cannot produce a JWT and every admin
+  write needs one. A device with no session is still denied by the same
+  policies.
 * The password is held to the Supabase password rule when the owner changes it;
   only the shipped default is exempt, because the brief fixes it at `admin123`.
 
@@ -696,6 +697,54 @@ controller is now `@Riverpod(keepAlive: true)` and always reseeded through `load
 open, which is also what makes the parent-carrying subcategory flow work.
 
 Unchanged: RLS still decides the write, and a denial still reads as `errorPermission`.
+
+### D-039 — The panel opens the database session, because RLS needs one
+
+The owner reported that *Category save* still answered *You do not have
+permission to do that.* after the panel-only login of D-030. The string is
+`errorPermission` (ARB → `AppLocalizations.errorPermission`), produced by exactly
+two places in `ErrorMapper`: a `PostgrestException` with SQLSTATE `42501`
+(`insufficient_privilege`, i.e. "new row violates row-level security policy for
+table \"categories\""), and a `StorageException` with HTTP 403. There is no
+Firebase, Firestore or App Check in this project at all — the backend is
+Supabase — so the Firebase-shaped causes do not apply.
+
+The policy itself is correct: `categories_admin_insert` is `for insert to
+authenticated with check (public.is_admin())`, and `public.is_admin()` reads
+`profiles.is_admin` for `auth.uid()`. The defect was upstream of the policy: the
+panel unlocked a *screen* and never signed anyone in, so no request carried an
+`Authorization: Bearer` header, `auth.uid()` was NULL, `is_admin()` was false and
+42501 was the only possible answer. The RLS suite could not catch this because it
+simulates the JWT with `set_config('request.jwt.claim.sub', …)`: every case it
+tests already has an identity.
+
+Fixed at the cause, with the permission check untouched:
+
+* The panel takes the owner's Supabase e-mail/password when the device has no
+  session, signs in with them, verifies `profiles.is_admin` and remembers only
+the e-mail (`AdminGateStore.saveOwnerEmail`); the session Supabase persists is
+  what carries the JWT afterwards. `AdminGate.unlock` also force-refreshes the
+  token (`refreshSession`) when a session already exists, because an expired JWT
+  is indistinguishable from a forbidden one.
+* `CatalogRemoteDataSource._write` now wraps every catalogue write. It refuses
+  to send a write with no session (`PermissionFailure(messageKey:
+  'errorNotSignedIn')`) instead of letting the server answer generically, and it
+  logs the real failure — operation, `public.<table>`, SQLSTATE, message,
+  details, hint, `uid` and the columns sent — through `AppLog` before rethrowing.
+* Two new messages say which of the three cases it is: `errorNotSignedIn`
+  (nothing connected), `errorNotAdmin` (signed in but not flagged). Both are in
+  all four ARBs.
+
+Not weakened: no policy is permissive, no check was deleted, and the authenticated
+non-admin and anon cases still fail in `tests/rls/rls_tests.sql` (24 groups, all
+passing).
+
+Proved with the toolchain: `flutter analyze --fatal-infos` clean, `flutter test`
+122 passing, and `bash scripts/run_rls_tests.sh` against a local PostgreSQL 16 —
+"ok 5 - the admin has full CRUD", while "anon INSERT on categories is denied" and
+"a non-admin INSERT on categories is denied" both assert SQLSTATE 42501. What is
+*not* verified here: the live project's migration state, because this workspace
+has no `SUPABASE_URL`/`SUPABASE_ANON_KEY` to query it with.
 
 Proved with the toolchain rather than by eye: `flutter analyze --fatal-infos` is clean,
 `flutter test` passes 122 tests (including `test/unit/storefront_subcategory_test.dart` and

@@ -687,7 +687,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get errorNetwork => 'لم نتمكن من الوصول إلى المتجر. تحقق من اتصالك.';
 
   @override
+  String get errorNotAdmin =>
+      'هذا الحساب مسجَّل الدخول لكنه غير موسوم كمالك المتجر. نفِّذ: update public.profiles set is_admin = true where id = \'<معرّف المستخدم>\';';
+
+  @override
   String get errorNotFound => 'لم نتمكن من العثور على ما تبحث عنه.';
+
+  @override
+  String get errorNotSignedIn =>
+      'حساب المالك في قاعدة البيانات غير مرتبط. افتح لوحة المالك (انقر الشعار خمس مرات) وسجّل الدخول.';
 
   @override
   String get errorPermission => 'ليس لديك إذن للقيام بذلك.';
@@ -736,6 +744,19 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get gateLocked => 'اسم المستخدم أو كلمة المرور غير صحيحة.';
+
+  @override
+  String get gateOwnerEmail => 'بريد المالك';
+
+  @override
+  String get gateOwnerHint =>
+      'مطلوب مرة واحدة لكل جهاز: كلمة مرور اللوحة وحدها لا تسمح بالكتابة في قاعدة البيانات. سجّل الدخول ببريد المالك وكلمة مروره.';
+
+  @override
+  String get gateOwnerPassword => 'كلمة مرور المالك';
+
+  @override
+  String get gateOwnerTitle => 'حساب المالك في قاعدة البيانات';
 
   @override
   String get gateTitle => 'دخول المالك';

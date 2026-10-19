@@ -686,7 +686,15 @@ class AppLocalizationsEn extends AppLocalizations {
       'We could not reach the store. Check your connection.';
 
   @override
+  String get errorNotAdmin =>
+      'This account is signed in but is not flagged as the shop owner. Run: update public.profiles set is_admin = true where id = \'<your user id>\';';
+
+  @override
   String get errorNotFound => 'We could not find what you were looking for.';
+
+  @override
+  String get errorNotSignedIn =>
+      'The owner database account is not connected. Open the owner panel (tap the logo five times) and sign in.';
 
   @override
   String get errorPermission => 'You do not have permission to do that.';
@@ -737,6 +745,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gateLocked => 'Incorrect username or password.';
+
+  @override
+  String get gateOwnerEmail => 'Owner e-mail';
+
+  @override
+  String get gateOwnerHint =>
+      'Needed once per device: the panel password alone cannot authorise a database write. Sign in with the shop owner\'s e-mail and password.';
+
+  @override
+  String get gateOwnerPassword => 'Owner password';
+
+  @override
+  String get gateOwnerTitle => 'Owner database account';
 
   @override
   String get gateTitle => 'Owner access';

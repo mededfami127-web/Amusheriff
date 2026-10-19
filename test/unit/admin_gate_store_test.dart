@@ -113,6 +113,23 @@ void main() {
     });
   });
 
+  group('owner account', () {
+    test('only the linked e-mail is remembered, never a password', () async {
+      await store.load();
+      expect(store.ownerEmail, isEmpty);
+
+      await store.saveOwnerEmail(' owner@example.com ');
+
+      expect(store.ownerEmail, 'owner@example.com');
+      final AdminGateStore reopened = AdminGateStore(_storageOf(bytes));
+      await reopened.load();
+      expect(reopened.ownerEmail, 'owner@example.com');
+      expect(bytes.keys.where((String key) => key.contains('owner')), <String>[
+        'asm.admin.ownerEmail',
+      ], reason: 'the owner password must never reach the keystore');
+    });
+  });
+
   group('changing the password', () {
     test('requires the current password and then replaces it', () async {
       await store.load();

@@ -693,7 +693,15 @@ class AppLocalizationsOm extends AppLocalizations {
       'Suuqii bira ga\'uu hin dandeenye. Interneetii kee ilaali.';
 
   @override
+  String get errorNotAdmin =>
+      'Heruun kun seeneera garuu akka abbaa suuqaa hin mallattoofamne. Kana hojjedhu: update public.profiles set is_admin = true where id = \'<id fayyadamaa>\';';
+
+  @override
   String get errorNotFound => 'Wanta barbaadde argachuu hin dandeenye.';
+
+  @override
+  String get errorNotSignedIn =>
+      'Heruun abbaa suuqaa kuusaa daataa hin hidhamne. Paanela abbaa suuqaa bani (mallattoo yeroo shan tuqi)ii seeni.';
 
   @override
   String get errorPermission => 'Kana gochuuf hayyama hin qabdu.';
@@ -746,6 +754,19 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get gateLocked => 'Maqaa fayyadamaa yookaan jecha darbii sirrii miti.';
+
+  @override
+  String get gateOwnerEmail => 'Imeelii abbaa suuqaa';
+
+  @override
+  String get gateOwnerHint =>
+      'Meeshaa tokkoon tokkoon al tokko barbaachisa: jechi darbii paanelaa qofti kuusaa daataa keessatti barreessuuf hayyama hin kennu. Imeelii fi jecha darbii abbaa suuqaa fayyadamii seeni.';
+
+  @override
+  String get gateOwnerPassword => 'Jecha darbii abbaa suuqaa';
+
+  @override
+  String get gateOwnerTitle => 'Heruu kuusaa daataa abbaa suuqaa';
 
   @override
   String get gateTitle => 'Seensa abbaa qabeenyaa';

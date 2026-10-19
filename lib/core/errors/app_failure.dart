@@ -87,10 +87,20 @@ final class AuthFailure extends AppFailure {
   bool get isRetryable => false;
 }
 
-/// Signed in, but not allowed to perform the operation (RLS denied the write).
+/// Not allowed to perform the operation: RLS denied the write, or the owner
+/// database account is not connected to this device at all.
+///
+/// The default key is the generic "You do not have permission to do that.".
+/// Callers that know more pass a sharper key — `errorNotSignedIn` when there is
+/// no session to send, `errorNotAdmin` when the session's profile is not
+/// flagged — because the two have completely different fixes.
 final class PermissionFailure extends AppFailure {
-  const PermissionFailure({super.debugMessage, super.cause, super.statusCode})
-    : super(messageKey: 'errorPermission');
+  const PermissionFailure({
+    super.debugMessage,
+    super.cause,
+    super.statusCode,
+    super.messageKey = 'errorPermission',
+  });
 
   @override
   bool get isRetryable => false;

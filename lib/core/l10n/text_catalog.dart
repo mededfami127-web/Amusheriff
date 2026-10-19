@@ -2242,6 +2242,16 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
     },
   ),
   AppTextEntry(
+    key: 'errorNotAdmin',
+    sectionKey: 'groupErrors',
+    defaults: <String, String>{
+      'en': 'This account is signed in but is not flagged as the shop owner. Run: update public.profiles set is_admin = true where id = \'<your user id>\';',
+      'am': 'ይህ መለያ ገብቷል ግን የሱቁ ባለቤት ተብሎ አልተመዘገበም። ይህን ያሂዱ፦ update public.profiles set is_admin = true where id = \'<የተጠቃሚ መለያ>\';',
+      'ar': 'هذا الحساب مسجَّل الدخول لكنه غير موسوم كمالك المتجر. نفِّذ: update public.profiles set is_admin = true where id = \'<معرّف المستخدم>\';',
+      'om': 'Heruun kun seeneera garuu akka abbaa suuqaa hin mallattoofamne. Kana hojjedhu: update public.profiles set is_admin = true where id = \'<id fayyadamaa>\';',
+    },
+  ),
+  AppTextEntry(
     key: 'errorNotFound',
     sectionKey: 'groupErrors',
     defaults: <String, String>{
@@ -2249,6 +2259,16 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
       'am': 'የፈለጉትን ማግኘት አልቻልንም።',
       'ar': 'لم نتمكن من العثور على ما تبحث عنه.',
       'om': 'Wanta barbaadde argachuu hin dandeenye.',
+    },
+  ),
+  AppTextEntry(
+    key: 'errorNotSignedIn',
+    sectionKey: 'groupErrors',
+    defaults: <String, String>{
+      'en': 'The owner database account is not connected. Open the owner panel (tap the logo five times) and sign in.',
+      'am': 'የባለቤት የውሂብ ጎታ መለያ አልተገናኘም። የባለቤት ፓነሉን ይክፈቱ (ሎጎውን አምስት ጊዜ ይንኩ) እና ይግቡ።',
+      'ar': 'حساب المالك في قاعدة البيانات غير مرتبط. افتح لوحة المالك (انقر الشعار خمس مرات) وسجّل الدخول.',
+      'om': 'Heruun abbaa suuqaa kuusaa daataa hin hidhamne. Paanela abbaa suuqaa bani (mallattoo yeroo shan tuqi)ii seeni.',
     },
   ),
   AppTextEntry(
@@ -2399,6 +2419,46 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
       'am': 'የመግቢያ ስም ወይም የይለፍ ቃል ትክክል አይደለም።',
       'ar': 'اسم المستخدم أو كلمة المرور غير صحيحة.',
       'om': 'Maqaa fayyadamaa yookaan jecha darbii sirrii miti.',
+    },
+  ),
+  AppTextEntry(
+    key: 'gateOwnerEmail',
+    sectionKey: 'gateTitle',
+    defaults: <String, String>{
+      'en': 'Owner e-mail',
+      'am': 'የባለቤት ኢሜይል',
+      'ar': 'بريد المالك',
+      'om': 'Imeelii abbaa suuqaa',
+    },
+  ),
+  AppTextEntry(
+    key: 'gateOwnerHint',
+    sectionKey: 'gateTitle',
+    defaults: <String, String>{
+      'en': 'Needed once per device: the panel password alone cannot authorise a database write. Sign in with the shop owner\'s e-mail and password.',
+      'am': 'በእያንዳንዱ መሣሪያ አንድ ጊዜ ያስፈልጋል፦ የፓነሉ የይለፍ ቃል ብቻውን በውሂብ ጎታ ውስጥ ለመጻፍ ፈቃድ አይሰጥም። በባለቤቱ ኢሜይል እና የይለፍ ቃል ይግቡ።',
+      'ar': 'مطلوب مرة واحدة لكل جهاز: كلمة مرور اللوحة وحدها لا تسمح بالكتابة في قاعدة البيانات. سجّل الدخول ببريد المالك وكلمة مروره.',
+      'om': 'Meeshaa tokkoon tokkoon al tokko barbaachisa: jechi darbii paanelaa qofti kuusaa daataa keessatti barreessuuf hayyama hin kennu. Imeelii fi jecha darbii abbaa suuqaa fayyadamii seeni.',
+    },
+  ),
+  AppTextEntry(
+    key: 'gateOwnerPassword',
+    sectionKey: 'gateTitle',
+    defaults: <String, String>{
+      'en': 'Owner password',
+      'am': 'የባለቤት የይለፍ ቃል',
+      'ar': 'كلمة مرور المالك',
+      'om': 'Jecha darbii abbaa suuqaa',
+    },
+  ),
+  AppTextEntry(
+    key: 'gateOwnerTitle',
+    sectionKey: 'gateTitle',
+    defaults: <String, String>{
+      'en': 'Owner database account',
+      'am': 'የባለቤት የውሂብ ጎታ መለያ',
+      'ar': 'حساب المالك في قاعدة البيانات',
+      'om': 'Heruu kuusaa daataa abbaa suuqaa',
     },
   ),
   AppTextEntry(

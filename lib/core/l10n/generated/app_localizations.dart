@@ -1398,11 +1398,23 @@ abstract class AppLocalizations {
   /// **'We could not reach the store. Check your connection.'**
   String get errorNetwork;
 
+  /// No description provided for @errorNotAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'This account is signed in but is not flagged as the shop owner. Run: update public.profiles set is_admin = true where id = \'<your user id>\';'**
+  String get errorNotAdmin;
+
   /// No description provided for @errorNotFound.
   ///
   /// In en, this message translates to:
   /// **'We could not find what you were looking for.'**
   String get errorNotFound;
+
+  /// No description provided for @errorNotSignedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'The owner database account is not connected. Open the owner panel (tap the logo five times) and sign in.'**
+  String get errorNotSignedIn;
 
   /// No description provided for @errorPermission.
   ///
@@ -1493,6 +1505,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Incorrect username or password.'**
   String get gateLocked;
+
+  /// No description provided for @gateOwnerEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner e-mail'**
+  String get gateOwnerEmail;
+
+  /// No description provided for @gateOwnerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Needed once per device: the panel password alone cannot authorise a database write. Sign in with the shop owner\'s e-mail and password.'**
+  String get gateOwnerHint;
+
+  /// No description provided for @gateOwnerPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner password'**
+  String get gateOwnerPassword;
+
+  /// No description provided for @gateOwnerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner database account'**
+  String get gateOwnerTitle;
 
   /// No description provided for @gateTitle.
   ///
