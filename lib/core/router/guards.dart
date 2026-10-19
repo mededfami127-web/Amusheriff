@@ -7,9 +7,10 @@ import 'routes.dart';
 /// Deliberately a **pure function** so it can be unit-tested without a widget
 /// tree or a router instance. The rules:
 ///
-/// * The five-tap owner panel is the **only** door to `/admin/**`: unlocking it
-///   with the owner's username and password is all the gateway asks for. There
-///   is no second e-mail/password screen between the panel and the sidebar.
+/// * The five-tap owner panel is the **only** door to `/admin/**`. The panel
+///   itself asks for the owner's username/password, and — when the device holds
+///   no Supabase session — for the owner's database account as well, so the
+///   writes that follow carry a JWT (D-039).
 /// * `gateUnlocked` therefore decides the guard on its own. The state lives in
 ///   the encrypted keystore, so it survives a restart until the owner signs out
 ///   of the gateway.
