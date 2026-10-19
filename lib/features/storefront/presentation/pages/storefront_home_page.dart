@@ -22,6 +22,7 @@ import '../../../catalog/presentation/providers/catalog_providers.dart';
 import '../../../contacts/presentation/providers/contact_providers.dart';
 import '../../../settings/domain/entities/site_settings.dart';
 import '../../../settings/presentation/providers/site_settings_providers.dart';
+import '../../../settings/presentation/providers/site_content_providers.dart';
 import '../providers/storefront_providers.dart';
 import '../widgets/product_card.dart';
 
@@ -35,6 +36,19 @@ class StorefrontHomePage extends ConsumerWidget {
     final AppLocalizations l10n = AppLocalizations.of(context);
     final SiteSettings settings = ref.watch(siteSettingsValueProvider);
     final String language = Localizations.localeOf(context).languageCode;
+
+    final Map<String, String> siteContent = ref.watch(
+      siteContentValueProvider(language),
+    );
+
+    String heroTitle(String fallback) =>
+        siteContent['heroTitle'] ?? fallback;
+    String heroTagline(String fallback) =>
+        siteContent['heroTagline'] ?? fallback;
+    String heroButtonLabel(String fallback) =>
+        siteContent['heroButtonLabel'] ?? fallback;
+    String sectionTitle(String fallback) =>
+        siteContent['sectionTitle:${fallback}'] ?? fallback;
 
     final AsyncValue<List<Category>> categories = ref.watch(
       visibleCategoriesProvider,
@@ -178,15 +192,16 @@ class _Hero extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 6),
-      child: Container(          padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+      child: Container(
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
         decoration: BoxDecoration(
           gradient: BrandGradients.brandVertical,
-          borderRadius: BorderRadius.circular(26),
+          borderRadius: BorderRadius.circular(20),
           boxShadow: <BoxShadow>[
             BoxShadow(
-              color: BrandColors.royalViolet.withValues(alpha: 0.30),
-              blurRadius: 30,
-              offset: const Offset(0, 14),
+              color: BrandColors.royalViolet.withValues(alpha: 0.28),
+              blurRadius: 22,
+              offset: const Offset(0, 10),
             ),
           ],
         ),
@@ -209,24 +224,26 @@ class _Hero extends ConsumerWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             Image.asset(
               'assets/brand/logo_transparent.png',
-              height: 40,
+              height: 34,
               filterQuality: FilterQuality.high,
               errorBuilder: (_, __, ___) => const _HeroFallbackLogo(),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 6),
             Text(
-              settings.storeNameFor(language).toUpperCase(),
+              heroTitle(settings.storeNameFor(language).toUpperCase()),
               style: BrandTypography.displaySmall.copyWith(
                 color: BrandColors.ivory,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             LiveEditableText(
               textKey: 'tagline',
-              text: settings.hasTagline ? settings.tagline! : l10n.tagline,
+              text: settings.hasTagline
+                  ? heroTagline(settings.tagline!)
+                  : heroTagline(l10n.tagline),
               dark: true,
               dense: true,
               maxLines: 2,
@@ -235,25 +252,26 @@ class _Hero extends ConsumerWidget {
                 color: BrandColors.ivory.withValues(alpha: 0.88),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 6),
             const GoldDivider(withOrnament: true),
-            const SizedBox(height: 12),
+            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             Row(
               children: <Widget>[
                 Expanded(
                   child: _HeroAction(
                     icon: Icons.grid_view_rounded,
-                    label: l10n.sectionBrowseCategories,
+                    label: heroButtonLabel(l10n.sectionBrowseCategories),
                     subtitle: null,
                     textKey: 'sectionBrowseCategories',
                     onTap: () => context.push(Routes.search),
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 8),
                 Expanded(
                   child: _HeroAction(
                     icon: Icons.chat_bubble_outline_rounded,
-                    label: l10n.actionContactOwner,
+                    label: heroButtonLabel(l10n.actionContactOwner),
                     textKey: 'actionContactOwner',
                     subtitle: primary,
                     onTap: () => context.push(Routes.about),

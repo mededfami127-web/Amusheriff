@@ -35,6 +35,7 @@ abstract final class Routes {
 
   /// Every word of the app, per screen and per language.
   static const String adminTextEditor = '/admin/text';
+  static const String adminSiteContent = '/admin/site-content';
 
   /// The device-local gateway password (the five-tap panel), as opposed to
   /// [adminChangePassword], which changes the Supabase account password.

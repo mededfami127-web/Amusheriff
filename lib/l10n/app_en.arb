@@ -4,7 +4,16 @@
     "placeholders": {
       "name": {
         "type": "String"
-      }
+      "adminSiteContent": "Site content",
+"adminSiteContentHint": "Rewrite the words customers see on the home screen before the built-in wording.",
+"adminSiteContentValue": "Value",
+"heroTitle": "Welcome home",
+"heroTagline": "A quiet place to gather.",
+"heroButtonLabel": "Shop · Contact · Settings",
+"sectionTitleBrowse by category": "Browse by category",
+"sectionTitleFeatured": "Featured",
+"sectionTitleAll products": "All products",
+}
     }
   },
   "@a11yProductImage": {

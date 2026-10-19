@@ -324,4 +324,4 @@
   "groupStorefront": "شاشات المتجر",
   "groupValidation": "رسائل التحقق",
   "navFavourites": "المفضلة"
-}
+"adminSiteContent": "محتوى الموقع","adminSiteContentHint": "إعادة كتابة الكلمات التي يرىها الزبائن على الشاشة الرئيسية قبل الصياغة المدمجة.","adminSiteContentValue": "قيمة","heroTitle": "مرحباً بكم في الدار","heroTagline": "مكان هادئ للتجمع.","heroButtonLabel": "متجر · اتصال · إعدادات","sectionTitleBrowse by category": "تصفح حسب الفئة","sectionTitleFeatured": "متميز","sectionTitleAll products": "جميع المنتجات",}
