@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -87,17 +88,31 @@ class _AdminProductsPageState extends ConsumerState<AdminProductsPage> {
               icon: Icons.search_off_rounded,
             );
           }
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
-            children: <Widget>[
-              _filters(l10n, categories),
-              const SizedBox(height: 4),
-              for (final Product product in rows)
-                _ProductTile(
-                  key: ValueKey<String>(product.id),
-                  product: product,
-                  onEdit: () => _openEditor(context, product),
+          // A builder list, not a Column of every row: the catalogue keeps
+          // growing and only the visible tiles should be built.
+          return CustomScrollView(
+            slivers: <Widget>[
+              SliverPadding(
+                padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 16, 0),
+                sliver: SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: _filters(l10n, categories),
+                  ),
                 ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsetsDirectional.fromSTEB(16, 0, 16, 96),
+                sliver: SliverList.builder(
+                  itemCount: rows.length,
+                  itemBuilder: (BuildContext context, int index) =>
+                      _ProductTile(
+                        key: ValueKey<String>(rows[index].id),
+                        product: rows[index],
+                        onEdit: () => _openEditor(context, rows[index]),
+                      ),
+                ),
+              ),
             ],
           );
         },
@@ -142,11 +157,17 @@ class _AdminProductsPageState extends ConsumerState<AdminProductsPage> {
         const SizedBox(height: 12),
         DropdownButtonFormField<String?>(
           initialValue: _categoryId,
+          // A long category name must ellipsize inside the field, not overflow
+          // the dropdown's internal Row on a 320dp phone.
+          isExpanded: true,
           decoration: InputDecoration(labelText: l10n.adminCategories),
           items: <DropdownMenuItem<String?>>[
             DropdownMenuItem<String?>(
               value: null,
-              child: Text(l10n.adminFilterAllCategories),
+              child: Text(
+                l10n.adminFilterAllCategories,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
             for (final Category category in categories)
               DropdownMenuItem<String?>(
@@ -155,6 +176,7 @@ class _AdminProductsPageState extends ConsumerState<AdminProductsPage> {
                   category.nameFor(
                     Localizations.localeOf(context).languageCode,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
           ],
@@ -218,10 +240,15 @@ class _ProductTile extends ConsumerWidget {
                     color: BrandColors.deepPlum,
                     child: Icon(Icons.chair_outlined, color: BrandColors.gold),
                   )
-                : Image.network(
-                    ref.read(storageUrlsProvider).productMediaThumb(cover),
+                : CachedNetworkImage(
+                    imageUrl: ref
+                        .read(storageUrlsProvider)
+                        .productMediaThumb(cover),
+                    memCacheWidth: 104,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const ColoredBox(
+                    placeholder: (_, __) =>
+                        const ColoredBox(color: BrandColors.deepPlum),
+                    errorWidget: (_, __, ___) => const ColoredBox(
                       color: BrandColors.deepPlum,
                       child: Icon(
                         Icons.image_not_supported_outlined,

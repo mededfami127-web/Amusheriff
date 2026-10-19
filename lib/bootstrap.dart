@@ -16,7 +16,9 @@ import 'features/storefront/data/favourites_store.dart';
 import 'features/storefront/presentation/providers/favourites_providers.dart';
 import 'core/errors/app_failure.dart';
 import 'core/errors/error_mapper.dart';
+import 'core/errors/error_reporter.dart';
 import 'core/utils/app_logger.dart';
+import 'core/widgets/app_error_boundary.dart';
 import 'features/settings/presentation/providers/site_settings_providers.dart';
 
 /// Boots the app in a deterministic order:
@@ -111,47 +113,22 @@ void _run(
 void _installErrorHandlers() {
   final FlutterExceptionHandler? previous = FlutterError.onError;
   FlutterError.onError = (FlutterErrorDetails details) {
-    FlutterError.presentError(details);
-    AppLog.error('flutter error', details.exception);
-    if (Env.hasSentry) {
-      Sentry.captureException(details.exception, stackTrace: details.stack);
-    }
+    // The log/Sentry sink is the only place that reports; `presentError` only
+    // decides what a debug console prints.
+    reportFlutterError(details);
+    if (kDebugMode) FlutterError.presentError(details);
     previous?.call(details);
   };
 
   PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
-    AppLog.error('uncaught platform error', error);
-    if (Env.hasSentry) {
-      Sentry.captureException(error, stackTrace: stack);
-    }
+    AppErrorReporter.report(error, stack, context: 'platform error');
     return false;
   };
 
   if (kReleaseMode) {
-    // Never show the red screen to a customer.
+    // Never show the red screen to a customer. Inside an `AppErrorBoundary`
+    // this card also carries a working Retry.
     ErrorWidget.builder = (FlutterErrorDetails details) =>
-        const _BrandedError();
-  }
-}
-
-/// Minimal, branded replacement for the default release-mode error screen.
-class _BrandedError extends StatelessWidget {
-  const _BrandedError();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Material(
-      color: Color(0xFF16121C),
-      child: Center(
-        child: Padding(
-          padding: EdgeInsets.all(24),
-          child: Text(
-            'Something went wrong.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Color(0xFFE6C97A), fontSize: 16),
-          ),
-        ),
-      ),
-    );
+        const BrandedErrorFallback();
   }
 }

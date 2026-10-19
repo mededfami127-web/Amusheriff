@@ -41,9 +41,12 @@ class MediaProcessor {
   const MediaProcessor();
 
   /// Long edge the compressor targets for images.
-  static const int imageMaxWidth = 1920;
-  static const int imageMaxHeight = 1080;
-  static const int imageQuality = 82;
+  ///
+  /// 1600 px is enough for a full-width product photo on a 3x phone
+  /// (411 × 3 ≈ 1233 px) and well below the 5 MB bucket cap at quality 80.
+  static const int imageMaxWidth = 1600;
+  static const int imageMaxHeight = 1600;
+  static const int imageQuality = 80;
 
   /// Video poster frame quality (1–100) and the frame to grab.
   static const int thumbnailQuality = 60;

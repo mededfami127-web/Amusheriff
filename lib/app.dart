@@ -4,8 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import 'core/l10n/generated/app_localizations.dart';
 import 'core/l10n/text_localizations.dart';
+import 'core/network/connectivity_providers.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'core/widgets/app_error_boundary.dart';
 import 'features/settings/presentation/providers/site_settings_providers.dart';
 import 'features/text_editor/presentation/providers/text_editor_providers.dart';
 
@@ -49,14 +51,18 @@ class AmuApp extends ConsumerWidget {
         // Clamp text scaling so the luxury layouts never break, while still
         // honouring a user's accessibility setting up to a sane maximum.
         final MediaQueryData media = MediaQuery.of(context);
-        return MediaQuery(
-          data: media.copyWith(
-            textScaler: media.textScaler.clamp(
-              minScaleFactor: 0.9,
-              maxScaleFactor: 1.35,
+        return AppErrorBoundary(
+          child: OfflineBannerHost(
+            child: MediaQuery(
+              data: media.copyWith(
+                textScaler: media.textScaler.clamp(
+                  minScaleFactor: 0.9,
+                  maxScaleFactor: 1.35,
+                ),
+              ),
+              child: child ?? const SizedBox.shrink(),
             ),
           ),
-          child: child ?? const SizedBox.shrink(),
         );
       },
     );

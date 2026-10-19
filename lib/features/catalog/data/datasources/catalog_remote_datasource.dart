@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io' show HttpException, SocketException;
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/errors/app_failure.dart';
@@ -74,11 +77,57 @@ class CatalogRemoteDataSource {
     }
   }
 
+  /// One-shot reads get a deadline and a short backoff.
+  ///
+  /// A Realtime stream reconnects on its own; a `Future` does not. Without
+  /// this a dropped packet left a detail page spinning until the OS gave up,
+  /// and a `select` that failed once showed an error the customer could only
+  /// clear by reopening the screen. Three attempts, 300 ms then 900 ms, only
+  /// for transport errors — a policy denial must never be retried.
+  static const Duration readTimeout = Duration(seconds: 15);
+
+  Future<T> _read<T>(Future<T> Function() body) async {
+    const List<Duration> backoff = <Duration>[
+      Duration.zero,
+      Duration(milliseconds: 300),
+      Duration(milliseconds: 900),
+    ];
+    Object? lastError;
+    StackTrace? lastStack;
+    for (int attempt = 0; attempt < backoff.length; attempt++) {
+      if (backoff[attempt] > Duration.zero) {
+        await Future<void>.delayed(backoff[attempt]);
+      }
+      try {
+        return await body().timeout(readTimeout);
+      } on Object catch (error, stack) {
+        lastError = error;
+        lastStack = stack;
+        if (error is! SocketException &&
+            error is! TimeoutException &&
+            error is! HttpException) {
+          rethrow;
+        }
+      }
+    }
+    Error.throwWithStackTrace(lastError!, lastStack!);
+  }
+
   /// Columns shared by every product read, so the entity always decodes.
   static const String productColumns =
       'id, category_id, title, title_am, title_ar, description, '
       'description_am, description_ar, price, compare_at_price, currency_code, '
       'is_available, is_featured, is_published, sort_order, created_at, updated_at';
+
+  /// Every column [Category.fromJson] reads, and nothing else.
+  static const String categoryColumns =
+      'id, name, name_am, name_ar, slug, cover_path, parent_id, sort_order, '
+      'is_visible, created_at, updated_at';
+
+  /// Every column [ProductMedia.fromJson] reads.
+  static const String mediaColumns =
+      'id, product_id, kind, storage_path, thumbnail_path, duration_seconds, '
+      'is_cover, sort_order, created_at';
 
   // ── Categories ────────────────────────────────────────────────────────────
 
@@ -97,22 +146,32 @@ class CatalogRemoteDataSource {
 
   Future<List<Map<String, dynamic>>> fetchCategories({
     required bool onlyVisible,
-  }) async {
+  }) => _read(() async {
     PostgrestFilterBuilder<PostgrestList> query = _client
         .from(categoriesTable)
-        .select();
+        .select(categoryColumns);
     if (onlyVisible) query = query.eq('is_visible', true);
     final List<Map<String, dynamic>> rows = await query
         .order('sort_order', ascending: true)
         .order('name', ascending: true);
     return rows;
-  }
+  });
 
-  Future<Map<String, dynamic>?> categoryById(String id) =>
-      _client.from(categoriesTable).select().eq('id', id).maybeSingle();
+  Future<Map<String, dynamic>?> categoryById(String id) => _read(
+    () => _client
+        .from(categoriesTable)
+        .select(categoryColumns)
+        .eq('id', id)
+        .maybeSingle(),
+  );
 
-  Future<Map<String, dynamic>?> categoryBySlug(String slug) =>
-      _client.from(categoriesTable).select().eq('slug', slug).maybeSingle();
+  Future<Map<String, dynamic>?> categoryBySlug(String slug) => _read(
+    () => _client
+        .from(categoriesTable)
+        .select(categoryColumns)
+        .eq('slug', slug)
+        .maybeSingle(),
+  );
 
   Future<Map<String, dynamic>> insertCategory(Map<String, dynamic> row) =>
       _write<Map<String, dynamic>>(
@@ -177,7 +236,7 @@ class CatalogRemoteDataSource {
     String? categoryId,
     bool onlyPublished = true,
     bool onlyFeatured = false,
-  }) async {
+  }) => _read(() async {
     PostgrestFilterBuilder<PostgrestList> query = _client
         .from(productsTable)
         .select(productColumns);
@@ -188,14 +247,16 @@ class CatalogRemoteDataSource {
         .order('sort_order', ascending: true)
         .order('created_at', ascending: false);
     return rows;
-  }
+  });
 
   /// Single product with its media embedded via the FK relationship.
-  Future<Map<String, dynamic>?> productById(String id) => _client
-      .from(productsTable)
-      .select('$productColumns, product_media(*)')
-      .eq('id', id)
-      .maybeSingle();
+  Future<Map<String, dynamic>?> productById(String id) => _read(
+    () => _client
+        .from(productsTable)
+        .select('$productColumns, product_media($mediaColumns)')
+        .eq('id', id)
+        .maybeSingle(),
+  );
 
   Stream<Map<String, dynamic>?> watchProduct(String id) => _client
       .from(productsTable)
@@ -209,7 +270,7 @@ class CatalogRemoteDataSource {
   Future<List<Map<String, dynamic>>> searchProducts(
     String query, {
     int limit = 40,
-  }) async {
+  }) => _read(() async {
     final dynamic result = await _client.rpc<dynamic>(
       'search_products',
       params: <String, dynamic>{'q': query, 'p_limit': limit},
@@ -217,7 +278,7 @@ class CatalogRemoteDataSource {
     return (result as List<dynamic>).cast<Map<String, dynamic>>().toList(
       growable: false,
     );
-  }
+  });
 
   Future<Map<String, dynamic>> insertProduct(Map<String, dynamic> row) =>
       _write<Map<String, dynamic>>(
@@ -292,16 +353,14 @@ class CatalogRemoteDataSource {
           .eq('product_id', productId)
           .order('sort_order', ascending: true);
 
-  Future<List<Map<String, dynamic>>> fetchMediaForProduct(
-    String productId,
-  ) async {
-    final List<Map<String, dynamic>> rows = await _client
-        .from(mediaTable)
-        .select()
-        .eq('product_id', productId)
-        .order('sort_order', ascending: true);
-    return rows;
-  }
+  Future<List<Map<String, dynamic>>> fetchMediaForProduct(String productId) =>
+      _read(
+        () => _client
+            .from(mediaTable)
+            .select(mediaColumns)
+            .eq('product_id', productId)
+            .order('sort_order', ascending: true),
+      );
 
   Future<Map<String, dynamic>> insertMedia(Map<String, dynamic> row) =>
       _write<Map<String, dynamic>>(

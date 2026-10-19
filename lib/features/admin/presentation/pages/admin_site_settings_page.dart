@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -253,12 +254,18 @@ class _LogoPickerState extends ConsumerState<_LogoPicker> {
               children: <Widget>[
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
-                  child: Image.network(
-                    ref.read(storageUrlsProvider).brand(path),
+                  child: CachedNetworkImage(
+                    imageUrl: ref.read(storageUrlsProvider).brand(path),
+                    memCacheWidth: 112,
                     height: 56,
                     width: 56,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) =>
+                    placeholder: (_, __) => const SizedBox(
+                      height: 56,
+                      width: 56,
+                      child: Center(child: Icon(Icons.image_outlined)),
+                    ),
+                    errorWidget: (_, __, ___) =>
                         const Icon(Icons.image_not_supported_outlined),
                   ),
                 ),

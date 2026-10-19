@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/brand_colors.dart';
 import '../theme/gradients.dart';
 import '../theme/typography.dart';
+import 'adaptive_scroll_body.dart';
 import 'gold_divider.dart';
 
 /// Centred, brand-styled empty state.
@@ -25,7 +26,7 @@ class EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool dark = Theme.of(context).brightness == Brightness.dark;
-    return Center(
+    final Widget content = Center(
       child: Padding(
         padding: EdgeInsets.symmetric(
           horizontal: 32,
@@ -86,6 +87,15 @@ class EmptyState extends StatelessWidget {
           ],
         ),
       ),
+    );
+
+    // Inside a sliver or a column the parent already scrolls; inside a Scaffold
+    // body a short viewport (keyboard open, 2.0 text) needs this to scroll.
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) =>
+          constraints.hasBoundedHeight
+          ? AdaptiveScrollBody(child: content)
+          : content,
     );
   }
 }

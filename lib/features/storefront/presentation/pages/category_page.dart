@@ -15,6 +15,9 @@ import '../../../../core/widgets/shimmer_card.dart';
 import '../../../catalog/domain/entities/category.dart';
 import '../../../catalog/domain/entities/product.dart';
 import '../../../catalog/presentation/providers/catalog_providers.dart';
+import '../providers/selected_category_slug.dart' show selectedCategorySlug, currentCategorySlugFromGoRouter;
+import '../providers/storefront_providers.dart';
+import '../widgets/category_subcategory_line.dart';
 import '../widgets/product_card.dart';
 
 /// One category's products, keyed by slug so the URL is shareable.
@@ -32,6 +35,8 @@ class CategoryPage extends ConsumerWidget {
     final AsyncValue<Category?> category = ref.watch(
       categoryBySlugProvider(slug),
     );
+
+    final int limit = ref.watch(visibleCountProvider('category-$slug'));
 
     final String? categoryId = category.value?.id;
     final AsyncValue<List<Product>> products = categoryId == null
@@ -52,6 +57,14 @@ class CategoryPage extends ConsumerWidget {
             .toList(growable: false) ??
         const <Category>[];
 
+    final String? selectedSlug = ref.watch(
+      selectedCategorySlugProvider,
+    ).value;
+
+    // If the URL did not give us a slug, fall back to the page's own slug so
+    // the chips still reflect the page the customer is looking at.
+    final String? effectiveSelectedSlug = selectedSlug ?? slug;
+
     return AppScaffold(
       showLockup: false,
       title: category.value?.nameFor(language) ?? l10n.stateLoading,
@@ -61,89 +74,90 @@ class CategoryPage extends ConsumerWidget {
           failure: error is AppFailure ? error : UnknownFailure(cause: error),
           onRetry: () => ref.invalidate(categoryBySlugProvider(slug)),
         ),
-        AsyncValue<Category?>(:final Category? value) when value == null =>
-          EmptyState(
-            title: l10n.stateNotFoundTitle,
-            message: l10n.stateNotFoundMessage,
-            icon: Icons.category_outlined,
-          ),
-        _ => CustomScrollView(
-          slivers: <Widget>[
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 18, 16, 4),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      category.value!.nameFor(language),
-                      style:
-                          BrandTypography.displayForLocale(
-                            Localizations.localeOf(context),
-                            base: BrandTypography.displayMedium,
-                          ).copyWith(
-                            color: dark
-                                ? BrandColors.goldLight
-                                : BrandColors.charcoal,
-                          ),
-                    ),
-                    const SizedBox(height: 10),
-                    const SizedBox(width: 72, child: GoldDivider()),
-                    if (subcategories.isNotEmpty) ...<Widget>[
-                      const SizedBox(height: 14),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: <Widget>[
-                          for (final Category child in subcategories)
-                            ActionChip(
-                              avatar: const Icon(
-                                Icons.subdirectory_arrow_right_rounded,
-                                size: 16,
-                                color: BrandColors.gold,
-                              ),
-                              backgroundColor: dark
-                                  ? BrandColors.plumSurface
-                                  : BrandColors.ivory,
-                              side: const BorderSide(
-                                color: BrandColors.goldHairline,
-                              ),
-                              label: Text(child.nameFor(language)),
-                              labelStyle: BrandTypography.labelLarge,
-                              onPressed: () =>
-                                  context.go(Routes.category(child.slug)),
+        AsyncValue<Category?>(:final Category? value) =>
+          value == null
+              ? EmptyState(
+                  title: l10n.stateNotFoundTitle,
+                  message: l10n.stateNotFoundMessage,
+                  icon: Icons.category_outlined,
+                )
+              : CustomScrollView(
+                  slivers: <Widget>[
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                          16,
+                          18,
+                          16,
+                          4,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              value.nameFor(language),
+                              style:
+                                  BrandTypography.displayForLocale(
+                                    Localizations.localeOf(context),
+                                    base: BrandTypography.displayMedium,
+                                  ).copyWith(
+                                    color: dark
+                                        ? BrandColors.goldLight
+                                        : BrandColors.charcoal,
+                                  ),
                             ),
-                        ],
+                            const SizedBox(height: 10),
+                            const SizedBox(width: 72, child: GoldDivider()),
+                            if (subcategories.isNotEmpty) ...<Widget>[
+                              _SubcategoryLine(
+                                categories: subcategories,
+                                language: language,
+                                selectedSlug: effectiveSelectedSlug,
+                              ),
+                              const SizedBox(height: 10),
+                            ],
+                          ],
+                        ),
                       ),
-                    ],
+                    ),
+                    switch (products) {
+                      AsyncLoading() => const SliverShimmerGrid(),
+                      AsyncError(:final Object error) => SliverToBoxAdapter(
+                        child: ErrorStateView(
+                          failure: error is AppFailure
+                              ? error
+                              : UnknownFailure(cause: error),
+                          compact: true,
+                        ),
+                      ),
+                      AsyncValue<List<Product>>(:final List<Product>? value) =>
+                        _gridSliver(
+                          context,
+                          value ?? const <Product>[],
+                          limit: limit,
+                          onMore: () => ref
+                              .read(
+                                visibleCountProvider('category-$slug').notifier,
+                              )
+                              .more(),
+                        ),
+                    },
                   ],
                 ),
-              ),
-            ),
-            switch (products) {
-              AsyncLoading() => const SliverToBoxAdapter(child: ShimmerGrid()),
-              AsyncError(:final Object error) => SliverToBoxAdapter(
-                child: ErrorStateView(
-                  failure: error is AppFailure
-                      ? error
-                      : UnknownFailure(cause: error),
-                  compact: true,
-                ),
-              ),
-              AsyncValue<List<Product>>(:final List<Product>? value) =>
-                _gridSliver(context, value ?? const <Product>[]),
-            },
-          ],
-        ),
       },
     );
   }
 
   /// Grid of results, or an empty state — always returned as a sliver so it can
   /// sit inside the `CustomScrollView` alongside the header.
-  Widget _gridSliver(BuildContext context, List<Product> items) {
+  Widget _gridSliver(
+    BuildContext context,
+    List<Product> items, {
+    required int limit,
+    required VoidCallback onMore,
+  }) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     if (items.isEmpty) {
-      final AppLocalizations l10n = AppLocalizations.of(context);
       return SliverToBoxAdapter(
         child: EmptyState(
           title: l10n.stateEmptyTitle,
@@ -151,20 +165,40 @@ class CategoryPage extends ConsumerWidget {
         ),
       );
     }
-    return SliverPadding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
-      sliver: SliverGrid(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          mainAxisSpacing: 16,
-          crossAxisSpacing: 16,
-          childAspectRatio: 0.62,
+    final List<Product> page = items.take(limit).toList(growable: false);
+    final bool hasMore = items.length > page.length;
+
+    return SliverMainAxisGroup(
+      slivers: <Widget>[
+        SliverPadding(
+          padding: const EdgeInsetsDirectional.fromSTEB(16, 12, 16, 28),
+          sliver: SliverGrid(
+            gridDelegate: productGridDelegate(context),
+            delegate: SliverChildBuilderDelegate(
+              (_, int index) => RepaintBoundary(
+                child: ProductCard(
+                  key: ValueKey<String>(page[index].id),
+                  product: page[index],
+                ),
+              ),
+              childCount: page.length,
+            ),
+          ),
         ),
-        delegate: SliverChildBuilderDelegate(
-          (_, int index) => ProductCard(product: items[index]),
-          childCount: items.length,
-        ),
-      ),
+        if (hasMore)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(16, 0, 16, 28),
+              child: Center(
+                child: OutlinedButton.icon(
+                  onPressed: onMore,
+                  icon: const Icon(Icons.expand_more_rounded, size: 18),
+                  label: Text(l10n.actionLoadMore),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

@@ -39,6 +39,12 @@ class StorageUrls {
   String brand(String path) =>
       _client.storage.from(brandBucket).getPublicUrl(path);
 
+  /// Public URL for a category cover held in the `brand` bucket.
+  ///
+  /// Kept explicit (rather than free-form `brand(path)`) so the storefront
+  /// thumbnails and the admin cover preview share one method and one bucket.
+  String categoryCover(String path) => brand(path);
+
   static bool isRemote(String value) =>
       value.startsWith('http://') || value.startsWith('https://');
 }

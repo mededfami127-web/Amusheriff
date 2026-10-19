@@ -145,17 +145,19 @@ class _ContactTile extends ConsumerWidget {
             color: link.isPrimary ? BrandColors.deepPlum : BrandColors.ivory,
           ),
         ),
-        title: Row(
+        // A long label plus the primary badge does not fit a 320dp tile at
+        // 2.0 text; Wrap moves the badge to a second line.
+        title: Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: <Widget>[
-            Flexible(
-              child: Text(
-                link.label,
-                style: BrandTypography.titleMedium,
-                overflow: TextOverflow.ellipsis,
-              ),
+            Text(
+              link.label,
+              style: BrandTypography.titleMedium,
+              overflow: TextOverflow.ellipsis,
             ),
-            if (link.isPrimary) ...<Widget>[
-              const SizedBox(width: 8),
+            if (link.isPrimary)
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
@@ -167,7 +169,6 @@ class _ContactTile extends ConsumerWidget {
                   style: BrandTypography.labelSmall,
                 ),
               ),
-            ],
           ],
         ),
         subtitle: Text(

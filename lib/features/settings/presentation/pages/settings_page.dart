@@ -178,16 +178,20 @@ class _Section extends StatelessWidget {
           child: Icon(icon, size: 20, color: BrandColors.gold),
         ),
         const SizedBox(width: 10),
-        Text(
-          title,
-          style:
-              BrandTypography.displayForLocale(
-                Localizations.localeOf(context),
-                base: BrandTypography.displaySmall,
-              ).copyWith(
-                fontSize: 19,
-                color: dark ? BrandColors.goldLight : BrandColors.charcoal,
-              ),
+        Expanded(
+          child: Text(
+            title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style:
+                BrandTypography.displayForLocale(
+                  Localizations.localeOf(context),
+                  base: BrandTypography.displaySmall,
+                ).copyWith(
+                  fontSize: 19,
+                  color: dark ? BrandColors.goldLight : BrandColors.charcoal,
+                ),
+          ),
         ),
       ],
     );

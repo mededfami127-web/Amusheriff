@@ -22,6 +22,7 @@ import '../../../catalog/presentation/providers/catalog_providers.dart';
 import '../../../contacts/presentation/providers/contact_providers.dart';
 import '../../../settings/domain/entities/site_settings.dart';
 import '../../../settings/presentation/providers/site_settings_providers.dart';
+import '../providers/storefront_providers.dart';
 import '../widgets/product_card.dart';
 
 /// Public home. Everything on this page is driven by live Supabase streams, so
@@ -44,6 +45,13 @@ class StorefrontHomePage extends ConsumerWidget {
     final AsyncValue<List<Product>> all = ref.watch(
       storefrontProductsProvider(),
     );
+
+    // One page of 20 at a time. The streams stay live; this only limits how
+    // much of the already-cached list is built and painted in one pass.
+    final int categoryLimit = ref.watch(
+      visibleCountProvider('home-categories'),
+    );
+    final int productLimit = ref.watch(visibleCountProvider('home-products'));
 
     return AppScaffold(
       actions: <Widget>[
@@ -105,7 +113,18 @@ class StorefrontHomePage extends ConsumerWidget {
                           message: l10n.stateEmptyMessage,
                           compact: true,
                         )
-                      : _CategoryRail(categories: roots);
+                      : _CategoryRail(
+                          categories: roots
+                              .take(categoryLimit)
+                              .toList(growable: false),
+                          hasMore: roots.length > categoryLimit,
+                          onMore: () => ref
+                              .read(
+                                visibleCountProvider('home-categories')
+                                    .notifier,
+                              )
+                              .more(),
+                        );
                 },
               ),
             ),
@@ -130,7 +149,13 @@ class StorefrontHomePage extends ConsumerWidget {
                 textKey: 'sectionAllProducts',
               ),
             ),
-            _ProductGrid(asyncProducts: all),
+            _ProductGrid(
+              asyncProducts: all,
+              limit: productLimit,
+              onMore: () => ref
+                  .read(visibleCountProvider('home-products').notifier)
+                  .more(),
+            ),
             const SliverToBoxAdapter(child: _FooterContact()),
             const SliverToBoxAdapter(child: SizedBox(height: 28)),
           ],
@@ -153,8 +178,7 @@ class _Hero extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 6),
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(22, 26, 22, 24),
+      child: Container(          padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
         decoration: BoxDecoration(
           gradient: BrandGradients.brandVertical,
           borderRadius: BorderRadius.circular(26),
@@ -185,42 +209,47 @@ class _Hero extends ConsumerWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 12),
             Image.asset(
               'assets/brand/logo_transparent.png',
-              height: 62,
+              height: 40,
               filterQuality: FilterQuality.high,
+              errorBuilder: (_, __, ___) => const _HeroFallbackLogo(),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 10),
             Text(
               settings.storeNameFor(language).toUpperCase(),
-              style: BrandTypography.brandTitle.copyWith(
+              style: BrandTypography.displaySmall.copyWith(
                 color: BrandColors.ivory,
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             LiveEditableText(
               textKey: 'tagline',
               text: settings.hasTagline ? settings.tagline! : l10n.tagline,
               dark: true,
-              style: BrandTypography.bodyMedium.copyWith(
+              dense: true,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: BrandTypography.bodySmall.copyWith(
                 color: BrandColors.ivory.withValues(alpha: 0.88),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
             const GoldDivider(withOrnament: true),
-            const SizedBox(height: 18),
+            const SizedBox(height: 12),
             Row(
               children: <Widget>[
                 Expanded(
                   child: _HeroAction(
                     icon: Icons.grid_view_rounded,
                     label: l10n.sectionBrowseCategories,
+                    subtitle: null,
                     textKey: 'sectionBrowseCategories',
                     onTap: () => context.push(Routes.search),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
                 Expanded(
                   child: _HeroAction(
                     icon: Icons.chat_bubble_outline_rounded,
@@ -262,8 +291,7 @@ class _HeroAction extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        child: Padding(              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -340,9 +368,15 @@ class _SectionHeader extends StatelessWidget {
 }
 
 class _CategoryRail extends StatelessWidget {
-  const _CategoryRail({required this.categories});
+  const _CategoryRail({
+    required this.categories,
+    this.hasMore = false,
+    this.onMore,
+  });
 
   final List<Category> categories;
+  final bool hasMore;
+  final VoidCallback? onMore;
 
   @override
   Widget build(BuildContext context) {
@@ -350,14 +384,48 @@ class _CategoryRail extends StatelessWidget {
     final AppLocalizations l10n = AppLocalizations.of(context);
     final String language = Localizations.localeOf(context).languageCode;
 
+    // The tile's text block grows with the accessibility scale; the rail has
+    // to grow with it, or the two-line name overflows the card.
+    final double scale = MediaQuery.textScalerOf(context).scale(1);
     return SizedBox(
-      height: 148,
+      height: 148 + (scale - 1).clamp(0.0, 1.0) * 76,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: categories.length,
+        itemCount: categories.length + (hasMore ? 1 : 0),
         separatorBuilder: (_, __) => const SizedBox(width: 12),
         itemBuilder: (BuildContext context, int index) {
+          if (index == categories.length) {
+            return SizedBox(
+              width: 138,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(18),
+                onTap: onMore,
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: BrandColors.goldHairline),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      const Icon(
+                        Icons.expand_more_rounded,
+                        color: BrandColors.gold,
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        AppLocalizations.of(context).actionLoadMore,
+                        textAlign: TextAlign.center,
+                        style: BrandTypography.labelSmall,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }
           final Category category = categories[index];
           return Semantics(
             button: true,
@@ -420,8 +488,9 @@ class _FeaturedRail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double scale = MediaQuery.textScalerOf(context).scale(1);
     return SizedBox(
-      height: 296,
+      height: 296 + (scale - 1).clamp(0.0, 1.0) * 108,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -435,9 +504,15 @@ class _FeaturedRail extends StatelessWidget {
 }
 
 class _ProductGrid extends StatelessWidget {
-  const _ProductGrid({required this.asyncProducts});
+  const _ProductGrid({
+    required this.asyncProducts,
+    required this.limit,
+    required this.onMore,
+  });
 
   final AsyncValue<List<Product>> asyncProducts;
+  final int limit;
+  final VoidCallback onMore;
 
   @override
   Widget build(BuildContext context) {
@@ -452,14 +527,19 @@ class _ProductGrid extends StatelessWidget {
         ),
       ),
       AsyncValue<List<Product>>(:final List<Product>? value) => _gridSliver(
+        context,
         l10n,
         value ?? const <Product>[],
       ),
     };
   }
 
-  /// Grid of all published products, or the branded empty state.
-  Widget _gridSliver(AppLocalizations l10n, List<Product> items) {
+  /// Grid of the first page, or the branded empty state.
+  Widget _gridSliver(
+    BuildContext context,
+    AppLocalizations l10n,
+    List<Product> items,
+  ) {
     if (items.isEmpty) {
       return SliverToBoxAdapter(
         child: EmptyState(
@@ -468,20 +548,40 @@ class _ProductGrid extends StatelessWidget {
         ),
       );
     }
-    return SliverPadding(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-      sliver: SliverGrid(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          mainAxisSpacing: 16,
-          crossAxisSpacing: 16,
-          childAspectRatio: 0.62,
+    final List<Product> page = items.take(limit).toList(growable: false);
+    final bool hasMore = items.length > page.length;
+
+    return SliverMainAxisGroup(
+      slivers: <Widget>[
+        SliverPadding(
+          padding: const EdgeInsetsDirectional.fromSTEB(16, 4, 16, 0),
+          sliver: SliverGrid(
+            gridDelegate: productGridDelegate(context),
+            delegate: SliverChildBuilderDelegate(
+              (_, int index) => RepaintBoundary(
+                child: ProductCard(
+                  key: ValueKey<String>(page[index].id),
+                  product: page[index],
+                ),
+              ),
+              childCount: page.length,
+            ),
+          ),
         ),
-        delegate: SliverChildBuilderDelegate(
-          (_, int index) => ProductCard(product: items[index]),
-          childCount: items.length,
-        ),
-      ),
+        if (hasMore)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(16, 18, 16, 0),
+              child: Center(
+                child: OutlinedButton.icon(
+                  onPressed: onMore,
+                  icon: const Icon(Icons.expand_more_rounded, size: 18),
+                  label: Text(l10n.actionLoadMore),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

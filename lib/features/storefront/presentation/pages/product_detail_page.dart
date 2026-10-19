@@ -39,23 +39,24 @@ class ProductDetailPage extends ConsumerWidget {
     final AsyncValue<Product?> product = ref.watch(
       productDetailProvider(productId),
     );
+    final Product? current = product.value;
 
     return AppScaffold(
       showLockup: false,
-      title: product.value?.titleFor(language) ?? l10n.stateLoading,
+      title: current?.titleFor(language) ?? l10n.stateLoading,
       actions: <Widget>[
-        if (product.value != null) FavouriteButton(productId: productId),
-        if (product.value != null)
+        if (current != null) FavouriteButton(productId: productId),
+        if (current != null)
           IconButton(
             icon: const Icon(Icons.share_outlined),
             tooltip: l10n.actionShare,
             onPressed: () => ref
                 .read(linkLauncherProvider)
                 .shareProduct(
-                  title: product.value!.titleFor(language),
+                  title: current.titleFor(language),
                   price: Formatters.money(
-                    product.value!.price,
-                    currency: product.value!.currencyCode,
+                    current.price,
+                    currency: current.currencyCode,
                     locale: language,
                   ),
                   url: 'amusheriff://product/$productId',
@@ -68,13 +69,14 @@ class ProductDetailPage extends ConsumerWidget {
           failure: error is AppFailure ? error : UnknownFailure(cause: error),
           onRetry: () => ref.invalidate(productDetailProvider(productId)),
         ),
-        AsyncValue<Product?>(:final Product? value) when value == null =>
-          EmptyState(
-            title: l10n.stateNotFoundTitle,
-            message: l10n.stateNotFoundMessage,
-            icon: Icons.chair_outlined,
-          ),
-        _ => _Body(product: product.value!, language: language),
+        AsyncValue<Product?>(:final Product? value) =>
+          value == null
+              ? EmptyState(
+                  title: l10n.stateNotFoundTitle,
+                  message: l10n.stateNotFoundMessage,
+                  icon: Icons.chair_outlined,
+                )
+              : _Body(product: value, language: language),
       },
     );
   }
@@ -115,9 +117,12 @@ class _Body extends ConsumerWidget {
                     ),
               ),
               const SizedBox(height: 14),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
+              // Three price parts on one line cannot fit a 320dp phone at
+              // 2.0 text; the Wrap breaks between them instead of clipping.
+              Wrap(
+                spacing: 12,
+                runSpacing: 6,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: <Widget>[
                   ShaderMask(
                     shaderCallback: BrandGradients.goldHorizontal.createShader,
@@ -135,7 +140,6 @@ class _Body extends ConsumerWidget {
                     ),
                   ),
                   if (product.hasDiscount) ...<Widget>[
-                    const SizedBox(width: 12),
                     Text(
                       Formatters.money(
                         product.compareAtPrice!,
@@ -148,7 +152,6 @@ class _Body extends ConsumerWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 10),
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 9,
@@ -236,6 +239,11 @@ class _GalleryState extends ConsumerState<_Gallery> {
     final bool dark = Theme.of(context).brightness == Brightness.dark;
     final List<ProductMedia> media = widget.product.media;
     final int index = ref.watch(galleryIndexProvider);
+    final int cacheWidth =
+        (MediaQuery.sizeOf(context).width *
+                MediaQuery.devicePixelRatioOf(context))
+            .round()
+            .clamp(320, 1600);
     final int safeIndex = index.clamp(0, media.isEmpty ? 0 : media.length - 1);
 
     if (media.isEmpty) {
@@ -269,6 +277,7 @@ class _GalleryState extends ConsumerState<_Gallery> {
                 imageUrl: ref
                     .read(storageUrlsProvider)
                     .productMedia(item.storagePath),
+                memCacheWidth: cacheWidth,
                 fit: BoxFit.cover,
                 placeholder: (_, __) =>
                     const ShimmerBox(height: 320, radius: 0),
@@ -348,6 +357,7 @@ class _GalleryState extends ConsumerState<_Gallery> {
                     imageUrl: ref
                         .read(storageUrlsProvider)
                         .productMediaThumb(media[i].storagePath, width: 180),
+                    memCacheWidth: 180,
                     fit: BoxFit.cover,
                   ),
                 ),

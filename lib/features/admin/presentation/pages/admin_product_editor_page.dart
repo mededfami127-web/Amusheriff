@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -166,6 +167,7 @@ class _AdminProductEditorPageState
           ],
           DropdownButtonFormField<String>(
             initialValue: state.categoryId.isEmpty ? null : state.categoryId,
+            isExpanded: true,
             decoration: InputDecoration(
               labelText: l10n.adminCategories,
               errorText: localizeFieldKey(
@@ -181,6 +183,7 @@ class _AdminProductEditorPageState
                       category.nameFor(
                         Localizations.localeOf(context).languageCode,
                       ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 )
@@ -509,10 +512,13 @@ class _MediaCard extends ConsumerWidget {
               children: <Widget>[
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    urls.productMediaThumb(thumbPath, width: 220),
+                  child: CachedNetworkImage(
+                    imageUrl: urls.productMediaThumb(thumbPath, width: 220),
+                    memCacheWidth: 220,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const ColoredBox(
+                    placeholder: (_, __) =>
+                        const ColoredBox(color: BrandColors.deepPlum),
+                    errorWidget: (_, __, ___) => const ColoredBox(
                       color: BrandColors.deepPlum,
                       child: Icon(
                         Icons.image_not_supported_outlined,

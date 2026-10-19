@@ -35,10 +35,13 @@ class ShimmerBox extends StatelessWidget {
 }
 
 /// Product-card shaped placeholder used while the catalogue loads.
+///
+/// The image block takes whatever height the host grid cell has left after the
+/// two text lines, instead of a hard-coded 260: a 320dp phone at 2.0 text has
+/// less room than a tablet, and the fixed block used to overflow it.
 class ShimmerCard extends StatelessWidget {
-  const ShimmerCard({super.key, this.height = 260, this.showLines = true});
+  const ShimmerCard({super.key, this.showLines = true});
 
-  final double height;
   final bool showLines;
 
   @override
@@ -46,7 +49,7 @@ class ShimmerCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        ShimmerBox(height: height, radius: 20),
+        const Expanded(child: ShimmerBox(height: double.infinity, radius: 20)),
         if (showLines) ...<Widget>[
           const SizedBox(height: 12),
           const ShimmerBox(height: 14, width: 160),
@@ -85,6 +88,42 @@ class ShimmerGrid extends StatelessWidget {
         childAspectRatio: aspectRatio,
       ),
       itemBuilder: (_, __) => const ShimmerCard(),
+    );
+  }
+}
+
+/// The same grid as a sliver, for screens that already own a CustomScrollView.
+///
+/// A shrink-wrapped `GridView` inside a scroll view nests two viewports and
+/// disables scrolling for the inner one; a real sliver is what the host needs.
+class SliverShimmerGrid extends StatelessWidget {
+  const SliverShimmerGrid({
+    super.key,
+    this.itemCount = 6,
+    this.aspectRatio = 0.62,
+    this.padding = const EdgeInsets.all(16),
+  });
+
+  final int itemCount;
+  final double aspectRatio;
+  final EdgeInsets padding;
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverPadding(
+      padding: padding,
+      sliver: SliverGrid(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          mainAxisSpacing: 16,
+          crossAxisSpacing: 16,
+          childAspectRatio: aspectRatio,
+        ),
+        delegate: SliverChildBuilderDelegate(
+          (_, __) => const ShimmerCard(),
+          childCount: itemCount,
+        ),
+      ),
     );
   }
 }

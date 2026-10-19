@@ -22,7 +22,8 @@ class SearchPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final AppLocalizations l10n = AppLocalizations.of(context);
-    final String query = ref.watch(searchQueryProvider);
+    final String typed = ref.watch(searchQueryProvider);
+    final String query = ref.watch(debouncedSearchQueryProvider);
     final bool dark = Theme.of(context).brightness == Brightness.dark;
 
     final AsyncValue<List<Product>> results = query.trim().length < 2
@@ -45,7 +46,7 @@ class SearchPage extends ConsumerWidget {
               decoration: InputDecoration(
                 hintText: l10n.searchHint,
                 prefixIcon: const Icon(Icons.search_rounded),
-                suffixIcon: query.isEmpty
+                suffixIcon: typed.isEmpty
                     ? null
                     : IconButton(
                         icon: const Icon(Icons.close_rounded),
@@ -91,15 +92,11 @@ class SearchPage extends ConsumerWidget {
                             child: GridView.builder(
                               padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
                               itemCount: value.length,
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 2,
-                                    mainAxisSpacing: 16,
-                                    crossAxisSpacing: 16,
-                                    childAspectRatio: 0.62,
-                                  ),
-                              itemBuilder: (_, int index) =>
-                                  ProductCard(product: value[index]),
+                              gridDelegate: productGridDelegate(context),
+                              itemBuilder: (_, int index) => ProductCard(
+                                key: ValueKey<String>(value[index].id),
+                                product: value[index],
+                              ),
                             ),
                           ),
                         ],

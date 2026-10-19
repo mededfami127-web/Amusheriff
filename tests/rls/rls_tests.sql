@@ -83,6 +83,13 @@ insert into public.text_overrides (text_key, locale, value) values
 \echo 'ok - catalogue fixtures inserted'
 
 -- ═══════════════════════════════════════════════════════════════════════════
+-- site_content + admin_contact_settings RLS assertions
+-- ═══════════════════════════════════════════════════════════════════════════
+\echo '── site_content + admin_contact_settings RLS'
+\i '$(dirname $0)/rls_site_content_and_contact_settings.sql'
+\echo 'ok - site_content and admin_contact_settings RLS'
+
+-- ═══════════════════════════════════════════════════════════════════════════
 -- 1 · ANON — read visibility
 -- ═══════════════════════════════════════════════════════════════════════════
 set role anon;

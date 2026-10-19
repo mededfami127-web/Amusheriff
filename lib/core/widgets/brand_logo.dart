@@ -21,12 +21,38 @@ class BrandLogo extends StatelessWidget {
       height: size,
       filterQuality: FilterQuality.high,
       semanticLabel: 'ASM',
+      errorBuilder: (_, __, ___) => _FallbackBadge(size: size),
+    );
+  }
+}
+
+class _FallbackBadge extends StatelessWidget {
+  const _FallbackBadge({required this.size});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: BrandGradients.brand,
+      ),
+      child: Icon(
+        Icons.account_circle_outlined,
+        size: size * 0.7,
+        color: BrandColors.ivory,
+      ),
     );
   }
 }
 
 /// The brand name in the active locale, set in the gold display face with the
 /// Amharic and Arabic lines rendered in their own scripts.
+///
+/// Text only. No image or asset path depends on locale.
 class BrandWordmark extends StatelessWidget {
   const BrandWordmark({
     super.key,

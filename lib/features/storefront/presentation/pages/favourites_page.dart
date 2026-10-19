@@ -43,37 +43,54 @@ class FavouritesPage extends ConsumerWidget {
               message: l10n.favouritesEmptyMessage,
               icon: Icons.favorite_border_rounded,
             )
-          : ListView(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 40),
-              children: <Widget>[
-                Text(
-                  l10n.navFavourites,
-                  style: BrandTypography.displayMedium.copyWith(
-                    color: dark ? BrandColors.goldLight : BrandColors.charcoal,
+          // One CustomScrollView: a shrink-wrapped grid inside a ListView
+          // nests two viewports and loses lazy building for every tile.
+          : CustomScrollView(
+              slivers: <Widget>[
+                SliverPadding(
+                  padding: const EdgeInsetsDirectional.fromSTEB(16, 14, 16, 0),
+                  sliver: SliverToBoxAdapter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          l10n.navFavourites,
+                          style: BrandTypography.displayMedium.copyWith(
+                            color: dark
+                                ? BrandColors.goldLight
+                                : BrandColors.charcoal,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const SizedBox(width: 72, child: GoldDivider()),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
                   ),
                 ),
-                const SizedBox(height: 8),
-                const SizedBox(width: 72, child: GoldDivider()),
-                const SizedBox(height: 16),
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 16,
-                    childAspectRatio: 0.62,
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  sliver: SliverGrid(
+                    gridDelegate: productGridDelegate(context),
+                    delegate: SliverChildBuilderDelegate(
+                      (_, int index) => ProductCard(
+                        key: ValueKey<String>(products[index].id),
+                        product: products[index],
+                      ),
+                      childCount: products.length,
+                    ),
                   ),
-                  itemCount: products.length,
-                  itemBuilder: (_, int index) =>
-                      ProductCard(product: products[index]),
                 ),
-                const SizedBox(height: 22),
-                Center(
-                  child: TextButton.icon(
-                    icon: const Icon(Icons.storefront_outlined),
-                    label: Text(l10n.adminViewStore),
-                    onPressed: () => context.go(Routes.storefront),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 22, 16, 40),
+                    child: Center(
+                      child: TextButton.icon(
+                        icon: const Icon(Icons.storefront_outlined),
+                        label: Text(l10n.adminViewStore),
+                        onPressed: () => context.go(Routes.storefront),
+                      ),
+                    ),
                   ),
                 ),
               ],

@@ -36,8 +36,9 @@ class ProductCard extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              AspectRatio(
-                aspectRatio: 1.06,
+              // The photo takes whatever height the host leaves after the text,
+              // so a taller accessibility text block cannot overflow the cell.
+              Expanded(
                 child: Stack(
                   fit: StackFit.expand,
                   children: <Widget>[
@@ -48,11 +49,19 @@ class ProductCard extends ConsumerWidget {
                         imageUrl: ref
                             .read(storageUrlsProvider)
                             .productMediaThumb(cover, width: 560),
+                        // Decode at the size the tile paints; a full 4K photo
+                        // per grid cell is most of the raster cost of a scroll.
+                        memCacheWidth: 560,
                         fit: BoxFit.cover,
                         fadeInDuration: const Duration(milliseconds: 220),
                         placeholder: (_, __) => _Placeholder(dark: dark),
                         errorWidget: (_, __, ___) =>
                             _Placeholder(dark: dark, failed: true),
+                        imageBuilder: (_, ImageProvider provider) => Semantics(
+                          label: l10n.a11yProductImage(title),
+                          image: true,
+                          child: Image(image: provider, fit: BoxFit.cover),
+                        ),
                         // Helps screen readers and keeps a11y labels localized.
                         imageBuilder: (_, ImageProvider provider) => Semantics(
                           label: l10n.a11yProductImage(title),
@@ -119,7 +128,13 @@ class ProductCard extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    Row(
+                    // A price and a struck-through price side by side do not fit
+                    // a 136dp tile at 2.0 text; a Wrap puts the second one on
+                    // its own line instead of clipping the first.
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 2,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: <Widget>[
                         ShaderMask(
                           shaderCallback:
@@ -136,24 +151,20 @@ class ProductCard extends ConsumerWidget {
                             ),
                           ),
                         ),
-                        if (product.hasDiscount) ...<Widget>[
-                          const SizedBox(width: 8),
-                          Flexible(
-                            child: Text(
-                              Formatters.money(
-                                product.compareAtPrice!,
-                                currency: product.currencyCode,
-                                locale: language,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              style: BrandTypography.priceStruck.copyWith(
-                                color: BrandTypography.mutedOn(
-                                  Theme.of(context).brightness,
-                                ),
+                        if (product.hasDiscount)
+                          Text(
+                            Formatters.money(
+                              product.compareAtPrice!,
+                              currency: product.currencyCode,
+                              locale: language,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            style: BrandTypography.priceStruck.copyWith(
+                              color: BrandTypography.mutedOn(
+                                Theme.of(context).brightness,
                               ),
                             ),
                           ),
-                        ],
                       ],
                     ),
                   ],
@@ -165,6 +176,28 @@ class ProductCard extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Grid metrics that grow with the accessibility text scale.
+///
+/// The old fixed `0.62` aspect was tuned for 1.0 text; at 2.0 the text block is
+/// twice as tall and the tile had no room left. Two things change instead of
+/// shrinking the words:
+///
+/// * a phone at 1.6x or more drops to one column, because a price token cannot
+///   wrap inside a 136dp tile without breaking mid-number;
+/// * otherwise the cell gets taller, and the photo absorbs the difference.
+SliverGridDelegate productGridDelegate(BuildContext context) {
+  final double scale = MediaQuery.textScalerOf(context).scale(1);
+  final double width = MediaQuery.sizeOf(context).width;
+  final bool singleColumn = width < 600 && scale >= 1.6;
+  final double extra = (scale - 1).clamp(0.0, 1.0) * 0.55;
+  return SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: singleColumn ? 1 : 2,
+    mainAxisSpacing: 16,
+    crossAxisSpacing: 16,
+    childAspectRatio: singleColumn ? 0.9 : 0.62 / (1 + extra),
+  );
 }
 
 class _Placeholder extends StatelessWidget {
