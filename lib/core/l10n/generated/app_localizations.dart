@@ -2057,6 +2057,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Value'**
   String get adminSiteContentValue;
+
+  /// No description provided for @adminContactSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact settings'**
+  String get adminContactSettings;
+
+  /// No description provided for @adminContactSettingsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The channels customers can use to reach you. Leave a field empty to hide it.'**
+  String get adminContactSettingsHint;
+
+  /// No description provided for @adminOwnerPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner phone (tel:)'**
+  String get adminOwnerPhone;
+
+  /// No description provided for @adminOwnerEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner e-mail'**
+  String get adminOwnerEmail;
+
+  /// No description provided for @adminWhatsappNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp number'**
+  String get adminWhatsappNumber;
+
+  /// No description provided for @adminTelegramHandle.
+  ///
+  /// In en, this message translates to:
+  /// **'Telegram handle'**
+  String get adminTelegramHandle;
+
+  /// No description provided for @adminInstagramHandle.
+  ///
+  /// In en, this message translates to:
+  /// **'Instagram handle'**
+  String get adminInstagramHandle;
+
+  /// No description provided for @adminFacebookHandle.
+  ///
+  /// In en, this message translates to:
+  /// **'Facebook handle'**
+  String get adminFacebookHandle;
+
+  /// No description provided for @adminTiktokHandle.
+  ///
+  /// In en, this message translates to:
+  /// **'TikTok handle'**
+  String get adminTiktokHandle;
+
+  /// No description provided for @adminYoutubeHandle.
+  ///
+  /// In en, this message translates to:
+  /// **'YouTube handle or URL'**
+  String get adminYoutubeHandle;
+
+  /// No description provided for @adminWebsiteUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Website URL'**
+  String get adminWebsiteUrl;
+
+  /// No description provided for @contactOwnerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Reach the owner directly about this piece.'**
+  String get contactOwnerHint;
 }
 
 class _AppLocalizationsDelegate

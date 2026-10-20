@@ -326,5 +326,17 @@
   "navFavourites": "Filannoo",
   "adminSiteContent": "ትርጉም መግቢያ",
   "adminSiteContentHint": "የቤት ሳህነቴን ለማስተዳድር በሚያገግሙ ቃላትን ይቀይሩ።",
-  "adminSiteContentValue": "ተግባር"
+  "adminSiteContentValue": "ተግባር",
+  "adminContactSettings": "Qindaa'ina quunnamtii",
+  "adminContactSettingsHint": "Karaalee maamilli ittiin si quunnamuu danda'an. Dhaquuuf dirree duwwaa dhiisi.",
+  "adminOwnerPhone": "Bilbila abbaa qabeenyaa (tel:)",
+  "adminOwnerEmail": "Imeelii abbaa qabeenyaa",
+  "adminWhatsappNumber": "Lakkoofsa WhatsApp",
+  "adminTelegramHandle": "Maqaa Telegram",
+  "adminInstagramHandle": "Maqaa Instagram",
+  "adminFacebookHandle": "Maqaa Facebook",
+  "adminTiktokHandle": "Maqaa TikTok",
+  "adminYoutubeHandle": "Maqaa YouTube yookaan URL",
+  "adminWebsiteUrl": "URL weebsaayitii",
+  "contactOwnerHint": "Wanta kana irratti abbaa qabeenyaa kallattiin quunnami."
 }

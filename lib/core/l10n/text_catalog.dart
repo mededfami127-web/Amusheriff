@@ -680,6 +680,26 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
     },
   ),
   AppTextEntry(
+    key: 'adminContactSettings',
+    sectionKey: 'adminContacts',
+    defaults: <String, String>{
+      'en': 'Contact settings',
+      'am': 'የመገኛ ቅንብሮች',
+      'ar': 'إعدادات التواصل',
+      'om': 'Qindaa\'ina quunnamtii',
+    },
+  ),
+  AppTextEntry(
+    key: 'adminContactSettingsHint',
+    sectionKey: 'adminContacts',
+    defaults: <String, String>{
+      'en': 'The channels customers can use to reach you. Leave a field empty to hide it.',
+      'am': 'ደንበኞች እርስዎን ለማግኘት ሊጠቀሙባቸው የሚችሉ መንገዶች። ለመደበቅ መስኩን ባዶ ይተውት።',
+      'ar': 'القنوات التي يمكن للزبائن التواصل معك عبرها. اترك الحقل فارغًا لإخفائه.',
+      'om': 'Karaalee maamilli ittiin si quunnamuu danda\'an. Dhaquuuf dirree duwwaa dhiisi.',
+    },
+  ),
+  AppTextEntry(
     key: 'adminContactValue',
     sectionKey: 'adminContacts',
     defaults: <String, String>{
@@ -860,6 +880,16 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
     },
   ),
   AppTextEntry(
+    key: 'adminFacebookHandle',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'Facebook handle',
+      'am': 'የፌስቡክ መጠሪያ',
+      'ar': 'معرّف فيسبوك',
+      'om': 'Maqaa Facebook',
+    },
+  ),
+  AppTextEntry(
     key: 'adminFeatured',
     sectionKey: 'adminProducts',
     defaults: <String, String>{
@@ -967,6 +997,16 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
       'am': 'ጥያቄው ተጸድቋል',
       'ar': 'تم حذف الاستفسار',
       'om': 'Gaaffiin haqame',
+    },
+  ),
+  AppTextEntry(
+    key: 'adminInstagramHandle',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'Instagram handle',
+      'am': 'የኢንስታግራም መጠሪያ',
+      'ar': 'معرّف إنستغرام',
+      'om': 'Maqaa Instagram',
     },
   ),
   AppTextEntry(
@@ -1197,6 +1237,26 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
       'am': 'ሌሎች ክፍለ ጊዜዎች ተውሰደዋል።',
       'ar': 'تم تسجيل خروج الجلسات الأخرى.',
       'om': 'Seensaaleen biroo baafaman.',
+    },
+  ),
+  AppTextEntry(
+    key: 'adminOwnerEmail',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'Owner e-mail',
+      'am': 'የባለቤቱ ኢሜይል',
+      'ar': 'البريد الإلكتروني للمالك',
+      'om': 'Imeelii abbaa qabeenyaa',
+    },
+  ),
+  AppTextEntry(
+    key: 'adminOwnerPhone',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'Owner phone (tel:)',
+      'am': 'የባለቤቱ ስልክ (tel:)',
+      'ar': 'هاتف المالك (tel:)',
+      'om': 'Bilbila abbaa qabeenyaa (tel:)',
     },
   ),
   AppTextEntry(
@@ -1700,6 +1760,16 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
     },
   ),
   AppTextEntry(
+    key: 'adminTelegramHandle',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'Telegram handle',
+      'am': 'የቴሌግራም መጠሪያ',
+      'ar': 'معرّف تيليجرام',
+      'om': 'Maqaa Telegram',
+    },
+  ),
+  AppTextEntry(
     key: 'adminTextEditor',
     sectionKey: 'adminTextEditor',
     defaults: <String, String>{
@@ -1830,6 +1900,16 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
     },
   ),
   AppTextEntry(
+    key: 'adminTiktokHandle',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'TikTok handle',
+      'am': 'የቲክቶክ መጠሪያ',
+      'ar': 'معرّف تيك توك',
+      'om': 'Maqaa TikTok',
+    },
+  ),
+  AppTextEntry(
     key: 'adminUnpublish',
     sectionKey: 'adminProducts',
     defaults: <String, String>{
@@ -1941,6 +2021,26 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
     },
   ),
   AppTextEntry(
+    key: 'adminWebsiteUrl',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'Website URL',
+      'am': 'የድረ-ገጽ URL',
+      'ar': 'رابط الموقع',
+      'om': 'URL weebsaayitii',
+    },
+  ),
+  AppTextEntry(
+    key: 'adminWhatsappNumber',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'WhatsApp number',
+      'am': 'የዋትስአፕ ቁጥር',
+      'ar': 'رقم واتساب',
+      'om': 'Lakkoofsa WhatsApp',
+    },
+  ),
+  AppTextEntry(
     key: 'adminWhen',
     sectionKey: 'adminDashboard',
     defaults: <String, String>{
@@ -1948,6 +2048,16 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
       'am': 'መቼ',
       'ar': 'متى',
       'om': 'Yeroo',
+    },
+  ),
+  AppTextEntry(
+    key: 'adminYoutubeHandle',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'YouTube handle or URL',
+      'am': 'የዩቲዩብ መጠሪያ ወይም URL',
+      'ar': 'معرّف يوتيوب أو الرابط',
+      'om': 'Maqaa YouTube yookaan URL',
     },
   ),
   AppTextEntry(
@@ -2058,6 +2168,16 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
       'am': 'ሌላ',
       'ar': 'أخرى',
       'om': 'Kan biraa',
+    },
+  ),
+  AppTextEntry(
+    key: 'contactOwnerHint',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'Reach the owner directly about this piece.',
+      'am': 'ስለዚህ ዕቃ በቀጥታ ባለቤቱን ያግኙ።',
+      'ar': 'تواصل مع المالك مباشرة بخصوص هذه القطعة.',
+      'om': 'Wanta kana irratti abbaa qabeenyaa kallattiin quunnami.',
     },
   ),
   AppTextEntry(

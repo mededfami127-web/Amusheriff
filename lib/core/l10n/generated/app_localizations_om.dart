@@ -1064,4 +1064,42 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get adminSiteContentValue => 'ተግባር';
+
+  @override
+  String get adminContactSettings => 'Qindaa\'ina quunnamtii';
+
+  @override
+  String get adminContactSettingsHint =>
+      'Karaalee maamilli ittiin si quunnamuu danda\'an. Dhaquuuf dirree duwwaa dhiisi.';
+
+  @override
+  String get adminOwnerPhone => 'Bilbila abbaa qabeenyaa (tel:)';
+
+  @override
+  String get adminOwnerEmail => 'Imeelii abbaa qabeenyaa';
+
+  @override
+  String get adminWhatsappNumber => 'Lakkoofsa WhatsApp';
+
+  @override
+  String get adminTelegramHandle => 'Maqaa Telegram';
+
+  @override
+  String get adminInstagramHandle => 'Maqaa Instagram';
+
+  @override
+  String get adminFacebookHandle => 'Maqaa Facebook';
+
+  @override
+  String get adminTiktokHandle => 'Maqaa TikTok';
+
+  @override
+  String get adminYoutubeHandle => 'Maqaa YouTube yookaan URL';
+
+  @override
+  String get adminWebsiteUrl => 'URL weebsaayitii';
+
+  @override
+  String get contactOwnerHint =>
+      'Wanta kana irratti abbaa qabeenyaa kallattiin quunnami.';
 }

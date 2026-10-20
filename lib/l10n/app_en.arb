@@ -411,5 +411,17 @@
   "validateVideoUnreadable": "That video could not be read",
   "adminSiteContent": "Site content",
   "adminSiteContentHint": "Rewrite the words customers see on the home screen before the built-in wording.",
-  "adminSiteContentValue": "Value"
+  "adminSiteContentValue": "Value",
+  "adminContactSettings": "Contact settings",
+  "adminContactSettingsHint": "The channels customers can use to reach you. Leave a field empty to hide it.",
+  "adminOwnerPhone": "Owner phone (tel:)",
+  "adminOwnerEmail": "Owner e-mail",
+  "adminWhatsappNumber": "WhatsApp number",
+  "adminTelegramHandle": "Telegram handle",
+  "adminInstagramHandle": "Instagram handle",
+  "adminFacebookHandle": "Facebook handle",
+  "adminTiktokHandle": "TikTok handle",
+  "adminYoutubeHandle": "YouTube handle or URL",
+  "adminWebsiteUrl": "Website URL",
+  "contactOwnerHint": "Reach the owner directly about this piece."
 }

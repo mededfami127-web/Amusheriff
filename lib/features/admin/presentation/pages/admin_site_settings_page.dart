@@ -19,6 +19,7 @@ import '../../../catalog/presentation/controllers/media_upload_controller.dart';
 import '../../../settings/domain/entities/site_settings.dart';
 import '../../../settings/presentation/providers/site_settings_providers.dart';
 import '../controllers/admin_editors.dart';
+import '../widgets/admin_contact_settings_section.dart';
 import '../widgets/admin_scaffold.dart';
 import '../widgets/admin_text_field.dart';
 
@@ -110,6 +111,8 @@ class AdminSiteSettingsPage extends ConsumerWidget {
           ),
           const SizedBox(height: 22),
           const _LanguageAndThemePanel(),
+          const SizedBox(height: 22),
+          const AdminContactSettingsSection(),
           const SizedBox(height: 22),
           _LogoPicker(
             logoPath: state.logoPath,

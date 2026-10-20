@@ -326,5 +326,17 @@
   "navFavourites": "المفضلة",
   "adminSiteContent": "محتوى الموقع",
   "adminSiteContentHint": "إعادة كتابة الكلمات التي يراها الزبائن على الشاشة الرئيسية قبل الصياغة المدمجة.",
-  "adminSiteContentValue": "قيمة"
+  "adminSiteContentValue": "قيمة",
+  "adminContactSettings": "إعدادات التواصل",
+  "adminContactSettingsHint": "القنوات التي يمكن للزبائن التواصل معك عبرها. اترك الحقل فارغًا لإخفائه.",
+  "adminOwnerPhone": "هاتف المالك (tel:)",
+  "adminOwnerEmail": "البريد الإلكتروني للمالك",
+  "adminWhatsappNumber": "رقم واتساب",
+  "adminTelegramHandle": "معرّف تيليجرام",
+  "adminInstagramHandle": "معرّف إنستغرام",
+  "adminFacebookHandle": "معرّف فيسبوك",
+  "adminTiktokHandle": "معرّف تيك توك",
+  "adminYoutubeHandle": "معرّف يوتيوب أو الرابط",
+  "adminWebsiteUrl": "رابط الموقع",
+  "contactOwnerHint": "تواصل مع المالك مباشرة بخصوص هذه القطعة."
 }

@@ -18,8 +18,11 @@ import 'package:amu_sharif_majlis/features/catalog/presentation/providers/catalo
 import 'package:amu_sharif_majlis/features/contacts/domain/drafts/contact_link_draft.dart';
 import 'package:amu_sharif_majlis/features/contacts/domain/entities/contact_kind.dart';
 import 'package:amu_sharif_majlis/features/contacts/domain/entities/contact_link.dart';
+import 'package:amu_sharif_majlis/features/contacts/domain/entities/contact_settings.dart';
 import 'package:amu_sharif_majlis/features/contacts/domain/repositories/contact_repository.dart';
+import 'package:amu_sharif_majlis/features/contacts/domain/repositories/contact_settings_repository.dart';
 import 'package:amu_sharif_majlis/features/contacts/presentation/providers/contact_providers.dart';
+import 'package:amu_sharif_majlis/features/contacts/presentation/providers/contact_settings_providers.dart';
 import 'package:amu_sharif_majlis/features/inquiries/domain/entities/inquiry.dart';
 import 'package:amu_sharif_majlis/features/inquiries/domain/repositories/inquiry_repository.dart';
 import 'package:amu_sharif_majlis/features/inquiries/presentation/providers/inquiry_providers.dart';
@@ -140,6 +143,8 @@ class FakeBackend {
     mode: contactsMode,
     rows: _contacts,
   );
+  final FakeContactSettingsRepository contactSettings =
+      FakeContactSettingsRepository();
   late final FakeInquiryRepository inquiries = FakeInquiryRepository(
     mode: inquiriesMode,
     rows: _inquiries,
@@ -156,6 +161,7 @@ class FakeBackend {
     productRepositoryProvider.overrideWithValue(products),
     productMediaRepositoryProvider.overrideWithValue(media),
     contactRepositoryProvider.overrideWithValue(contacts),
+    contactSettingsRepositoryProvider.overrideWithValue(contactSettings),
     inquiryRepositoryProvider.overrideWithValue(inquiries),
     siteSettingsRepositoryProvider.overrideWithValue(settings),
     siteContentRepositoryProvider.overrideWithValue(siteContent),
@@ -445,6 +451,25 @@ class FakeContactRepository implements ContactRepository {
 
   @override
   Future<void> reorder(List<String> orderedIds) async {}
+}
+
+class FakeContactSettingsRepository implements ContactSettingsRepository {
+  static const ContactSettings settings = ContactSettings(
+    ownerPhone: '+251911223344',
+    ownerEmail: 'owner@asm.et',
+    whatsappNumber: '251911223344',
+    telegramHandle: 'amumejlisamusharif',
+    instagramHandle: 'amusheriff',
+  );
+
+  @override
+  Stream<ContactSettings> watch() => Stream<ContactSettings>.value(settings);
+
+  @override
+  Future<ContactSettings> fetch() async => settings;
+
+  @override
+  Future<void> save(ContactSettings settings) async {}
 }
 
 class FakeInquiryRepository implements InquiryRepository {

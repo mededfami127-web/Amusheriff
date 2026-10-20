@@ -1032,4 +1032,41 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get adminSiteContentValue => 'አረፍተ ነገር';
+
+  @override
+  String get adminContactSettings => 'የመገኛ ቅንብሮች';
+
+  @override
+  String get adminContactSettingsHint =>
+      'ደንበኞች እርስዎን ለማግኘት ሊጠቀሙባቸው የሚችሉ መንገዶች። ለመደበቅ መስኩን ባዶ ይተውት።';
+
+  @override
+  String get adminOwnerPhone => 'የባለቤቱ ስልክ (tel:)';
+
+  @override
+  String get adminOwnerEmail => 'የባለቤቱ ኢሜይል';
+
+  @override
+  String get adminWhatsappNumber => 'የዋትስአፕ ቁጥር';
+
+  @override
+  String get adminTelegramHandle => 'የቴሌግራም መጠሪያ';
+
+  @override
+  String get adminInstagramHandle => 'የኢንስታግራም መጠሪያ';
+
+  @override
+  String get adminFacebookHandle => 'የፌስቡክ መጠሪያ';
+
+  @override
+  String get adminTiktokHandle => 'የቲክቶክ መጠሪያ';
+
+  @override
+  String get adminYoutubeHandle => 'የዩቲዩብ መጠሪያ ወይም URL';
+
+  @override
+  String get adminWebsiteUrl => 'የድረ-ገጽ URL';
+
+  @override
+  String get contactOwnerHint => 'ስለዚህ ዕቃ በቀጥታ ባለቤቱን ያግኙ።';
 }

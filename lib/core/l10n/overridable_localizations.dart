@@ -1230,4 +1230,49 @@ class OverridableAppLocalizations extends AppLocalizations {
   @override
   String get adminSiteContentValue =>
       _text('adminSiteContentValue', _base.adminSiteContentValue);
+
+  @override
+  String get adminContactSettings =>
+      _text('adminContactSettings', _base.adminContactSettings);
+
+  @override
+  String get adminContactSettingsHint =>
+      _text('adminContactSettingsHint', _base.adminContactSettingsHint);
+
+  @override
+  String get adminOwnerPhone => _text('adminOwnerPhone', _base.adminOwnerPhone);
+
+  @override
+  String get adminOwnerEmail => _text('adminOwnerEmail', _base.adminOwnerEmail);
+
+  @override
+  String get adminWhatsappNumber =>
+      _text('adminWhatsappNumber', _base.adminWhatsappNumber);
+
+  @override
+  String get adminTelegramHandle =>
+      _text('adminTelegramHandle', _base.adminTelegramHandle);
+
+  @override
+  String get adminInstagramHandle =>
+      _text('adminInstagramHandle', _base.adminInstagramHandle);
+
+  @override
+  String get adminFacebookHandle =>
+      _text('adminFacebookHandle', _base.adminFacebookHandle);
+
+  @override
+  String get adminTiktokHandle =>
+      _text('adminTiktokHandle', _base.adminTiktokHandle);
+
+  @override
+  String get adminYoutubeHandle =>
+      _text('adminYoutubeHandle', _base.adminYoutubeHandle);
+
+  @override
+  String get adminWebsiteUrl => _text('adminWebsiteUrl', _base.adminWebsiteUrl);
+
+  @override
+  String get contactOwnerHint =>
+      _text('contactOwnerHint', _base.contactOwnerHint);
 }

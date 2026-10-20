@@ -326,5 +326,17 @@
   "navFavourites": "ተወዳጆች",
   "adminSiteContent": "ቁጥር የሚያስተዳድ",
   "adminSiteContentHint": "ቤት ሳህነቴን ለማስተዳድር በሚያገግሙ ቃላትን ይቀይሩ።",
-  "adminSiteContentValue": "አረፍተ ነገር"
+  "adminSiteContentValue": "አረፍተ ነገር",
+  "adminContactSettings": "የመገኛ ቅንብሮች",
+  "adminContactSettingsHint": "ደንበኞች እርስዎን ለማግኘት ሊጠቀሙባቸው የሚችሉ መንገዶች። ለመደበቅ መስኩን ባዶ ይተውት።",
+  "adminOwnerPhone": "የባለቤቱ ስልክ (tel:)",
+  "adminOwnerEmail": "የባለቤቱ ኢሜይል",
+  "adminWhatsappNumber": "የዋትስአፕ ቁጥር",
+  "adminTelegramHandle": "የቴሌግራም መጠሪያ",
+  "adminInstagramHandle": "የኢንስታግራም መጠሪያ",
+  "adminFacebookHandle": "የፌስቡክ መጠሪያ",
+  "adminTiktokHandle": "የቲክቶክ መጠሪያ",
+  "adminYoutubeHandle": "የዩቲዩብ መጠሪያ ወይም URL",
+  "adminWebsiteUrl": "የድረ-ገጽ URL",
+  "contactOwnerHint": "ስለዚህ ዕቃ በቀጥታ ባለቤቱን ያግኙ።"
 }

@@ -1053,4 +1053,41 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get adminSiteContentValue => 'قيمة';
+
+  @override
+  String get adminContactSettings => 'إعدادات التواصل';
+
+  @override
+  String get adminContactSettingsHint =>
+      'القنوات التي يمكن للزبائن التواصل معك عبرها. اترك الحقل فارغًا لإخفائه.';
+
+  @override
+  String get adminOwnerPhone => 'هاتف المالك (tel:)';
+
+  @override
+  String get adminOwnerEmail => 'البريد الإلكتروني للمالك';
+
+  @override
+  String get adminWhatsappNumber => 'رقم واتساب';
+
+  @override
+  String get adminTelegramHandle => 'معرّف تيليجرام';
+
+  @override
+  String get adminInstagramHandle => 'معرّف إنستغرام';
+
+  @override
+  String get adminFacebookHandle => 'معرّف فيسبوك';
+
+  @override
+  String get adminTiktokHandle => 'معرّف تيك توك';
+
+  @override
+  String get adminYoutubeHandle => 'معرّف يوتيوب أو الرابط';
+
+  @override
+  String get adminWebsiteUrl => 'رابط الموقع';
+
+  @override
+  String get contactOwnerHint => 'تواصل مع المالك مباشرة بخصوص هذه القطعة.';
 }

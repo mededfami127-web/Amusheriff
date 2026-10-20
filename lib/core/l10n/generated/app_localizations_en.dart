@@ -1053,4 +1053,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminSiteContentValue => 'Value';
+
+  @override
+  String get adminContactSettings => 'Contact settings';
+
+  @override
+  String get adminContactSettingsHint =>
+      'The channels customers can use to reach you. Leave a field empty to hide it.';
+
+  @override
+  String get adminOwnerPhone => 'Owner phone (tel:)';
+
+  @override
+  String get adminOwnerEmail => 'Owner e-mail';
+
+  @override
+  String get adminWhatsappNumber => 'WhatsApp number';
+
+  @override
+  String get adminTelegramHandle => 'Telegram handle';
+
+  @override
+  String get adminInstagramHandle => 'Instagram handle';
+
+  @override
+  String get adminFacebookHandle => 'Facebook handle';
+
+  @override
+  String get adminTiktokHandle => 'TikTok handle';
+
+  @override
+  String get adminYoutubeHandle => 'YouTube handle or URL';
+
+  @override
+  String get adminWebsiteUrl => 'Website URL';
+
+  @override
+  String get contactOwnerHint => 'Reach the owner directly about this piece.';
 }

@@ -19,8 +19,11 @@ import '../../../catalog/domain/entities/product.dart';
 import '../../../catalog/domain/entities/product_media.dart';
 import '../../../catalog/presentation/providers/catalog_providers.dart';
 import '../../../contacts/domain/contact_launcher.dart';
+import '../../../contacts/domain/entities/contact_kind.dart';
 import '../../../contacts/domain/entities/contact_link.dart';
+import '../../../contacts/domain/entities/contact_settings.dart';
 import '../../../contacts/presentation/providers/contact_providers.dart';
+import '../../../contacts/presentation/providers/contact_settings_providers.dart';
 import '../../../../core/utils/launcher.dart';
 import '../providers/storefront_providers.dart';
 import '../widgets/favourite_button.dart';
@@ -94,6 +97,7 @@ class _Body extends ConsumerWidget {
     final bool dark = Theme.of(context).brightness == Brightness.dark;
     final String description = product.descriptionFor(language);
     final List<ContactLink> channels = ref.watch(orderChannelsProvider);
+    final ContactSettings settings = ref.watch(contactSettingsValueProvider);
 
     return ListView(
       padding: EdgeInsets.zero,
@@ -206,7 +210,11 @@ class _Body extends ConsumerWidget {
                 ),
               ],
               const SizedBox(height: 26),
-              _ContactActions(product: product, channels: channels),
+              _ContactActions(
+                product: product,
+                channels: channels,
+                settings: settings,
+              ),
             ],
           ),
         ),
@@ -371,27 +379,86 @@ class _GalleryState extends ConsumerState<_Gallery> {
 }
 
 class _ContactActions extends ConsumerWidget {
-  const _ContactActions({required this.product, required this.channels});
+  const _ContactActions({
+    required this.product,
+    required this.channels,
+    required this.settings,
+  });
 
   final Product product;
   final List<ContactLink> channels;
+  final ContactSettings settings;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final AppLocalizations l10n = AppLocalizations.of(context);
     final String language = Localizations.localeOf(context).languageCode;
     final ContactLauncher launcher = ref.read(contactLauncherProvider);
+    final String title = product.titleFor(language);
     final String price = Formatters.money(
       product.price,
       currency: product.currencyCode,
       locale: language,
     );
-    final String message = l10n.inquiryMessageTemplate(
-      product.titleFor(language),
-      price,
-    );
+    final String message = l10n.inquiryMessageTemplate(title, price);
 
-    if (channels.isEmpty) {
+    // Channels from `admin_contact_settings`, minus any kind already rendered
+    // from the curated `contact_links`, so the same WhatsApp button never shows
+    // twice. Only non-empty settings fields become a button.
+    final Set<ContactKind> curatedKinds = channels
+        .map((ContactLink link) => link.kind)
+        .toSet();
+    final List<ContactLink> ownerLinks = <ContactLink>[
+      if (settings.hasPhone && !curatedKinds.contains(ContactKind.phone))
+        _ownerLink(ContactKind.phone, l10n.contactPhone, settings.ownerPhone),
+      if (settings.hasWhatsApp && !curatedKinds.contains(ContactKind.whatsapp))
+        _ownerLink(
+          ContactKind.whatsapp,
+          l10n.contactWhatsApp,
+          settings.whatsappNumber,
+        ),
+      if (settings.hasTelegram && !curatedKinds.contains(ContactKind.telegram))
+        _ownerLink(
+          ContactKind.telegram,
+          l10n.contactTelegram,
+          settings.telegramHandle,
+        ),
+      if (settings.hasEmail && !curatedKinds.contains(ContactKind.email))
+        _ownerLink(ContactKind.email, l10n.contactEmail, settings.ownerEmail),
+      if (settings.hasInstagram &&
+          !curatedKinds.contains(ContactKind.instagram))
+        _ownerLink(
+          ContactKind.instagram,
+          l10n.contactInstagram,
+          settings.instagramHandle,
+        ),
+      if (settings.hasFacebook && !curatedKinds.contains(ContactKind.facebook))
+        _ownerLink(
+          ContactKind.facebook,
+          l10n.contactFacebook,
+          settings.facebookHandle,
+        ),
+      if (settings.hasTikTok && !curatedKinds.contains(ContactKind.tiktok))
+        _ownerLink(
+          ContactKind.tiktok,
+          l10n.contactTikTok,
+          settings.tiktokHandle,
+        ),
+      if (settings.hasYouTube && !curatedKinds.contains(ContactKind.youtube))
+        _ownerLink(
+          ContactKind.youtube,
+          l10n.contactYouTube,
+          settings.youtubeHandle,
+        ),
+      if (settings.hasWebsite && !curatedKinds.contains(ContactKind.website))
+        _ownerLink(
+          ContactKind.website,
+          l10n.contactWebsite,
+          settings.websiteUrl,
+        ),
+    ];
+
+    if (channels.isEmpty && ownerLinks.isEmpty) {
       return EmptyState(
         title: l10n.stateEmptyTitle,
         message: l10n.contactLaunchFailed,
@@ -400,25 +467,28 @@ class _ContactActions extends ConsumerWidget {
       );
     }
 
-    Future<void> open(ContactLink link) async {
-      final bool ok = await launcher.launch(link, message: message);
+    Future<void> open(ContactLink link, String prefilled) async {
+      final bool ok = await launcher.launch(link, message: prefilled);
       if (!ok && context.mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(l10n.contactLaunchFailed)));
       }
     }
 
-    // The most direct channel becomes the primary gradient button.
-    final ContactLink primary = channels.first;
+    // The most direct curated channel becomes the primary gradient button.
+    final ContactLink? primary = channels.isEmpty ? null : channels.first;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        GradientButton(
-          label: '${l10n.actionOrderNow} · ${primary.label}',
-          icon: primary.kind.icon,
-          onPressed: product.isOrderable ? () => open(primary) : null,
-        ),
+        if (primary != null)
+          GradientButton(
+            label: '${l10n.actionOrderNow} · ${primary.label}',
+            icon: primary.kind.icon,
+            onPressed: product.isOrderable
+                ? () => open(primary, message)
+                : null,
+          ),
         if (channels.length > 1) ...<Widget>[
           const SizedBox(height: 12),
           Wrap(
@@ -428,7 +498,28 @@ class _ContactActions extends ConsumerWidget {
                 .skip(1)
                 .map(
                   (ContactLink link) => OutlinedButton.icon(
-                    onPressed: () => open(link),
+                    onPressed: () => open(link, message),
+                    icon: Icon(link.kind.icon, size: 18),
+                    label: Text(link.label),
+                  ),
+                )
+                .toList(growable: false),
+          ),
+        ],
+        if (ownerLinks.isNotEmpty) ...<Widget>[
+          const SizedBox(height: 24),
+          Text(l10n.actionContactOwner, style: BrandTypography.titleMedium),
+          const SizedBox(height: 4),
+          Text(l10n.contactOwnerHint, style: BrandTypography.bodySmall),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: ownerLinks
+                .map(
+                  (ContactLink link) => OutlinedButton.icon(
+                    // WhatsApp / Telegram get the product name pre-filled.
+                    onPressed: () => open(link, title),
                     icon: Icon(link.kind.icon, size: 18),
                     label: Text(link.label),
                   ),
@@ -439,10 +530,18 @@ class _ContactActions extends ConsumerWidget {
         const SizedBox(height: 8),
         if (product.videos.isNotEmpty)
           Text(
-            l10n.a11yVideoThumbnail(product.titleFor(language)),
+            l10n.a11yVideoThumbnail(title),
             style: BrandTypography.bodySmall,
           ),
       ],
     );
   }
+
+  static ContactLink _ownerLink(ContactKind kind, String label, String value) =>
+      ContactLink(
+        id: 'settings-${kind.name}',
+        kind: kind,
+        label: label,
+        value: value,
+      );
 }
