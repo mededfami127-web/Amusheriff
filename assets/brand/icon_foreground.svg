@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="ASM adaptive foreground">
+  <defs>
+    <linearGradient id="goldGradientFG" gradientUnits="userSpaceOnUse"
+                    x1="512" y1="424" x2="512" y2="602">
+      <stop offset="0" stop-color="#786A08"/>
+      <stop offset="0.38" stop-color="#BE8C0E"/>
+      <stop offset="0.62" stop-color="#FAD660"/>
+      <stop offset="1" stop-color="#B0800C"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Transparent plate: only the sofa + ASM, sized for the 66% safe zone -->
+  <g transform="translate(512 512) scale(0.62) translate(-512 -512)">
+    <g fill="#FFFFFF">
+      <rect x="170" y="277" width="684" height="236" rx="72" ry="72"/>
+      <rect x="82" y="381" width="160" height="300" rx="72" ry="72"/>
+      <rect x="782" y="381" width="160" height="300" rx="72" ry="72"/>
+      <rect x="150" y="497" width="724" height="196" rx="62" ry="62"/>
+      <rect x="196" y="688" width="44" height="60" rx="20" ry="20"/>
+      <rect x="784" y="688" width="44" height="60" rx="20" ry="20"/>
+    </g>
+    <g stroke="#7A1E86" stroke-width="12" stroke-linecap="round" opacity="0.22">
+      <line x1="248" y1="540" x2="248" y2="650"/>
+      <line x1="776" y1="540" x2="776" y2="650"/>
+    </g>
+
+    <text x="512" y="596" text-anchor="middle"
+          font-family="DejaVu Serif, Georgia, 'Times New Roman', serif"
+          font-size="240" font-weight="700" letter-spacing="18"
+          fill="url(#goldGradientFG)">ASM</text>
+  </g>
+</svg>
