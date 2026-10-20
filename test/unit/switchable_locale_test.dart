@@ -1,3 +1,5 @@
+import 'package:amu_sharif_majlis/core/l10n/generated/app_localizations.dart';
+import 'package:amu_sharif_majlis/core/l10n/text_catalog.dart';
 import 'package:amu_sharif_majlis/core/utils/formatters.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -21,24 +23,31 @@ void main() {
     });
   });
 
-  group('supportedLocaleFor keeps Oromo off the platform locale list', () {
-    test('Oromo is presented to the platform as English', () {
-      expect(supportedLocaleFor('om'), equals(const Locale('en')));
-    });
-
-    test('shipped languages with platform support map one-to-one', () {
+  group('supportedLocaleFor mirrors supportedLocales, Oromo included', () {
+    test('every shipped language keeps its own platform locale', () {
       expect(supportedLocaleFor('en'), equals(const Locale('en')));
       expect(supportedLocaleFor('am'), equals(const Locale('am')));
       expect(supportedLocaleFor('ar'), equals(const Locale('ar')));
+      expect(supportedLocaleFor('om'), equals(const Locale('om')));
     });
 
     test('a region suffix does not change the result', () {
-      expect(supportedLocaleFor('om_ET'), equals(const Locale('en')));
+      expect(supportedLocaleFor('om_ET'), equals(const Locale('om')));
       expect(supportedLocaleFor('ar_AE'), equals(const Locale('ar')));
     });
 
-    test('unknown codes fall back to English', () {
+    test('an unsupported code falls back to English', () {
       expect(supportedLocaleFor('xx'), equals(const Locale('en')));
+    });
+
+    test('every returned locale is one the app actually supports', () {
+      for (final Locale locale in AppLocalizations.supportedLocales) {
+        expect(
+          supportedLocaleFor(locale.languageCode),
+          equals(locale),
+          reason: locale.languageCode,
+        );
+      }
     });
   });
 
@@ -56,12 +65,22 @@ void main() {
     });
   });
 
-  group('localeDisplayName labels the language picker', () {
+  group('localeDisplayName reuses the editor\'s locale names', () {
     test('every shipped language has its own label', () {
       expect(localeDisplayName('en'), equals('English'));
       expect(localeDisplayName('am'), equals('አማርኛ'));
       expect(localeDisplayName('ar'), equals('العربي'));
       expect(localeDisplayName('om'), equals('Oromoo'));
+    });
+
+    test('labels come from the generated catalog, not a second copy', () {
+      for (final String code in kAppTextLocales) {
+        expect(localeDisplayName(code), equals(kAppTextLocaleNames[code]));
+      }
+    });
+
+    test('a region suffix still finds the label', () {
+      expect(localeDisplayName('om_ET'), equals('Oromoo'));
     });
 
     test('unknown languages label as English', () {

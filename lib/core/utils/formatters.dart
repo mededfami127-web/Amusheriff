@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../l10n/text_catalog.dart';
+
 /// Locale-aware formatting helpers. Every formatter is created lazily and
 /// cached per locale so hot paths do not rebuild [NumberFormat] objects.
 ///
 /// The app ships text in four languages: English, Amharic, Arabic and Oromo.
-/// Money and date formatting uses [intlLocaleFor] so the same price and date
-/// stay stable when the user switches between `en`, `am`, `ar` and `om`.
+/// Formatting helpers take a locale that `intl` understands, so callers should
+/// resolve it with [intlLocaleFor] instead of passing the raw app language.
 abstract final class Formatters {
   const Formatters._();
 
@@ -114,24 +116,21 @@ abstract final class Formatters {
   static int _decimalDigits(num amount) => amount % 1 == 0 ? 0 : 2;
 }
 
-/// The four languages the app ships translations for.
-const List<String> _appLanguageCodes = <String>['en', 'am', 'ar', 'om'];
-
-/// An Android/ICU-style locale the `intl` package can format with.
+/// An `intl` locale that can format prices and dates for an app language.
 ///
-/// The app itself renders every string in Oromo, but the Flutter SDK and the
-/// `intl` package do not carry Oromo plural/currency patterns, so money and
-/// dates cannot be formatted directly from `om`. This helper maps the app
-/// locale to an `intl`-usable locale and never throws for an unsupported
-/// locale.
+/// The app translates every string itself, including Oromo, but the `intl`
+/// package ships no Oromo number/date patterns. Money and dates therefore use
+/// the closest pattern set the package does have, so `om` never reaches `intl`
+/// as a raw code and never throws.
+///
+/// This is deliberately separate from [supportedLocaleFor]: Oromo is a
+/// supported *app* locale, it just is not an `intl` one.
 String intlLocaleFor(String languageCode) {
-  switch (languageCode) {
-    case 'en':
-      return 'en_US';
-    case 'am':
-      return 'en_US';
+  switch (_languageCode(languageCode)) {
     case 'ar':
       return 'ar_AE';
+    case 'en':
+    case 'am':
     case 'om':
       return 'en_US';
     default:
@@ -139,36 +138,28 @@ String intlLocaleFor(String languageCode) {
   }
 }
 
-/// The best-supported `Locale` for the app language.
+/// The `Locale` for an app language, as listed in `supportedLocales`.
 ///
-/// Used where a real locale is required, for example the device's default
-/// `MaterialApp` locale, date pickers and any platform chrome that expects an
-/// actual ICU locale.
+/// Oromo is included: `AppLocalizations` ships `AppLocalizationsOm` and the
+/// app's delegate wrapper gap-fills Material/Cupertino for it, so mapping `om`
+/// to English here would render platform chrome in the wrong language.
 Locale supportedLocaleFor(String languageCode) {
-  final String code = languageCode.split('_').first;
-  if (!_appLanguageCodes.contains(code)) return const Locale('en');
-  if (code == 'om') return const Locale('en');
-  return Locale(code);
+  final String code = _languageCode(languageCode);
+  return isAppLocale(code) ? Locale(code) : const Locale('en');
 }
 
 /// True when the app ships its own localizations for [languageCode].
-bool isAppLocale(String languageCode) {
-  final String code = languageCode.split('_').first;
-  return _appLanguageCodes.contains(code);
-}
+///
+/// Delegates to the generated [kAppTextLocales] list so there is one source of
+/// truth for the shipped languages.
+bool isAppLocale(String languageCode) =>
+    kAppTextLocales.contains(_languageCode(languageCode));
 
-/// A display label for the app language picker.
-String localeDisplayName(String languageCode) {
-  switch (languageCode) {
-    case 'en':
-      return 'English';
-    case 'am':
-      return 'አማርኛ';
-    case 'ar':
-      return 'العربي';
-    case 'om':
-      return 'Oromoo';
-    default:
-      return 'English';
-  }
-}
+/// A display label for the app language picker, from [kAppTextLocaleNames].
+String localeDisplayName(String languageCode) =>
+    kAppTextLocaleNames[_languageCode(languageCode)] ??
+    kAppTextLocaleNames['en']!;
+
+/// Strips a region suffix (`om_ET`) and lower-cases the remaining code.
+String _languageCode(String languageCode) =>
+    languageCode.split('_').first.split('-').first.toLowerCase();
