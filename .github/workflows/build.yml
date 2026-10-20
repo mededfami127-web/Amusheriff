@@ -70,17 +70,21 @@ jobs:
 
       - name: Locate sdkmanager
         id: sdkmanager
-        env:
-          ANDROID_SDK_ROOT: ${{ runner.tool_cache }}/android/sdk
         run: |
           set -euo pipefail
+          sdk_root="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+          if [ -z "$sdk_root" ]; then
+            echo "::error::Neither ANDROID_HOME nor ANDROID_SDK_ROOT is set."
+            exit 1
+          fi
+
           found=""
-          if [ -x "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" ]; then
-            found="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
-          elif [ -x "$ANDROID_SDK_ROOT/cmdline-tools/16.0/bin/sdkmanager" ]; then
-            found="$ANDROID_SDK_ROOT/cmdline-tools/16.0/bin/sdkmanager"
+          if [ -x "$sdk_root/cmdline-tools/latest/bin/sdkmanager" ]; then
+            found="$sdk_root/cmdline-tools/latest/bin/sdkmanager"
+          elif [ -x "$sdk_root/cmdline-tools/16.0/bin/sdkmanager" ]; then
+            found="$sdk_root/cmdline-tools/16.0/bin/sdkmanager"
           else
-            for candidate in $(find "$ANDROID_SDK_ROOT" -type f -name sdkmanager -print 2>/dev/null | sort -V | tail -n 1); do
+            for candidate in $(find "$sdk_root" -type f -name sdkmanager -print 2>/dev/null | sort -V | tail -n 1); do
               if [ -x "$candidate" ]; then
                 found="$candidate"
               fi
@@ -88,28 +92,23 @@ jobs:
           fi
 
           if [ -z "$found" ]; then
-            echo "::error::sdkmanager was not found under ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+            echo "::error::sdkmanager was not found under $sdk_root"
             exit 1
           fi
 
-          mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
           echo "sdkmanager=$found" >> "$GITHUB_OUTPUT"
-          echo "sdkmanager_root=$(dirname "$found")/.." >> "$GITHUB_OUTPUT"
 
       - name: Accept Android SDK licenses
-        env:
-          ANDROID_SDK_ROOT: ${{ runner.tool_cache }}/android/sdk
         run: |
           "${{ steps.sdkmanager.outputs.sdkmanager }}" \
-            --sdk_root="$ANDROID_SDK_ROOT" \
+            --sdk_root="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}" \
             --licenses < /dev/null > /dev/null 2>&1 || true
 
       - name: Install Android SDK components
-        env:
-          ANDROID_SDK_ROOT: ${{ runner.tool_cache }}/android/sdk
         run: |
+          sdk_root="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
           "${{ steps.sdkmanager.outputs.sdkmanager }}" \
-            --sdk_root="$ANDROID_SDK_ROOT" \
+            --sdk_root="$sdk_root" \
             "platforms;android-34" \
             "build-tools;34.0.0" \
             "ndk;26.3.11579264" \
@@ -118,14 +117,14 @@ jobs:
               exit 1
             }
 
-          ndk_dir="$ANDROID_SDK_ROOT/ndk/26.3.11579264"
+          ndk_dir="$sdk_root/ndk/26.3.11579264"
           if [ ! -d "$ndk_dir" ]; then
             echo "::error::Expected NDK 26.3.11579264 was not installed."
             exit 1
           fi
 
-          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> "$GITHUB_ENV"
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> "$GITHUB_ENV"
+          echo "ANDROID_HOME=$sdk_root" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$sdk_root" >> "$GITHUB_ENV"
           echo "ANDROID_NDK_HOME=$ndk_dir" >> "$GITHUB_ENV"
 
       - uses: subosito/flutter-action@v2
