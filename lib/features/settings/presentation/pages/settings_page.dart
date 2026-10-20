@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/config/app_config.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/router/routes.dart';
 import '../../../../core/theme/brand_colors.dart';
 import '../../../../core/theme/gradients.dart';
 import '../../../../core/theme/typography.dart';
+import '../../../../core/utils/launcher.dart';
 import '../../../../core/widgets/app_scaffold.dart';
 import '../../../../core/widgets/gold_divider.dart';
 import '../../../admin/presentation/providers/admin_gate_providers.dart';
@@ -133,6 +135,28 @@ class SettingsPage extends ConsumerWidget {
             title: Text(l10n.settingsAbout, style: BrandTypography.titleMedium),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => context.push(Routes.about),
+          ),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: Icon(
+              Icons.privacy_tip_outlined,
+              color: dark ? BrandColors.goldLight : BrandColors.royalViolet,
+            ),
+            title: Text(
+              l10n.settingsPrivacyPolicy,
+              style: BrandTypography.titleMedium,
+            ),
+            trailing: const Icon(Icons.open_in_new_rounded, size: 18),
+            onTap: () => ref
+                .read(linkLauncherProvider)
+                .openWeb(AppConfig.privacyPolicyUrl)
+                .then((bool ok) {
+                  if (!ok && context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(l10n.contactLaunchFailed)),
+                    );
+                  }
+                }),
           ),
           const SizedBox(height: 26),
           // Discreet owner entry — the same username/password panel the logo's

@@ -883,6 +883,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsLanguage => 'اللغة';
 
   @override
+  String get settingsPrivacyPolicy => 'سياسة الخصوصية';
+
+  @override
   String get settingsTheme => 'المظهر';
 
   @override

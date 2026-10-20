@@ -2960,6 +2960,16 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
     },
   ),
   AppTextEntry(
+    key: 'settingsPrivacyPolicy',
+    sectionKey: 'settingsTitle',
+    defaults: <String, String>{
+      'en': 'Privacy Policy',
+      'am': 'የግላዊነት ፖሊሲ',
+      'ar': 'سياسة الخصوصية',
+      'om': 'Imaammata Dhuunfaa',
+    },
+  ),
+  AppTextEntry(
     key: 'settingsTheme',
     sectionKey: 'settingsTitle',
     defaults: <String, String>{

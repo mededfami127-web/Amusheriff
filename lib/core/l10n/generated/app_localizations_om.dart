@@ -890,6 +890,9 @@ class AppLocalizationsOm extends AppLocalizations {
   String get settingsLanguage => 'Afaan';
 
   @override
+  String get settingsPrivacyPolicy => 'Imaammata Dhuunfaa';
+
+  @override
   String get settingsTheme => 'Mul\'ata';
 
   @override

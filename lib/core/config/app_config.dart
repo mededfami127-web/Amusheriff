@@ -38,6 +38,11 @@ class AppConfig {
 
   bool get hasSentry => sentryDsn.isNotEmpty;
 
+  /// The privacy policy the Settings row opens. Also mirrored as a static page
+  /// in `docs/privacy/index.html` for the store listing.
+  static const String privacyPolicyUrl =
+      'https://sites.google.com/view/amusheriff-privacy/home';
+
   /// Tables the storefront subscribes to. Keeping the list in one place makes
   /// the realtime wiring auditable.
   static const List<String> realtimeTables = <String>[

@@ -866,6 +866,9 @@ class AppLocalizationsAm extends AppLocalizations {
   String get settingsLanguage => 'ቋንቋ';
 
   @override
+  String get settingsPrivacyPolicy => 'የግላዊነት ፖሊሲ';
+
+  @override
   String get settingsTheme => 'አቀራረብ';
 
   @override

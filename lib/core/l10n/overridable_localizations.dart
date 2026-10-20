@@ -1035,6 +1035,10 @@ class OverridableAppLocalizations extends AppLocalizations {
       _text('settingsLanguage', _base.settingsLanguage);
 
   @override
+  String get settingsPrivacyPolicy =>
+      _text('settingsPrivacyPolicy', _base.settingsPrivacyPolicy);
+
+  @override
   String get settingsTheme => _text('settingsTheme', _base.settingsTheme);
 
   @override
