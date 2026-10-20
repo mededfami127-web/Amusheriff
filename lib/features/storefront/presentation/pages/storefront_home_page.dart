@@ -185,7 +185,6 @@ class _Hero extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final AppLocalizations l10n = AppLocalizations.of(context);
-    final String? primary = ref.watch(primaryContactLinkProvider)?.displayValue;
     final Map<String, String> siteContent = ref.watch(
       siteContentValueProvider(language),
     );
@@ -197,9 +196,10 @@ class _Hero extends ConsumerWidget {
         siteContent['heroButtonLabel'] ?? fallback;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 6),
+      key: const ValueKey<String>('home-hero'),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 2),
       child: Container(
-        padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+        padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
         decoration: BoxDecoration(
           gradient: BrandGradients.brandVertical,
           borderRadius: BorderRadius.circular(20),
@@ -214,37 +214,24 @@ class _Hero extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(999),
-                border: Border.all(
-                  color: BrandColors.goldLight.withValues(alpha: 0.75),
-                ),
-              ),
-              child: Text(
-                l10n.brandMonogram,
-                style: BrandTypography.labelSmall.copyWith(
-                  color: BrandColors.goldLight,
-                  letterSpacing: 3,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
             Image.asset(
               'assets/brand/logo_transparent.png',
-              height: 34,
+              height: 24,
               filterQuality: FilterQuality.high,
               errorBuilder: (_, __, ___) => const _HeroFallbackLogo(),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 4),
             Text(
               heroTitle(settings.storeNameFor(language).toUpperCase()),
-              style: BrandTypography.displaySmall.copyWith(
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: BrandTypography.titleLarge.copyWith(
                 color: BrandColors.ivory,
+                fontSize: 18,
+                letterSpacing: 1.2,
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 4),
             LiveEditableText(
               textKey: 'tagline',
               text: settings.hasTagline
@@ -252,15 +239,12 @@ class _Hero extends ConsumerWidget {
                   : heroTagline(l10n.tagline),
               dark: true,
               dense: true,
-              maxLines: 2,
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: BrandTypography.bodySmall.copyWith(
                 color: BrandColors.ivory.withValues(alpha: 0.88),
               ),
             ),
-            const SizedBox(height: 6),
-            const GoldDivider(withOrnament: true),
-            const SizedBox(height: 6),
             const SizedBox(height: 8),
             Row(
               children: <Widget>[
@@ -268,7 +252,6 @@ class _Hero extends ConsumerWidget {
                   child: _HeroAction(
                     icon: Icons.grid_view_rounded,
                     label: heroButtonLabel(l10n.sectionBrowseCategories),
-                    subtitle: null,
                     textKey: 'sectionBrowseCategories',
                     onTap: () => context.push(Routes.search),
                   ),
@@ -279,7 +262,6 @@ class _Hero extends ConsumerWidget {
                     icon: Icons.chat_bubble_outline_rounded,
                     label: heroButtonLabel(l10n.actionContactOwner),
                     textKey: 'actionContactOwner',
-                    subtitle: primary,
                     onTap: () => context.push(Routes.about),
                   ),
                 ),
@@ -300,8 +282,8 @@ class _HeroFallbackLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 34,
-      width: 34,
+      height: 24,
+      width: 24,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
@@ -324,13 +306,11 @@ class _HeroAction extends StatelessWidget {
     required this.label,
     required this.textKey,
     required this.onTap,
-    this.subtitle,
   });
 
   final IconData icon;
   final String label;
   final String textKey;
-  final String? subtitle;
   final VoidCallback onTap;
 
   @override
@@ -342,12 +322,12 @@ class _HeroAction extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Icon(icon, size: 20, color: BrandColors.goldLight),
-              const SizedBox(height: 8),
+              Icon(icon, size: 14, color: BrandColors.goldLight),
+              const SizedBox(height: 3),
               LiveEditableText(
                 textKey: textKey,
                 text: label,
@@ -357,20 +337,9 @@ class _HeroAction extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: BrandTypography.labelLarge.copyWith(
                   color: BrandColors.ivory,
-                  fontSize: 13,
+                  fontSize: 12,
                 ),
               ),
-              if (subtitle != null) ...<Widget>[
-                const SizedBox(height: 3),
-                Text(
-                  subtitle!,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: BrandTypography.bodySmall.copyWith(
-                    color: BrandColors.ivory.withValues(alpha: 0.72),
-                  ),
-                ),
-              ],
             ],
           ),
         ),
