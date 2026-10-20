@@ -1,7 +1,12 @@
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 /// Locale-aware formatting helpers. Every formatter is created lazily and
 /// cached per locale so hot paths do not rebuild [NumberFormat] objects.
+///
+/// The app ships text in four languages: English, Amharic, Arabic and Oromo.
+/// Money and date formatting uses [intlLocaleFor] so the same price and date
+/// stay stable when the user switches between `en`, `am`, `ar` and `om`.
 abstract final class Formatters {
   const Formatters._();
 
@@ -105,4 +110,63 @@ abstract final class Formatters {
   }
 
   static int _decimalDigits(num amount) => amount % 1 == 0 ? 0 : 2;
+}
+
+/// The four languages the app ships translations for.
+const List<String> _appLanguageCodes = <String>['en', 'am', 'ar', 'om'];
+
+/// An Android/ICU-style locale the `intl` package can format with.
+///
+/// The app itself renders every string in Oromo, but the Flutter SDK and the
+/// `intl` package do not carry Oromo plural/currency patterns, so money and
+/// dates cannot be formatted directly from `om`. This helper maps the app
+/// locale to an `intl`-usable locale and never throws for an unsupported
+/// locale.
+String intlLocaleFor(String languageCode) {
+  switch (languageCode) {
+    case 'en':
+      return 'en_US';
+    case 'am':
+      return 'en_US';
+    case 'ar':
+      return 'ar_AE';
+    case 'om':
+      return 'en_US';
+    default:
+      return 'en_US';
+  }
+}
+
+/// The best-supported `Locale` for the app language.
+///
+/// Used where a real locale is required, for example the device's default
+/// `MaterialApp` locale, date pickers and any platform chrome that expects an
+/// actual ICU locale.
+Locale supportedLocaleFor(String languageCode) {
+  final String code = languageCode.split('_').first;
+  if (!_appLanguageCodes.contains(code)) return const Locale('en');
+  if (code == 'om') return const Locale('en');
+  return Locale(code);
+}
+
+/// True when the app ships its own localizations for [languageCode].
+bool isAppLocale(String languageCode) {
+  final String code = languageCode.split('_').first;
+  return _appLanguageCodes.contains(code);
+}
+
+/// A display label for the app language picker.
+String localeDisplayName(String languageCode) {
+  switch (languageCode) {
+    case 'en':
+      return 'English';
+    case 'am':
+      return 'አማርኛ';
+    case 'ar':
+      return 'العربي';
+    case 'om':
+      return 'Oromoo';
+    default:
+      return 'English';
+  }
 }
