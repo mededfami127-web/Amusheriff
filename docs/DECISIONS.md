@@ -589,11 +589,18 @@ Closing the remaining holes turned the formatting exclusion above into work:
   tag and a dispatch are exactly where an Xcode result is actionable, so the
   compile stays available there while `ci` is a real signal again on push.
 
-Android's release path stays where D-034 put it — `build.yml`, on a `v*` tag or a
-manual dispatch — because Play signing is the entire point of that job and a
-signed AAB on every push to `main` would be waste. It has been exercised for real
-once already: the `v1.0.0` tag ran the full `build` workflow to green in 11m42s
-and uploaded the signed APK and AAB.
+Android's release path stays where D-034 put it — `build.yml` — but it now runs
+on every push to `main` as well as on a `v*` tag and a manual dispatch, and it
+builds the AAB as a **release** bundle every time, under a name that does not
+change with the trigger (`asm-<flavor>-release-aab`). The earlier arrangement,
+where a push produced only a debug AAB, meant the store artifact simply did not
+exist for the newest commit: the AAB was reachable only from a tag, so "where is
+the AAB?" cost a release. One extra unsigned-scoped Android build per push is the
+price, and it is the artifact people actually look for. Signing still depends on
+the four secrets: present, the bundle is Play-ready; absent, Gradle's debug-key
+fallback is used and the run summary says the artifact is internal-testing only.
+The path has been exercised for real once: the `v1.0.0` tag ran the full workflow
+to green in 11m42s and uploaded a debug APK and a signed AAB.
 
 ### D-036 — Diagnosing "every screen shows an error" on the device
 

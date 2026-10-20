@@ -40,13 +40,13 @@ is tracked in `docs/DECISIONS.md` → "Open items handed to Part 2".
 | Edge Function | `deno check` · `deno lint` · `deno fmt --check supabase/functions/inquiry/index.ts` | clean on Deno 2.9.7 |
 | RLS acceptance suite | `bash scripts/run_rls_tests.sh` | **25/25 checks passed** on PostgreSQL 16.15 |
 | Migration runner | `bash scripts/apply_migrations.sh --dry-run`, then `--apply` twice | plan, dry run, apply and re-apply all clean on PostgreSQL 16.15 |
-| Signed release (Android) | `.github/workflows/build.yml` on the `v1.0.0` tag | **success** — signed APK + AAB, 11m42s |
+| Signed release (Android) | `.github/workflows/build.yml` on the `v1.0.0` tag | **success** — debug APK + signed AAB, 11m42s |
 
 The signed release has to run on GitHub's runners: this environment has no
 Android SDK or Xcode (and too little RAM for the Gradle daemon), so the three
-platform builds that CI performs — the release APK/AAB on a `v*` tag, the iOS
-release compile (`v*` tag or manual dispatch) and the per-push debug APK — are
-the ones verified there. What
+platform builds that CI performs — the release AAB on every push and tag, the
+iOS release compile (`v*` tag or manual dispatch) and the per-push debug APK —
+are the ones verified there. What
 remains unverified anywhere is the device: playback, signing for the App Store,
 and the Edge Function's rate limiting under the Edge Runtime. See
 `docs/DECISIONS.md` → D-034, D-035 and "Open items handed to Part 2".
@@ -62,7 +62,7 @@ runners; nothing is deployed from them.
 | --- | --- | --- |
 | [`ci.yml`](.github/workflows/ci.yml) | push + PR to `main`, `v*` tag, dispatch | generated sources are in sync, code is formatted, every locale has every key, `flutter analyze --fatal-infos` is clean, 170 tests pass, a release bundle compiles, the RLS suite passes on PostgreSQL 16, and the Edge Function type-checks, lints and formats. The unsigned iOS compile is in the same workflow but runs on a `v*` tag or a manual dispatch only — see the note below |
 | [`debug-apk.yml`](.github/workflows/debug-apk.yml) | push to `main`, dispatch | a dev-flavor debug APK, uploaded as the `asm-dev-debug-apk` artifact |
-| [`build.yml`](.github/workflows/build.yml) | push to `main`, `v*` tag, dispatch | on a push, the verify job (analysis + tests); on a tag or a dispatch, also a release APK and a Play-ready **signed** AAB (needs the four signing secrets) |
+| [`build.yml`](.github/workflows/build.yml) | push to `main`, `v*` tag, dispatch | analysis + tests, then a debug APK and a **release AAB** (`asm-<flavor>-release-aab`, built on every trigger). With the four signing secrets the AAB is signed with the upload key and Play-ready; without them it is debug-signed and the run says so |
 | [`supabase-db-push.yml`](.github/workflows/supabase-db-push.yml) | push + PR to `main`, dispatch | migrations plan, dry-run, apply and re-apply cleanly against a throwaway database |
 
 **Why the iOS job is not on the push path.** GitHub's hosted macOS pool has
@@ -207,11 +207,12 @@ variables → Actions → New repository secret*:
 
 `.github/workflows/build.yml` decodes `ANDROID_KEYSTORE_BASE64` into
 `android/app/upload-keystore.jks`, writes `android/key.properties`, checks the
-decoded file really is a keystore with `keytool -list`, and then builds the APK
-and the AAB — so the bundle is signed with your upload key. The job fails if
-the config or any signing secret is missing, if the config still contains
-example values, or if the base64 is not a valid keystore. It also checks the
-finished AAB for a signing certificate before uploading the artifact.
+decoded file really is a keystore with `keytool -list`, and then builds the debug
+APK and the release AAB — so the bundle is signed with your upload key. The job
+fails if the flavor config is missing or still contains example values, or if
+the base64 is not a valid keystore. When the four signing secrets are absent the
+AAB is still built, but debug-signed, and the run warns that it cannot be
+uploaded to Play — check the run summary before using it.
 
 **Optional shortcut** — `CONFIG_BASE64` (see step 3): when that secret is set it
 is decoded straight to `config/<flavor>.json`, replacing the three individual

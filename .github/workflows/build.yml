@@ -10,9 +10,14 @@ name: flutter ci
 # internal testing and says so in the summary, instead of failing the run.
 #
 # Also runs on a version tag (`v1.2.3`), where the flavor is always `prod`, and on
-# every push to `main`, where only the verify job runs — the artifacts already
-# come from `debug-apk.yml` on push and from a tag/dispatch here, so a push does
-# not pay for an APK/AAB it would have built twice.
+# every push to `main`, which builds the same two artifacts — a debug APK and a
+# *release* AAB — so the newest store bundle is always one download away from the
+# Actions tab.
+#
+# The AAB is a release bundle on every trigger, not only on a tag. Without the
+# four signing secrets Gradle signs it with the debug key (see
+# android/app/build.gradle.kts) and the run says so in its summary: a release-mode
+# bundle for internal testing, never a silent substitute for a Play upload.
 
 on:
   workflow_dispatch:
@@ -61,10 +66,6 @@ jobs:
 
   android:
     name: Android debug APK + AAB
-    # Push-to-main runs stop at `verify`: `debug-apk.yml` already builds the
-    # per-push APK, and the AAB exists to sign a release, which only a tag or a
-    # manual run can do.
-    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     needs: verify
     timeout-minutes: 60
@@ -253,17 +254,21 @@ jobs:
           flutter build apk --debug
           --dart-define-from-file=config/${{ steps.flavor.outputs.name }}.json
 
-      - name: Build release App Bundle (signed)
-        if: steps.signing.outputs.release == 'true' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+      # A release bundle, on every trigger. On a tag it is obfuscated for the
+      # store; everywhere else it is plain, so a bundle downloaded from a `main`
+      # run can be inspected. Gradle picks the signer: the upload key when the
+      # four secrets are present, the debug key otherwise.
+      - name: Build App Bundle (release, obfuscated)
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
         run: >
           flutter build appbundle --release
           --dart-define-from-file=config/prod.json
           --obfuscate --split-debug-info=build/symbols
 
-      - name: Build debug-signed App Bundle
-        if: steps.signing.outputs.release != 'true' || (github.event_name != 'push' || !startsWith(github.ref, 'refs/tags/v'))
+      - name: Build App Bundle (release)
+        if: github.event_name != 'push' || !startsWith(github.ref, 'refs/tags/v')
         run: >
-          flutter build appbundle --debug
+          flutter build appbundle --release
           --dart-define-from-file=config/${{ steps.flavor.outputs.name }}.json
 
       - name: Show what was built
@@ -272,18 +277,11 @@ jobs:
           set -euo pipefail
           echo "=== build outputs ==="
           ls -lh build/app/outputs/flutter-apk/app-debug.apk
-          if [ "${{ steps.signing.outputs.release }}" = "true" ] && [ "${{ github.event_name }}" = "push" ] && [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            echo "=== release AAB (signed) ==="
-            ls -lh build/app/outputs/bundle/release/app-release.aab
-          elif [ "${{ steps.signing.outputs.release }}" = "true" ]; then
-            ls -lh build/app/outputs/flutter-apk/app-release.apk \
-                  build/app/outputs/bundle/release/app-release.aab
-          else
-            ls -lh build/app/outputs/bundle/debug/app-debug.aab
-          fi
+          ls -lh build/app/outputs/bundle/release/app-release.aab
 
-      # Three separate artifacts so a device build and a store build never have
-      # to be downloaded together.
+      # Two artifacts, one name each, so a device build and a store build never
+      # have to be downloaded together — and the AAB name does not change with
+      # the trigger, which is what made it look missing on a push.
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
@@ -291,30 +289,11 @@ jobs:
           path: build/app/outputs/flutter-apk/app-debug.apk
           if-no-files-found: error
 
-      - name: Upload release AAB only
-        if: steps.signing.outputs.release == 'true' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+      - name: Upload release AAB
         uses: actions/upload-artifact@v4
         with:
-          name: asm-prod-release
+          name: asm-${{ steps.flavor.outputs.name }}-release-aab
           path: build/app/outputs/bundle/release/app-release.aab
-          if-no-files-found: error
-
-      - name: Upload release APK + AAB
-        if: steps.signing.outputs.release == 'true' && (github.event_name != 'push' || !startsWith(github.ref, 'refs/tags/v'))
-        uses: actions/upload-artifact@v4
-        with:
-          name: asm-${{ steps.flavor.outputs.name }}-release
-          path: |
-            build/app/outputs/flutter-apk/app-release.apk
-            build/app/outputs/bundle/release/app-release.aab
-          if-no-files-found: error
-
-      - name: Upload debug-signed AAB
-        if: steps.signing.outputs.release != 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: asm-${{ steps.flavor.outputs.name }}-debug-aab
-          path: build/app/outputs/bundle/debug/app-debug.aab
           if-no-files-found: error
 
       - name: Summarise the run
@@ -327,9 +306,9 @@ jobs:
             echo "| --- | --- |"
             echo "| Debug APK | yes — install on a device |"
             if [ "${{ steps.signing.outputs.release }}" = "true" ]; then
-              echo "| Release AAB | yes — signed with the upload key, upload to Play |"
+              echo "| Release AAB | \`asm-${FLAVOR}-release-aab\` — signed with the upload key, upload to Play |"
             else
-              echo "| Debug AAB | internal testing only — configure the keystore secrets for a Play-ready bundle |"
+              echo "| Release AAB | \`asm-${FLAVOR}-release-aab\` — release-mode but debug-signed, internal testing only; add the four keystore secrets for a Play-ready bundle |"
             fi
           } >> "$GITHUB_STEP_SUMMARY"
         env:
