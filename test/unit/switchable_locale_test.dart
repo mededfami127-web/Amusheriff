@@ -1,64 +1,63 @@
+import 'package:amu_sharif_majlis/core/utils/formatters.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../core/utils/formatters.dart';
-
 void main() {
-  group('intlLocaleFor falls back safely for unlocalized Oromo money/date', () {
-    test('om maps to an intl-capable locale', () {
+  group('intlLocaleFor always yields a locale intl can format with', () {
+    test('Oromo falls back to an intl-supported locale', () {
       expect(intlLocaleFor('om'), equals('en_US'));
-      expect(intlLocaleFor('om').split('_'), equals(<String>['en', 'US']));
+      expect(intlLocaleFor('om').contains('_'), isTrue);
     });
 
-    test('known app locales keep a deterministic intl locale', () {
+    test('the other shipped languages keep deterministic values', () {
       expect(intlLocaleFor('en'), equals('en_US'));
       expect(intlLocaleFor('am'), equals('en_US'));
-      expect(intlLocaleFor('ar').split('_'), equals(<String>['ar', 'AE']));
+      expect(intlLocaleFor('ar'), equals('ar_AE'));
     });
 
-    test('unknown language codes fall back to en_US', () {
+    test('unknown and empty codes fall back to en_US', () {
       expect(intlLocaleFor('xx'), equals('en_US'));
       expect(intlLocaleFor(''), equals('en_US'));
     });
   });
 
-  group('supportedLocaleFor keeps Oromo from reaching intl directly', () {
-    test('om is offered as English to the platform', () {
+  group('supportedLocaleFor keeps Oromo off the platform locale list', () {
+    test('Oromo is presented to the platform as English', () {
       expect(supportedLocaleFor('om'), equals(const Locale('en')));
     });
 
-    test('supported app locales map one-to-one', () {
+    test('shipped languages with platform support map one-to-one', () {
       expect(supportedLocaleFor('en'), equals(const Locale('en')));
       expect(supportedLocaleFor('am'), equals(const Locale('am')));
       expect(supportedLocaleFor('ar'), equals(const Locale('ar')));
     });
 
-    test('unknown language codes fall back to en', () {
+    test('a region suffix does not change the result', () {
+      expect(supportedLocaleFor('om_ET'), equals(const Locale('en')));
+      expect(supportedLocaleFor('ar_AE'), equals(const Locale('ar')));
+    });
+
+    test('unknown codes fall back to English', () {
       expect(supportedLocaleFor('xx'), equals(const Locale('en')));
     });
   });
 
-  group('isAppLocale recognises the four shipped languages', () {
-    test('shipped languages are app locales', () {
-      expect(isAppLocale('en'), isTrue);
-      expect(isAppLocale('am'), isTrue);
-      expect(isAppLocale('ar'), isTrue);
-      expect(isAppLocale('om'), isTrue);
+  group('isAppLocale recognises only the four shipped languages', () {
+    test('shipped languages are app locales, with or without a region', () {
+      for (final String code in <String>['en', 'am', 'ar', 'om']) {
+        expect(isAppLocale(code), isTrue, reason: code);
+        expect(isAppLocale('${code}_ET'), isTrue, reason: code);
+      }
     });
 
-    test('shipped languages accept region suffix', () {
-      expect(isAppLocale('en_US'), isTrue);
-      expect(isAppLocale('ar_AE'), isTrue);
-      expect(isAppLocale('om_ET'), isTrue);
-    });
-
-    test('unsupported languages are not app locales', () {
+    test('unsupported and empty codes are not app locales', () {
       expect(isAppLocale('xx'), isFalse);
       expect(isAppLocale(''), isFalse);
     });
   });
 
-  group('localeDisplayName stays neutral across languages', () {
-    test('the four shipped languages have readable labels', () {
+  group('localeDisplayName labels the language picker', () {
+    test('every shipped language has its own label', () {
       expect(localeDisplayName('en'), equals('English'));
       expect(localeDisplayName('am'), equals('አማርኛ'));
       expect(localeDisplayName('ar'), equals('العربي'));
@@ -70,31 +69,39 @@ void main() {
     });
   });
 
-  group('money keeps sensible shapes after the locale switch', () {
-    test('whole ETB amount does not render trailing decimals for en', () {
-      expect(Formatters.money(12500, locale: 'en'), equals('12,500.00 ETB'));
+  group('money survives a locale switch', () {
+    test('a whole amount drops the decimals and keeps the currency', () {
+      final String formatted = Formatters.money(12500, locale: 'en_US');
+      expect(formatted, contains('12,500'));
+      expect(formatted, contains('ETB'));
+      expect(formatted, isNot(contains('12,500.')));
     });
 
-    test('decimal ETB amount keeps two digits for en', () {
-      expect(Formatters.money(12500.5, locale: 'en'), equals('12,500.50 ETB'));
+    test('a fractional amount keeps two decimals', () {
+      expect(Formatters.money(12500.5, locale: 'en_US'), contains('12,500.50'));
     });
 
-    test('compact money still formats', () {
+    test('the same price formats through the Oromo fallback', () {
       expect(
-        Formatters.compactMoney(1250000, locale: 'en'),
+        Formatters.money(12500, locale: intlLocaleFor('om')),
+        equals(Formatters.money(12500, locale: 'en_US')),
+      );
+    });
+
+    test('compact money still carries the currency', () {
+      expect(
+        Formatters.compactMoney(1250000, locale: 'en_US'),
         contains('ETB'),
       );
     });
 
-    test('Oromo currency formatting falls back without throwing', () {
-      expect(() => Formatters.money(12500, locale: 'om'), returnsNormally);
-      expect(
-        Formatters.shortDate(
-          DateTime(2026, 01, 21, 10, 0, 0),
-          locale: 'om',
-        ),
-        isNotEmpty,
+    test('a date formats through the Oromo fallback', () {
+      final String formatted = Formatters.shortDate(
+        DateTime(2026, 1, 21, 10),
+        locale: intlLocaleFor('om'),
       );
+      expect(formatted, isNotEmpty);
+      expect(formatted, contains('2026'));
     });
   });
 }

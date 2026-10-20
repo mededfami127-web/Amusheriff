@@ -13,7 +13,7 @@ No unreleased changes.
 
 ### Added
 
-- First public release of the Amusherrif storefront and admin app.
+- First public release of the Amusheriff storefront and admin app.
 - Storefront home, category, product detail, search, favorites, and privacy-linked settings screens.
 - Admin gate with password entry, dashboard, products, categories, contacts, inquiries,
   site content and site settings editing, and system check diagnostics.
@@ -54,5 +54,5 @@ No unreleased changes.
   `android/key.properties` locally or through the CI `ANDROID_KEYSTORE_BASE64` secret for a
   publishable build.
 
-[Unreleased]: https://github.com/mededfami127-web/Amusherrif/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/mededfami127-web/Amusherrif/releases/tag/v1.0.0
+[Unreleased]: https://github.com/mededfami127-web/Amusheriff/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/mededfami127-web/Amusheriff/releases/tag/v1.0.0

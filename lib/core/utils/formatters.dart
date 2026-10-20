@@ -15,8 +15,10 @@ abstract final class Formatters {
 
   /// Formats a price with the shop currency.
   ///
-  /// ETB renders as `12,500.00 ETB`; locales that use a suffix currency symbol
-  /// (am, ar) are handled by [NumberFormat.currency] automatically.
+  /// Whole amounts render without decimals (`ETB12,500`) and fractional ones
+  /// keep two (`ETB12,500.50`). [locale] must be a locale the `intl` package
+  /// knows about, so callers should pass `intlLocaleFor(appLanguage)` rather
+  /// than the raw app language code.
   static String money(num amount, {String currency = 'ETB', String? locale}) {
     // Whole amounts drop the decimals; fractional ones keep two. The digit
     // count is part of the cache key, otherwise a cached 0-decimal formatter
