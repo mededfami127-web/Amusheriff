@@ -68,6 +68,24 @@ jobs:
           distribution: zulu
           java-version: "17"
 
+      - uses: actions/android-sdk/setup-sdk@v3
+        with:
+          cmdline-tools-version: 11076708
+          packages: |
+            platforms;android-34
+            build-tools;34.0.0
+            ndk;26.3.11579264
+            platform-tools
+
+      - name: Ensure repo NDK version
+        run: |
+          ndk_dir="$ANDROID_SDK_ROOT/ndk/26.3.11579264"
+          if [ ! -d "$ndk_dir" ]; then
+            echo "::error::Expected NDK 26.3.11579264 was not installed by actions/android-sdk/setup-sdk."
+            exit 1
+          fi
+          echo "ANDROID_NDK_HOME=$ndk_dir" >> "$GITHUB_ENV"
+
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
@@ -161,6 +179,7 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
+          mkdir -p android/app
           printf '%s' "$KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
 
           # A truncated or mistyped secret decodes to a file that is not a
@@ -201,8 +220,11 @@ jobs:
       - name: Show what was built
         shell: bash
         run: |
+          set -euo pipefail
+          echo "=== build outputs ==="
           ls -lh build/app/outputs/flutter-apk/app-debug.apk
           if [ "${{ steps.signing.outputs.release }}" = "true" ] && [ "${{ github.event_name }}" = "push" ] && [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            echo "=== release AAB (signed) ==="
             ls -lh build/app/outputs/bundle/release/app-release.aab
           elif [ "${{ steps.signing.outputs.release }}" = "true" ]; then
             ls -lh build/app/outputs/flutter-apk/app-release.apk \
