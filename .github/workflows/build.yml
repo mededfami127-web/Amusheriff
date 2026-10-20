@@ -68,21 +68,47 @@ jobs:
           distribution: zulu
           java-version: "17"
 
+      - name: Locate sdkmanager
+        id: sdkmanager
+        env:
+          ANDROID_SDK_ROOT: ${{ runner.tool_cache }}/android/sdk
+        run: |
+          set -euo pipefail
+          found=""
+          if [ -x "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" ]; then
+            found="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          elif [ -x "$ANDROID_SDK_ROOT/cmdline-tools/16.0/bin/sdkmanager" ]; then
+            found="$ANDROID_SDK_ROOT/cmdline-tools/16.0/bin/sdkmanager"
+          else
+            for candidate in $(find "$ANDROID_SDK_ROOT" -type f -name sdkmanager -print 2>/dev/null | sort -V | tail -n 1); do
+              if [ -x "$candidate" ]; then
+                found="$candidate"
+              fi
+            done
+          fi
+
+          if [ -z "$found" ]; then
+            echo "::error::sdkmanager was not found under ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+            exit 1
+          fi
+
+          mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
+          echo "sdkmanager=$found" >> "$GITHUB_OUTPUT"
+          echo "sdkmanager_root=$(dirname "$found")/.." >> "$GITHUB_OUTPUT"
+
       - name: Accept Android SDK licenses
         env:
           ANDROID_SDK_ROOT: ${{ runner.tool_cache }}/android/sdk
         run: |
-          for pkg in __sdk__tools; do
-            "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" \
-              --sdk_root="$ANDROID_SDK_ROOT" \
-              --licenses < /dev/null > /dev/null 2>&1 || true
-          done
+          "${{ steps.sdkmanager.outputs.sdkmanager }}" \
+            --sdk_root="$ANDROID_SDK_ROOT" \
+            --licenses < /dev/null > /dev/null 2>&1 || true
 
       - name: Install Android SDK components
         env:
           ANDROID_SDK_ROOT: ${{ runner.tool_cache }}/android/sdk
         run: |
-          "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" \
+          "${{ steps.sdkmanager.outputs.sdkmanager }}" \
             --sdk_root="$ANDROID_SDK_ROOT" \
             "platforms;android-34" \
             "build-tools;34.0.0" \
