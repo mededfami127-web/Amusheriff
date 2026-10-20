@@ -68,10 +68,13 @@ jobs:
           distribution: zulu
           java-version: "17"
 
-      - name: Configure Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Accept Android SDK licenses
+        env:
+          ANDROID_HOME: ${{ runner.tool_cache }}/android/sdk
+        run: |
+          yes | sdkmanager --sdk_root="$ANDROID_HOME" --licenses > /dev/null
 
-      - name: Install required SDK components
+      - name: Install Android SDK components
         env:
           ANDROID_HOME: ${{ runner.tool_cache }}/android/sdk
         run: |
