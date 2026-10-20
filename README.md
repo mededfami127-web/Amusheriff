@@ -19,8 +19,8 @@ database schema (RLS + storage policies), seed data and the RLS acceptance
 suite are done and green, and so are the screens: the storefront catalogue and
 the admin gateway (categories, products with media, contact links, branding,
 inquiries, password). Continuous integration covers all of it — analysis, tests,
-formatting, localization parity, a release compile, an unsigned iOS build, the
-Edge Function and the database. What is still open — device/emulator
+formatting, localization parity, a release compile, the Edge Function and the
+database, plus an unsigned iOS build on release tags and on demand. What is still open — device/emulator
 integration tests, CI/CD promotion gates and hardware-verified release builds —
 is tracked in `docs/DECISIONS.md` → "Open items handed to Part 2".
 
@@ -45,7 +45,8 @@ is tracked in `docs/DECISIONS.md` → "Open items handed to Part 2".
 The signed release has to run on GitHub's runners: this environment has no
 Android SDK or Xcode (and too little RAM for the Gradle daemon), so the three
 platform builds that CI performs — the release APK/AAB on a `v*` tag, the iOS
-release compile and the per-push debug APK — are the ones verified there. What
+release compile (`v*` tag or manual dispatch) and the per-push debug APK — are
+the ones verified there. What
 remains unverified anywhere is the device: playback, signing for the App Store,
 and the Edge Function's rate limiting under the Edge Runtime. See
 `docs/DECISIONS.md` → D-034, D-035 and "Open items handed to Part 2".
@@ -59,11 +60,18 @@ runners; nothing is deployed from them.
 
 | Workflow | Trigger | What it proves |
 | --- | --- | --- |
-| [`ci.yml`](.github/workflows/ci.yml) | push + PR to `main`, dispatch |generated sources are in sync, code is formatted, every locale has every key,
-`flutter analyze --fatal-infos` is clean, 170 tests pass, a release bundle compiles, the RLS suite passes on PostgreSQL 16, the Edge Function type-checks, lints and formats, and the iOS app compiles unsigned |
+| [`ci.yml`](.github/workflows/ci.yml) | push + PR to `main`, `v*` tag, dispatch | generated sources are in sync, code is formatted, every locale has every key, `flutter analyze --fatal-infos` is clean, 170 tests pass, a release bundle compiles, the RLS suite passes on PostgreSQL 16, and the Edge Function type-checks, lints and formats. The unsigned iOS compile is in the same workflow but runs on a `v*` tag or a manual dispatch only — see the note below |
 | [`debug-apk.yml`](.github/workflows/debug-apk.yml) | push to `main`, dispatch | a dev-flavor debug APK, uploaded as the `asm-dev-debug-apk` artifact |
-| [`build.yml`](.github/workflows/build.yml) | `v*` tag, dispatch | verify, then a release APK and a Play-ready **signed** AAB (needs the four signing secrets) |
+| [`build.yml`](.github/workflows/build.yml) | push to `main`, `v*` tag, dispatch | on a push, the verify job (analysis + tests); on a tag or a dispatch, also a release APK and a Play-ready **signed** AAB (needs the four signing secrets) |
 | [`supabase-db-push.yml`](.github/workflows/supabase-db-push.yml) | push + PR to `main`, dispatch | migrations plan, dry-run, apply and re-apply cleanly against a throwaway database |
+
+**Why the iOS job is not on the push path.** GitHub's hosted macOS pool has
+repeatedly refused to hand this repository a runner — `The job was not acquired
+by Runner of type hosted even after multiple attempts` — so every push to `main`
+turned red after 15 minutes without a line of iOS code being compiled: no signal,
+just a permanently red gate. The job now runs where an Xcode result is
+actionable, on a release tag and on manual dispatch. Every other check in `ci.yml`
+still runs on every push and PR.
 
 Each gate exists because of a failure it would have caught; per-gate rationale,
 including the one check deliberately left out, is in

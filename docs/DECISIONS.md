@@ -580,6 +580,15 @@ Closing the remaining holes turned the formatting exclusion above into work:
   Store signing, `chewie`/`video_player` playback and the iOS UI stay unverified
   in this environment.
 
+  The job is gated to a `v*` tag or a manual dispatch, not to every push. GitHub's
+  hosted macOS pool repeatedly failed to allocate a runner for it — every push run
+  logged `The job was not acquired by Runner of type hosted even after multiple
+  attempts`, held the run open for 15 minutes and then marked the whole `ci`
+  workflow failed without compiling anything. That is worse than no job: a gate
+  that is red for reasons the author cannot fix trains everyone to ignore it. A
+  tag and a dispatch are exactly where an Xcode result is actionable, so the
+  compile stays available there while `ci` is a real signal again on push.
+
 Android's release path stays where D-034 put it — `build.yml`, on a `v*` tag or a
 manual dispatch — because Play signing is the entire point of that job and a
 signed AAB on every push to `main` would be waste. It has been exercised for real

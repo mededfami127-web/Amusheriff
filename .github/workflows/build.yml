@@ -9,7 +9,10 @@ name: flutter ci
 # Play-ready; without them the workflow still delivers a debug-signed AAB for
 # internal testing and says so in the summary, instead of failing the run.
 #
-# Also runs on a version tag (`v1.2.3`), where the flavor is always `prod`.
+# Also runs on a version tag (`v1.2.3`), where the flavor is always `prod`, and on
+# every push to `main`, where only the verify job runs — the artifacts already
+# come from `debug-apk.yml` on push and from a tag/dispatch here, so a push does
+# not pay for an APK/AAB it would have built twice.
 
 on:
   workflow_dispatch:
@@ -20,6 +23,7 @@ on:
         options: [dev, staging, prod]
         default: prod
   push:
+    branches: [main]
     tags:
       - "v*"
 
@@ -57,6 +61,10 @@ jobs:
 
   android:
     name: Android debug APK + AAB
+    # Push-to-main runs stop at `verify`: `debug-apk.yml` already builds the
+    # per-push APK, and the AAB exists to sign a release, which only a tag or a
+    # manual run can do.
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     needs: verify
     timeout-minutes: 60
