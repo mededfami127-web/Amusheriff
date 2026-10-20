@@ -195,6 +195,52 @@ void main() {
     expect(find.text(l10n.adminProductSaved), findsOneWidget);
   });
 
+  testWidgets('a product can be filed under a subcategory', (
+    WidgetTester tester,
+  ) async {
+    categories = _FakeCategoryRepository(<Category>[
+      const Category(id: 'c1', name: 'Majlis', slug: 'majlis'),
+      const Category(
+        id: 'c2',
+        name: 'Corner Units',
+        slug: 'corner-units',
+        parentId: 'c1',
+        sortOrder: 1,
+      ),
+      const Category(id: 'c3', name: 'Bedrooms', slug: 'bedrooms'),
+    ]);
+    await tester.pumpWidget(harness(location: Routes.adminProductNew));
+    await settle(tester);
+
+    final AppLocalizations l10n = await AppLocalizations.delegate.load(
+      const Locale('en'),
+    );
+
+    await tester.tap(find.byType(DropdownButtonFormField<String>));
+    await settle(tester);
+
+    // The child is offered indented, directly under its mother, so the owner
+    // can tell the two apart.
+    expect(find.text('— Corner Units'), findsOneWidget);
+    await tester.tap(find.text('— Corner Units').last);
+    await settle(tester);
+
+    await tester.enterText(find.byType(TextField).first, 'Corner Sofa');
+    await settle(tester);
+
+    await tester.scrollUntilVisible(
+      find.text(l10n.actionSave),
+      240,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await settle(tester);
+    await tester.tap(find.text(l10n.actionSave));
+    await settle(tester);
+
+    expect(products.saved, hasLength(1));
+    expect(products.saved.single.categoryId, 'c2');
+  });
+
   testWidgets('category sheet blocks an invalid slug and saves a valid one', (
     WidgetTester tester,
   ) async {

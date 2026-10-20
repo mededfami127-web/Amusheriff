@@ -94,6 +94,31 @@ Stream<List<Product>> storefrontProducts(
   );
 }
 
+/// First product image per category, for category tiles without a cover.
+///
+/// Derived from the single [storefrontProducts] stream (products + media
+/// joined in memory), so the rail never issues one query per category.
+@riverpod
+Map<String, String> categoryThumbnailPaths(Ref ref) {
+  final List<Product> products =
+      ref.watch(storefrontProductsProvider()).value ?? const <Product>[];
+  final Map<String, String> paths = <String, String>{};
+  for (final Product product in products) {
+    if (paths.containsKey(product.categoryId)) continue;
+    ProductMedia? chosen;
+    for (final ProductMedia item in product.media) {
+      if (!item.isImage) continue;
+      if (item.isCover) {
+        chosen = item;
+        break;
+      }
+      chosen ??= item;
+    }
+    if (chosen != null) paths[product.categoryId] = chosen.storagePath;
+  }
+  return paths;
+}
+
 /// Admin product list, including unpublished rows.
 @riverpod
 Stream<List<Product>> adminProducts(Ref ref, {String? categoryId}) {

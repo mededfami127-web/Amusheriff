@@ -1,18 +1,21 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/network/storage_urls.dart';
 import '../../../../core/theme/brand_colors.dart';
 import '../../../../core/theme/gradients.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../catalog/domain/entities/category.dart';
+import '../../../catalog/presentation/providers/catalog_providers.dart';
 
 /// One category tile that always shows an image.
 ///
-/// Resolution order: category cover -> branded placeholder with an icon.
-/// No per-category product-image lookup here; the cover lives on the category
-/// row, which keeps this to a single image per tile and avoids N+1.
-class CategoryCard extends StatelessWidget {
+/// Resolution order: the category's own cover, then the first product image in
+/// that category, then a branded placeholder. The product fallback comes from
+/// one derived map (the storefront products stream), never a query per card.
+class CategoryCard extends ConsumerWidget {
   const CategoryCard({
     super.key,
     required this.category,
@@ -25,30 +28,51 @@ class CategoryCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final bool dark = Theme.of(context).brightness == Brightness.dark;
     final String language = Localizations.localeOf(context).languageCode;
+    final StorageUrls urls = ref.watch(storageUrlsProvider);
+    final String? productPath = ref.watch(
+      categoryThumbnailPathsProvider,
+    )[category.id];
 
-    return SizedBox(
-      width: width,
-      child: Card(
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(18),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                _CategoryThumb(category: category, dark: dark),
-                Text(
-                  category.nameFor(language),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: BrandTypography.titleMedium.copyWith(fontSize: 14),
-                ),
-              ],
+    final String? coverUrl = category.hasCover
+        ? urls.categoryCover(category.coverPath!)
+        : null;
+    final String? productUrl = productPath == null
+        ? null
+        : urls.productMediaThumb(productPath, width: 160);
+    final String? fallbackUrl = coverUrl != null ? productUrl : null;
+
+    return Semantics(
+      button: true,
+      label: l10n.a11yOpenCategory(category.nameFor(language)),
+      child: SizedBox(
+        width: width,
+        child: Card(
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(18),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  _CategoryThumb(
+                    url: coverUrl ?? productUrl,
+                    fallbackUrl: fallbackUrl,
+                    dark: dark,
+                  ),
+                  Text(
+                    category.nameFor(language),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: BrandTypography.titleMedium.copyWith(fontSize: 14),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -57,35 +81,44 @@ class CategoryCard extends StatelessWidget {
   }
 }
 
-class _CategoryThumb extends ConsumerWidget {
-  const _CategoryThumb({required this.category, required this.dark});
+class _CategoryThumb extends StatelessWidget {
+  const _CategoryThumb({
+    required this.url,
+    required this.fallbackUrl,
+    required this.dark,
+  });
 
-  final Category category;
+  final String? url;
+  final String? fallbackUrl;
   final bool dark;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final StorageUrls urls = ref.watch(storageUrlsProvider);
-    final Widget image = category.hasCover
-        ? ClipRRect(
+  Widget build(BuildContext context) {
+    final Widget placeholder = _CategoryThumbFallback(dark: dark);
+    final Widget image = url == null
+        ? placeholder
+        : ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Image.network(
-              urls.categoryCover(category.coverPath!),
+            child: CachedNetworkImage(
+              imageUrl: url!,
               width: 40,
               height: 40,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => _CategoryThumbFallback(dark: dark),
-              loadingBuilder:
-                  (
-                    BuildContext context,
-                    Widget child,
-                    ImageChunkEvent? progress,
-                  ) => progress == null
-                  ? child
-                  : _CategoryThumbFallback(dark: dark),
+              memCacheWidth: 160,
+              placeholder: (_, __) => placeholder,
+              errorWidget: (_, __, ___) => fallbackUrl == null
+                  ? placeholder
+                  : CachedNetworkImage(
+                      imageUrl: fallbackUrl!,
+                      width: 40,
+                      height: 40,
+                      fit: BoxFit.cover,
+                      memCacheWidth: 160,
+                      placeholder: (_, __) => placeholder,
+                      errorWidget: (_, __, ___) => placeholder,
+                    ),
             ),
-          )
-        : _CategoryThumbFallback(dark: dark);
+          );
 
     return Container(
       width: 40,

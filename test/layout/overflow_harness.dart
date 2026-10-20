@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:amu_sharif_majlis/core/errors/app_failure.dart';
 import 'package:amu_sharif_majlis/core/l10n/generated/app_localizations.dart';
+import 'package:amu_sharif_majlis/core/network/storage_urls.dart';
 import 'package:amu_sharif_majlis/core/network/supabase_client_provider.dart';
 import 'package:amu_sharif_majlis/core/l10n/text_localizations.dart';
 import 'package:amu_sharif_majlis/core/theme/app_theme.dart';
@@ -156,7 +157,20 @@ class FakeBackend {
   final FakeAuthRepository auth = FakeAuthRepository();
   final FakeTextOverridesRepository overrides = FakeTextOverridesRepository();
 
+  /// A client that is only ever asked to build public URLs — no request is
+  /// made, so the tests stay offline while the cards render real image URLs.
+  static final StorageUrls storageUrls = StorageUrls(
+    SupabaseClient(
+      'https://harness.supabase.co',
+      'harness-anon-key',
+      // The URL builder needs no session, and the refresh timer would outlive
+      // the test and trip the pending-timer assertion.
+      authOptions: const AuthClientOptions(autoRefreshToken: false),
+    ),
+  );
+
   List<Object> get overridesList => <Object>[
+    storageUrlsProvider.overrideWithValue(storageUrls),
     categoryRepositoryProvider.overrideWithValue(categories),
     productRepositoryProvider.overrideWithValue(products),
     productMediaRepositoryProvider.overrideWithValue(media),

@@ -24,6 +24,7 @@ import '../../../settings/domain/entities/site_settings.dart';
 import '../../../settings/presentation/providers/site_settings_providers.dart';
 import '../../../settings/presentation/providers/site_content_providers.dart';
 import '../providers/storefront_providers.dart';
+import '../widgets/category_card.dart';
 import '../widgets/product_card.dart';
 
 /// Public home. Everything on this page is driven by live Supabase streams, so
@@ -400,10 +401,6 @@ class _CategoryRail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool dark = Theme.of(context).brightness == Brightness.dark;
-    final AppLocalizations l10n = AppLocalizations.of(context);
-    final String language = Localizations.localeOf(context).languageCode;
-
     // The tile's text block grows with the accessibility scale; the rail has
     // to grow with it, or the two-line name overflows the card.
     final double scale = MediaQuery.textScalerOf(context).scale(1);
@@ -447,53 +444,10 @@ class _CategoryRail extends StatelessWidget {
             );
           }
           final Category category = categories[index];
-          return Semantics(
-            button: true,
-            label: l10n.a11yOpenCategory(category.nameFor(language)),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(18),
-              onTap: () => context.push(Routes.category(category.slug)),
-              child: Container(
-                width: 138,
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: BrandColors.goldHairline),
-                  gradient: LinearGradient(
-                    colors: dark
-                        ? <Color>[BrandColors.plumSurface, BrandColors.deepPlum]
-                        : <Color>[Colors.white, BrandColors.ivory],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: BrandGradients.brand,
-                      ),
-                      child: const Icon(
-                        Icons.weekend_outlined,
-                        size: 20,
-                        color: BrandColors.ivory,
-                      ),
-                    ),
-                    Text(
-                      category.nameFor(language),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: BrandTypography.titleMedium.copyWith(fontSize: 14),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+          return CategoryCard(
+            category: category,
+            width: 138,
+            onTap: () => context.push(Routes.category(category.slug)),
           );
         },
       ),

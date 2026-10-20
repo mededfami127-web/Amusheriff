@@ -41,7 +41,7 @@ void main() {
     media = _FakeProductMediaRepository();
   });
 
-  Widget harness() {
+  Widget harness({Locale locale = const Locale('en')}) {
     final GoRouter router = GoRouter(
       initialLocation: Routes.category('majlis'),
       routes: <RouteBase>[
@@ -62,6 +62,7 @@ void main() {
       ],
       child: MaterialApp.router(
         routerConfig: router,
+        locale: locale,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
       ),
@@ -106,6 +107,54 @@ void main() {
     expect(find.byType(CategorySubcategoryLine), findsNothing);
     expect(find.text(l10n.stateEmptyTitle), findsOneWidget);
     expect(find.text('Corner Units'), findsWidgets);
+  });
+
+  testWidgets('the subcategory line runs right-to-left in Arabic', (
+    WidgetTester tester,
+  ) async {
+    categories = _FakeCategoryRepository(<Category>[
+      const Category(id: 'c1', name: 'Majlis', slug: 'majlis'),
+      for (int i = 0; i < 30; i++)
+        Category(
+          id: 's$i',
+          name: 'Sub $i',
+          slug: 'sub-$i',
+          parentId: 'c1',
+          sortOrder: i,
+        ),
+    ]);
+
+    await tester.pumpWidget(harness(locale: const Locale('ar')));
+    await settle(tester);
+
+    // The page itself is RTL, so the line inherits the direction.
+    expect(
+      Directionality.of(tester.element(find.byType(CategorySubcategoryLine))),
+      TextDirection.rtl,
+    );
+
+    // Chips are laid out from the right edge inwards: the second chip sits to
+    // the left of the first, not to its right.
+    final double first = tester.getCenter(find.text('Sub 0')).dx;
+    final double second = tester.getCenter(find.text('Sub 1')).dx;
+    expect(second, lessThan(first));
+
+    // The line is a horizontal scrollable whose axis points left (RTL), so the
+    // later chips live off-screen and are reached by dragging the rail.
+    final Finder rail = find.descendant(
+      of: find.byType(CategorySubcategoryLine),
+      matching: find.byType(Scrollable),
+    );
+    expect(tester.widget<Scrollable>(rail).axisDirection, AxisDirection.left);
+    expect(find.text('Sub 25'), findsNothing);
+    await tester.scrollUntilVisible(
+      find.text('Sub 25'),
+      400,
+      scrollable: rail.first,
+    );
+    await tester.pump();
+    expect(find.text('Sub 25'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }
 

@@ -102,6 +102,7 @@ class _AdminProductEditorPageState
     );
     final List<Category> categories =
         ref.watch(allCategoriesProvider).value ?? const <Category>[];
+    final List<Category> pickable = _withSubcategoriesUnderParents(categories);
 
     if (_missing) {
       return AdminScaffold(
@@ -175,14 +176,16 @@ class _AdminProductEditorPageState
                 state.fieldErrors['categoryId'],
               ),
             ),
-            items: categories
+            items: pickable
                 .map(
                   (Category category) => DropdownMenuItem<String>(
                     value: category.id,
                     child: Text(
-                      category.nameFor(
-                        Localizations.localeOf(context).languageCode,
-                      ),
+                      category.parentId == null
+                          ? category.nameFor(
+                              Localizations.localeOf(context).languageCode,
+                            )
+                          : '— ${category.nameFor(Localizations.localeOf(context).languageCode)}',
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -645,4 +648,43 @@ class _MediaCard extends ConsumerWidget {
       );
     }
   }
+}
+
+/// Mother categories with their subcategories directly underneath, so the
+/// owner can file a product under a child without hunting for it in a flat
+/// list. Children of a hidden mother stay pickable, and a child whose mother is
+/// missing from the list is kept at the end rather than dropped.
+List<Category> _withSubcategoriesUnderParents(List<Category> categories) {
+  final List<Category> ordered = <Category>[];
+  final Set<String> seen = <String>{};
+
+  final List<Category> roots =
+      categories
+          .where((Category c) => c.parentId == null || c.parentId!.isEmpty)
+          .toList(growable: false)
+        ..sort(_bySortThenName);
+
+  for (final Category root in roots) {
+    ordered.add(root);
+    seen.add(root.id);
+    final List<Category> children =
+        categories
+            .where((Category c) => c.parentId == root.id)
+            .toList(growable: false)
+          ..sort(_bySortThenName);
+    for (final Category child in children) {
+      ordered.add(child);
+      seen.add(child.id);
+    }
+  }
+
+  for (final Category leftover in categories) {
+    if (!seen.contains(leftover.id)) ordered.add(leftover);
+  }
+  return ordered;
+}
+
+int _bySortThenName(Category a, Category b) {
+  final int byOrder = a.sortOrder.compareTo(b.sortOrder);
+  return byOrder != 0 ? byOrder : a.name.compareTo(b.name);
 }

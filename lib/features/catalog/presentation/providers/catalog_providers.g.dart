@@ -603,6 +603,68 @@ final class StorefrontProductsFamily extends $Family
   String toString() => r'storefrontProductsProvider';
 }
 
+/// First product image per category, for category tiles without a cover.
+///
+/// Derived from the single [storefrontProducts] stream (products + media
+/// joined in memory), so the rail never issues one query per category.
+
+@ProviderFor(categoryThumbnailPaths)
+final categoryThumbnailPathsProvider = CategoryThumbnailPathsProvider._();
+
+/// First product image per category, for category tiles without a cover.
+///
+/// Derived from the single [storefrontProducts] stream (products + media
+/// joined in memory), so the rail never issues one query per category.
+
+final class CategoryThumbnailPathsProvider
+    extends
+        $FunctionalProvider<
+          Map<String, String>,
+          Map<String, String>,
+          Map<String, String>
+        >
+    with $Provider<Map<String, String>> {
+  /// First product image per category, for category tiles without a cover.
+  ///
+  /// Derived from the single [storefrontProducts] stream (products + media
+  /// joined in memory), so the rail never issues one query per category.
+  CategoryThumbnailPathsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'categoryThumbnailPathsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$categoryThumbnailPathsHash();
+
+  @$internal
+  @override
+  $ProviderElement<Map<String, String>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  Map<String, String> create(Ref ref) {
+    return categoryThumbnailPaths(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Map<String, String> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Map<String, String>>(value),
+    );
+  }
+}
+
+String _$categoryThumbnailPathsHash() =>
+    r'3dd5f083b7a9aa37576766b1b6cf651f4ed5befd';
+
 /// Admin product list, including unpublished rows.
 
 @ProviderFor(adminProducts)
