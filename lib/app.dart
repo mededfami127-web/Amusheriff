@@ -40,6 +40,9 @@ class AmuApp extends ConsumerWidget {
       themeMode: prefs.themeMode,
       locale: prefs.locale,
       supportedLocales: AppLocalizations.supportedLocales,
+      // A device locale the catalogue does not ship (or `om_ET`) resolves to a
+      // language this app has text and number data for, not to no locale.
+      localeResolutionCallback: resolveAppLocale,
       // `appLocalizationsDelegates` puts the override-aware delegate in the
       // generated one's place, so every `AppLocalizations.of(context)` lookup in
       // the app honours the owner's edits without a call site changing, and

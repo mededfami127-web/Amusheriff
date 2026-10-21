@@ -95,6 +95,21 @@ class FallbackCupertinoLocalizationsDelegate
   ) => false;
 }
 
+/// Snaps any requested locale to one the app actually ships.
+///
+/// The language is chosen in-app, but the device can still push `om_ET`,
+/// `ar_SA` or a language the catalogue does not translate. Matching on the
+/// language code keeps `om_ET` Oromo instead of letting the framework fall back
+/// to the wrong text, and anything unknown lands on English rather than on a
+/// locale with no localizations at all.
+Locale resolveAppLocale(Locale? requested, Iterable<Locale> supported) {
+  if (requested == null) return const Locale('en');
+  for (final Locale locale in supported) {
+    if (locale.languageCode == requested.languageCode) return locale;
+  }
+  return const Locale('en');
+}
+
 /// Every delegate `MaterialApp` installs, in precedence order.
 ///
 /// One list, so a test that pumps a screen resolves exactly what the app does —

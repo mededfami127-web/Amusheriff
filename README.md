@@ -31,12 +31,12 @@ is tracked in `docs/DECISIONS.md` → "Open items handed to Part 2".
 | Check | Command | Result |
 | --- | --- | --- |
 | Code generation | `dart run build_runner build` + `dart run tool/gen_text_overlay.dart` | 0 errors; `git status` clean afterwards |
-| Formatting | `dart format --output=none --set-exit-if-changed .` | clean (0 of 188 files change) |
+| Formatting | `dart format --output=none --set-exit-if-changed .` | clean (0 of 199 files change) |
 | Static analysis | `flutter analyze --fatal-infos` | **No issues found** |
-| Unit + widget tests | `flutter test` | **170 passed** |
+| Unit + widget tests | `flutter test test/unit` | **171 passed** |
 | Layout overflow matrix | `flutter test test/layout` | **46 screens × 12 layouts, 0 overflows** |
 | Release compile | `flutter build bundle --release` | builds clean |
-| Localization key parity | `dart run tool/check_l10n_parity.dart` | **326 message keys in each of en, am, ar, om** |
+| Localization key parity | `dart run tool/check_l10n_parity.dart` | **339 message keys in each of en, am, ar, om** |
 | Edge Function | `deno check` · `deno lint` · `deno fmt --check supabase/functions/inquiry/index.ts` | clean on Deno 2.9.7 |
 | RLS acceptance suite | `bash scripts/run_rls_tests.sh` | **25/25 checks passed** on PostgreSQL 16.15 |
 | Migration runner | `bash scripts/apply_migrations.sh --dry-run`, then `--apply` twice | plan, dry run, apply and re-apply all clean on PostgreSQL 16.15 |
@@ -60,7 +60,7 @@ runners; nothing is deployed from them.
 
 | Workflow | Trigger | What it proves |
 | --- | --- | --- |
-| [`ci.yml`](.github/workflows/ci.yml) | push + PR to `main`, `v*` tag, dispatch | generated sources are in sync, code is formatted, every locale has every key, `flutter analyze --fatal-infos` is clean, 170 tests pass, a release bundle compiles, the RLS suite passes on PostgreSQL 16, and the Edge Function type-checks, lints and formats. The unsigned iOS compile is in the same workflow but runs on a `v*` tag or a manual dispatch only — see the note below |
+| [`ci.yml`](.github/workflows/ci.yml) | push + PR to `main`, `v*` tag, dispatch | generated sources are in sync, code is formatted, every locale has every key, `flutter analyze --fatal-infos` is clean, the unit and layout suites pass, a release bundle compiles, the RLS suite passes on PostgreSQL 16, and the Edge Function type-checks, lints and formats. The unsigned iOS compile is in the same workflow but runs on a `v*` tag or a manual dispatch only — see the note below |
 | [`debug-apk.yml`](.github/workflows/debug-apk.yml) | push to `main`, dispatch | a dev-flavor debug APK, uploaded as the `asm-dev-debug-apk` artifact |
 | [`build.yml`](.github/workflows/build.yml) | push to `main`, `v*` tag, dispatch | analysis + tests, then a debug APK and a **release AAB** (`asm-<flavor>-release-aab`, built on every trigger). With the four signing secrets the AAB is signed with the upload key and Play-ready; without them it is debug-signed and the run says so |
 | [`supabase-db-push.yml`](.github/workflows/supabase-db-push.yml) | push + PR to `main`, dispatch | migrations plan, dry-run, apply and re-apply cleanly against a throwaway database |

@@ -770,6 +770,49 @@ nesting and the save-refusal messages), `flutter build bundle --release` builds,
 the look on hardware: no emulator or device ran here, so the on-device banners, the
 snackbars and the chip row are checked as widgets, not as a shipped APK.
 
+### D-040 — Oromo crashed the price formatter, and category covers got the whole card
+
+**The Oromo storefront error.** In the released app, switching to Afaan Oromo
+replaced the catalogue tiles with the branded error panel while English was fine.
+The cause was not the image widgets: `ProductCard` built its price with
+`Formatters.money(…, locale: Localizations.localeOf(context).languageCode)`, so
+Oromo passed the raw `om` to `intl`. `intl` ships no Oromo data and
+`NumberFormat.currency(locale: 'om')` throws rather than falling back:
+
+```
+ArgumentError: Invalid argument(s): Invalid locale "om"
+#0 _throwLocaleError (package:intl/src/intl_helpers.dart:246:3)
+#1 verifiedLocale (package:intl/src/intl_helpers.dart:240:42)
+#2 new NumberFormat._forPattern (package:intl/src/intl/number_format.dart:390:22)
+#3 new NumberFormat.currency (package:intl/src/intl/number_format.dart:312:22)
+#4 Formatters.money (lib/core/utils/formatters.dart:32:26)
+#7 ProductCard.build (lib/features/storefront/presentation/widgets/product_card.dart:139:40)
+```
+
+A build exception replaces its subtree with `ErrorWidget`, which `bootstrap()`
+points at `BrandedErrorFallback` — hence "the images disappear and show an
+error". The old layout suite missed it because it only collected overflow
+messages and swallowed the rest.
+
+Fixed in one place: every `Formatters` helper now maps an app language through
+`intlLocaleFor` (Oromo → `en_US`, Arabic → `ar_AE`) before touching `intl`, and
+catches a missing pattern to return plain text (`ETB 40,000`, `2026-10-21`)
+rather than throwing. No call site needs to know which languages `intl` ships,
+and image URLs still come only from storage paths, so the same photo loads in
+all four languages. `localeResolutionCallback` (`resolveAppLocale`) snaps a
+device locale such as `om_ET` to a shipped language.
+
+**Category covers fill the card.** The tile drew a 40dp circle in the top-left
+of an otherwise empty card. `CategoryCard` is now a `Stack` with a
+`Positioned.fill` `BoxFit.cover` photo clipped to the card's rounded corners, a
+bottom scrim, and the name in ivory over it (two lines, ellipsis). The source
+stays cover → first product image (`categoryThumbnailPathsProvider`, one
+derived map, no N+1) → branded sofa placeholder; the decode is capped at 480px
+and a shimmer covers the load. `test/unit/om_locale_images_test.dart` pumps the
+app's real `MaterialApp` locale wiring at en/am/ar/om and fails on any
+framework error, asserts the card-sized image, the visible price, identical
+image URLs, and no overflow at 320x568 with 2.0 text in all four locales.
+
 ---
 
 ## E. Open items handed to Part 2

@@ -7,8 +7,9 @@ import '../l10n/text_catalog.dart';
 /// cached per locale so hot paths do not rebuild [NumberFormat] objects.
 ///
 /// The app ships text in four languages: English, Amharic, Arabic and Oromo.
-/// Formatting helpers take a locale that `intl` understands, so callers should
-/// resolve it with [intlLocaleFor] instead of passing the raw app language.
+/// Callers pass the app language straight through; each helper maps it with
+/// [intlLocaleFor] and falls back to plain text (`ETB 40,000`) rather than
+/// throwing for a language `intl` has no data for, as Oromo is.
 abstract final class Formatters {
   const Formatters._();
 
@@ -18,25 +19,51 @@ abstract final class Formatters {
   /// Formats a price with the shop currency.
   ///
   /// Whole amounts render without decimals (`ETB12,500`) and fractional ones
-  /// keep two (`ETB12,500.50`). [locale] must be a locale the `intl` package
-  /// knows about, so callers should pass `intlLocaleFor(appLanguage)` rather
-  /// than the raw app language code.
+  /// keep two (`ETB12,500.50`).
+  ///
+  /// [locale] may be a raw app language, including Oromo, which `intl` has no
+  /// data for: it is mapped through [intlLocaleFor] first, and if a pattern is
+  /// still unavailable the value falls back to plain text (`ETB 40,000`)
+  /// instead of throwing inside a widget build.
   static String money(num amount, {String currency = 'ETB', String? locale}) {
     // Whole amounts drop the decimals; fractional ones keep two. The digit
     // count is part of the cache key, otherwise a cached 0-decimal formatter
     // would silently round a later fractional price.
     final int digits = _decimalDigits(amount);
-    final String key = '${locale ?? ''}|$currency|$digits';
-    final NumberFormat format = _money.putIfAbsent(
-      key,
-      () => NumberFormat.currency(
-        locale: locale,
-        name: currency,
-        symbol: currency,
-        decimalDigits: digits,
-      ),
+    final String resolved = _intlLocale(locale);
+    final String key = '$resolved|$currency|$digits';
+    try {
+      final NumberFormat format = _money.putIfAbsent(
+        key,
+        () => NumberFormat.currency(
+          locale: resolved,
+          name: currency,
+          symbol: currency,
+          decimalDigits: digits,
+        ),
+      );
+      return format.format(amount);
+    } catch (_) {
+      return plainMoney(amount, currency: currency);
+    }
+  }
+
+  /// The no-`intl` price: `ETB 40,000`, or `ETB 40,000.50` for a fraction.
+  ///
+  /// Used when the locale has no number data. Deliberately readable in every
+  /// language rather than silently dropping the price.
+  static String plainMoney(num amount, {String currency = 'ETB'}) {
+    final int digits = _decimalDigits(amount);
+    final String fixed = amount.abs().toStringAsFixed(digits);
+    final int dot = fixed.indexOf('.');
+    final String whole = dot == -1 ? fixed : fixed.substring(0, dot);
+    final String fraction = dot == -1 ? '' : fixed.substring(dot);
+    final String grouped = whole.replaceAllMapped(
+      RegExp(r'\B(?=(\d{3})+(?!\d))'),
+      (Match _) => ',',
     );
-    return format.format(amount);
+    final String sign = amount < 0 ? '-' : '';
+    return '$sign$currency $grouped$fraction';
   }
 
   /// Compact price for dense grids, e.g. `12.5K ETB`.
@@ -45,32 +72,72 @@ abstract final class Formatters {
     String currency = 'ETB',
     String? locale,
   }) {
-    final NumberFormat format = NumberFormat.compactCurrency(
-      locale: locale,
-      symbol: currency,
-      decimalDigits: 0,
-    );
-    return format.format(amount);
+    try {
+      final NumberFormat format = NumberFormat.compactCurrency(
+        locale: _intlLocale(locale),
+        symbol: currency,
+        decimalDigits: 0,
+      );
+      return format.format(amount);
+    } catch (_) {
+      return plainMoney(amount, currency: currency);
+    }
   }
 
-  static String decimal(num value, {int digits = 0, String? locale}) =>
-      NumberFormat.decimalPatternDigits(
-        locale: locale,
+  static String decimal(num value, {int digits = 0, String? locale}) {
+    try {
+      return NumberFormat.decimalPatternDigits(
+        locale: _intlLocale(locale),
         decimalDigits: digits,
       ).format(value);
-
-  static String percent(num ratio, {int digits = 0, String? locale}) =>
-      NumberFormat.percentPattern(locale).format(ratio);
-
-  static String shortDate(DateTime date, {String? locale}) {
-    final String key = locale ?? 'en';
-    return _shortDate
-        .putIfAbsent(key, () => DateFormat.yMMMd(key))
-        .format(date.toLocal());
+    } catch (_) {
+      return value.toStringAsFixed(digits);
+    }
   }
 
-  static String dateTime(DateTime date, {String? locale}) =>
-      DateFormat.yMMMd(locale).add_jm().format(date.toLocal());
+  static String percent(num ratio, {int digits = 0, String? locale}) {
+    try {
+      return NumberFormat.percentPattern(_intlLocale(locale)).format(ratio);
+    } catch (_) {
+      return '${(ratio * 100).toStringAsFixed(digits)}%';
+    }
+  }
+
+  static String shortDate(DateTime date, {String? locale}) {
+    final String resolved = _intlLocale(locale);
+    try {
+      return _shortDate
+          .putIfAbsent(resolved, () => DateFormat.yMMMd(resolved))
+          .format(date.toLocal());
+    } catch (_) {
+      return plainDate(date);
+    }
+  }
+
+  /// The no-`intl` date: `2026-10-21`.
+  static String plainDate(DateTime date) {
+    final DateTime local = date.toLocal();
+    final String month = local.month.toString().padLeft(2, '0');
+    final String day = local.day.toString().padLeft(2, '0');
+    return '${local.year}-$month-$day';
+  }
+
+  static String dateTime(DateTime date, {String? locale}) {
+    final String resolved = _intlLocale(locale);
+    try {
+      return DateFormat.yMMMd(resolved).add_jm().format(date.toLocal());
+    } catch (_) {
+      final DateTime local = date.toLocal();
+      final String hour = local.hour.toString().padLeft(2, '0');
+      final String minute = local.minute.toString().padLeft(2, '0');
+      return '${plainDate(local)} $hour:$minute';
+    }
+  }
+
+  /// Maps an app language to locale data `intl` actually ships.
+  static String _intlLocale(String? languageCode) => languageCode == null
+      ? Intl.getCurrentLocale()
+      : intlLocaleFor(languageCode);
 
   /// Compact age label for activity feeds: `now`, `14min`, `3h`, `2d`, and a
   /// short date once the value is a week old.
