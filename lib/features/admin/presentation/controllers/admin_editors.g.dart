@@ -66,7 +66,7 @@ final class CategoryEditorControllerProvider
 }
 
 String _$categoryEditorControllerHash() =>
-    r'de64ca6d89d17e86d2e013519c35dc6db00f4cec';
+    r'f288e0d366d459e91826584570a881313ecfea71';
 
 /// Create / edit a category, including its optional place under a mother
 /// category.
@@ -266,7 +266,7 @@ final class ProductEditorControllerProvider
 }
 
 String _$productEditorControllerHash() =>
-    r'0e6523863a5fc866e1a4752184c0b888afcdd2a8';
+    r'4bb80ea2f839ca9b72bc0a72adee30d754e645dd';
 
 abstract class _$ProductEditorController extends $Notifier<ProductEditorState> {
   ProductEditorState build();

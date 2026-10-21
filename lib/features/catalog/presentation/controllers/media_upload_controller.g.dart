@@ -99,7 +99,7 @@ final class MediaUploadControllerProvider
 }
 
 String _$mediaUploadControllerHash() =>
-    r'0466e205320d7c82be8b1b58d8c9c96d020328c5';
+    r'134c06e4d635a6a43c95ee61ea3aa5d05aec9e9e';
 
 /// Upload queue for the media manager: **concurrency 2**, per-file phase,
 /// cancel and retry, plus a compensating delete when the catalogue row that
