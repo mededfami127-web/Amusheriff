@@ -115,14 +115,15 @@ class CatalogRemoteDataSource {
 
   /// Columns shared by every product read, so the entity always decodes.
   static const String productColumns =
-      'id, category_id, title, title_am, title_ar, description, '
-      'description_am, description_ar, price, compare_at_price, currency_code, '
-      'is_available, is_featured, is_published, sort_order, created_at, updated_at';
+      'id, category_id, title, title_am, title_ar, title_om, description, '
+      'description_am, description_ar, description_om, price, compare_at_price, '
+      'currency_code, is_available, is_featured, is_published, sort_order, '
+      'created_at, updated_at';
 
   /// Every column [Category.fromJson] reads, and nothing else.
   static const String categoryColumns =
-      'id, name, name_am, name_ar, slug, cover_path, parent_id, sort_order, '
-      'is_visible, created_at, updated_at';
+      'id, name, name_am, name_ar, name_om, slug, cover_path, parent_id, '
+      'sort_order, is_visible, created_at, updated_at';
 
   /// Every column [ProductMedia.fromJson] reads.
   static const String mediaColumns =

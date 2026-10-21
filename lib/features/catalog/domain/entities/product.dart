@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../../../core/utils/localized_text.dart';
 import 'product_media.dart';
 
 part 'product.freezed.dart';
@@ -15,9 +16,11 @@ abstract class Product with _$Product {
     required String title,
     String? titleAm,
     String? titleAr,
+    String? titleOm,
     String? description,
     String? descriptionAm,
     String? descriptionAr,
+    String? descriptionOm,
     required double price,
     double? compareAtPrice,
     @Default('ETB') String currencyCode,
@@ -40,17 +43,23 @@ abstract class Product with _$Product {
       _$ProductFromJson(json);
 
   // ── Localized text ────────────────────────────────────────────────────────
-  String titleFor(String languageCode) => switch (languageCode) {
-    'am' => _first(<String?>[titleAm, title, titleAr]),
-    'ar' => _first(<String?>[titleAr, title, titleAm]),
-    _ => _first(<String?>[title, titleAm, titleAr]),
-  };
+  // Selected language → English → any language that has text. Every screen
+  // reads the title through here, so no widget has to know the column names.
+  String titleFor(String languageCode) => localizedText(
+    languageCode: languageCode,
+    english: title,
+    amharic: titleAm,
+    arabic: titleAr,
+    oromo: titleOm,
+  );
 
-  String descriptionFor(String languageCode) => switch (languageCode) {
-    'am' => _first(<String?>[descriptionAm, description, descriptionAr]),
-    'ar' => _first(<String?>[descriptionAr, description, descriptionAm]),
-    _ => _first(<String?>[description, descriptionAm, descriptionAr]),
-  };
+  String descriptionFor(String languageCode) => localizedText(
+    languageCode: languageCode,
+    english: description ?? '',
+    amharic: descriptionAm,
+    arabic: descriptionAr,
+    oromo: descriptionOm,
+  );
 
   // ── Pricing ───────────────────────────────────────────────────────────────
   bool get hasDiscount =>
@@ -82,11 +91,4 @@ abstract class Product with _$Product {
       media.where((ProductMedia m) => m.isVideo).toList(growable: false);
 
   bool get isOrderable => isAvailable && isPublished;
-}
-
-String _first(List<String?> values) {
-  for (final String? v in values) {
-    if (v != null && v.trim().isNotEmpty) return v;
-  }
-  return '';
 }

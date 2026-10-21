@@ -14,6 +14,7 @@ class CategoryDraft {
     required this.slug,
     this.nameAm,
     this.nameAr,
+    this.nameOm,
     this.coverPath,
     this.parentId,
     this.sortOrder = 0,
@@ -24,6 +25,7 @@ class CategoryDraft {
   final String slug;
   final String? nameAm;
   final String? nameAr;
+  final String? nameOm;
   final String? coverPath;
 
   /// Set to make this row a subcategory of [parentId]; `null` keeps it
@@ -38,6 +40,7 @@ class CategoryDraft {
     'slug': slug.trim(),
     'name_am': _nullIfBlank(nameAm),
     'name_ar': _nullIfBlank(nameAr),
+    'name_om': _nullIfBlank(nameOm),
     'cover_path': _nullIfBlank(coverPath),
     // Sent only when it is set: a project that has not applied
     // `20260101000700_subcategories.sql` yet keeps creating plain categories
@@ -60,9 +63,11 @@ class ProductDraft {
     required this.price,
     this.titleAm,
     this.titleAr,
+    this.titleOm,
     this.description,
     this.descriptionAm,
     this.descriptionAr,
+    this.descriptionOm,
     this.compareAtPrice,
     this.currencyCode = 'ETB',
     this.isAvailable = true,
@@ -76,9 +81,11 @@ class ProductDraft {
   final double price;
   final String? titleAm;
   final String? titleAr;
+  final String? titleOm;
   final String? description;
   final String? descriptionAm;
   final String? descriptionAr;
+  final String? descriptionOm;
   final double? compareAtPrice;
   final String currencyCode;
   final bool isAvailable;
@@ -91,9 +98,11 @@ class ProductDraft {
     'title': title.trim(),
     'title_am': _nullIfBlank(titleAm),
     'title_ar': _nullIfBlank(titleAr),
+    'title_om': _nullIfBlank(titleOm),
     'description': _nullIfBlank(description),
     'description_am': _nullIfBlank(descriptionAm),
     'description_ar': _nullIfBlank(descriptionAr),
+    'description_om': _nullIfBlank(descriptionOm),
     'price': price,
     'compare_at_price': compareAtPrice,
     'currency_code': currencyCode,

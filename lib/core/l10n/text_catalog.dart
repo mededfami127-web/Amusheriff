@@ -550,6 +550,16 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
     },
   ),
   AppTextEntry(
+    key: 'adminCategoryNameOm',
+    sectionKey: 'adminCategories',
+    defaults: <String, String>{
+      'en': 'Name (Oromo)',
+      'am': 'ስም (ኦሮምኛ)',
+      'ar': 'الاسم (أورومو)',
+      'om': 'Maqaa (Oromoo)',
+    },
+  ),
+  AppTextEntry(
     key: 'adminCategoryUpdated',
     sectionKey: 'adminCategories',
     defaults: <String, String>{
@@ -1370,6 +1380,16 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
     },
   ),
   AppTextEntry(
+    key: 'adminProductDescriptionOm',
+    sectionKey: 'adminProducts',
+    defaults: <String, String>{
+      'en': 'Description (Oromo)',
+      'am': 'መግለጫ (ኦሮምኛ)',
+      'ar': 'الوصف (أورومو)',
+      'om': 'Ibsa (Oromoo)',
+    },
+  ),
+  AppTextEntry(
     key: 'adminProductSaved',
     sectionKey: 'adminProducts',
     defaults: <String, String>{
@@ -1407,6 +1427,16 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
       'am': 'ርዕስ (አረብኛ)',
       'ar': 'العنوان (العربية)',
       'om': 'Mata-duree (Arabiffa)',
+    },
+  ),
+  AppTextEntry(
+    key: 'adminProductTitleOm',
+    sectionKey: 'adminProducts',
+    defaults: <String, String>{
+      'en': 'Title (Oromo)',
+      'am': 'ርዕስ (ኦሮምኛ)',
+      'ar': 'العنوان (أورومو)',
+      'om': 'Mata-duree (Oromoo)',
     },
   ),
   AppTextEntry(

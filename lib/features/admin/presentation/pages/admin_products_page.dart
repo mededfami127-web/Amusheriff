@@ -126,9 +126,12 @@ class _AdminProductsPageState extends ConsumerState<AdminProductsPage> {
         .where((Product product) {
           if (_onlyDrafts && product.isPublished) return false;
           if (query.isEmpty) return true;
+          // Every language is searched, so the owner can find a row by the
+          // wording they typed on the form — whichever language that was.
           return product.title.toLowerCase().contains(query) ||
               (product.titleAm ?? '').toLowerCase().contains(query) ||
-              (product.titleAr ?? '').toLowerCase().contains(query);
+              (product.titleAr ?? '').toLowerCase().contains(query) ||
+              (product.titleOm ?? '').toLowerCase().contains(query);
         })
         .toList(growable: false);
   }

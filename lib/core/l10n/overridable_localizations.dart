@@ -213,6 +213,10 @@ class OverridableAppLocalizations extends AppLocalizations {
       _text('adminCategoryNameAr', _base.adminCategoryNameAr);
 
   @override
+  String get adminCategoryNameOm =>
+      _text('adminCategoryNameOm', _base.adminCategoryNameOm);
+
+  @override
   String get adminCategoryUpdated =>
       _text('adminCategoryUpdated', _base.adminCategoryUpdated);
 
@@ -492,6 +496,10 @@ class OverridableAppLocalizations extends AppLocalizations {
       _text('adminProductDescriptionAm', _base.adminProductDescriptionAm);
 
   @override
+  String get adminProductDescriptionOm =>
+      _text('adminProductDescriptionOm', _base.adminProductDescriptionOm);
+
+  @override
   String get adminProductDescription =>
       _text('adminProductDescription', _base.adminProductDescription);
 
@@ -506,6 +514,10 @@ class OverridableAppLocalizations extends AppLocalizations {
   @override
   String get adminProductTitleAm =>
       _text('adminProductTitleAm', _base.adminProductTitleAm);
+
+  @override
+  String get adminProductTitleOm =>
+      _text('adminProductTitleOm', _base.adminProductTitleOm);
 
   @override
   String get adminProductTitle =>

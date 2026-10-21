@@ -3,6 +3,7 @@ import 'package:amu_sharif_majlis/core/router/routes.dart';
 import 'package:amu_sharif_majlis/features/admin/presentation/pages/admin_categories_page.dart';
 import 'package:amu_sharif_majlis/features/admin/presentation/pages/admin_product_editor_page.dart';
 import 'package:amu_sharif_majlis/features/admin/presentation/pages/admin_products_page.dart';
+import 'package:amu_sharif_majlis/features/admin/presentation/widgets/admin_text_field.dart';
 import 'package:amu_sharif_majlis/features/catalog/domain/drafts/catalog_drafts.dart';
 import 'package:amu_sharif_majlis/features/catalog/domain/entities/category.dart';
 import 'package:amu_sharif_majlis/features/catalog/domain/entities/product.dart';
@@ -256,7 +257,7 @@ void main() {
 
     // English name given, slug left invalid (upper-case and a space).
     await tester.enterText(find.byType(TextField).first, 'Chaise');
-    await tester.enterText(find.byType(TextField).at(3), 'Chaise Longue');
+    await tester.enterText(_slugField(l10n), 'Chaise Longue');
     await tester.ensureVisible(find.text(l10n.actionSave));
     await settle(tester);
     await tester.tap(find.text(l10n.actionSave));
@@ -265,7 +266,7 @@ void main() {
     expect(categories.saved, isEmpty);
     expect(find.text(l10n.validateSlug), findsOneWidget);
 
-    await tester.enterText(find.byType(TextField).at(3), 'chaise-longue');
+    await tester.enterText(_slugField(l10n), 'chaise-longue');
     await tester.ensureVisible(find.text(l10n.actionSave));
     await settle(tester);
     await tester.tap(find.text(l10n.actionSave));
@@ -322,7 +323,7 @@ void main() {
     );
 
     await tester.enterText(find.byType(TextField).first, 'Majlis Sofas');
-    await tester.enterText(find.byType(TextField).at(3), 'sofas-majlis');
+    await tester.enterText(_slugField(l10n), 'sofas-majlis');
     await settle(tester);
 
     await tester.ensureVisible(find.text(l10n.actionSave));
@@ -674,3 +675,13 @@ class _FakeProductMediaRepository implements ProductMediaRepository {
   @override
   Future<void> reorder(List<String> orderedIds) async {}
 }
+
+/// The slug input of the category sheet, addressed by its label.
+///
+/// A positional finder (`TextField.at(3)`) silently pointed at the wrong field
+/// as soon as the sheet gained another language, so the label — which is what
+/// the owner actually reads — is the anchor.
+Finder _slugField(AppLocalizations l10n) => find.descendant(
+  of: find.widgetWithText(AdminTextField, l10n.adminSlug),
+  matching: find.byType(TextField),
+);

@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../../../core/utils/localized_text.dart';
+
 part 'category.freezed.dart';
 part 'category.g.dart';
 
@@ -12,6 +14,7 @@ abstract class Category with _$Category {
     required String name,
     String? nameAm,
     String? nameAr,
+    String? nameOm,
     required String slug,
     String? coverPath,
     String? parentId,
@@ -30,20 +33,13 @@ abstract class Category with _$Category {
       _$CategoryFromJson(json);
 
   /// Name in the requested locale, falling back to English then any value.
-  String nameFor(String languageCode) {
-    return switch (languageCode) {
-      'am' => _firstNonEmpty(<String?>[nameAm, name, nameAr]),
-      'ar' => _firstNonEmpty(<String?>[nameAr, name, nameAm]),
-      _ => _firstNonEmpty(<String?>[name, nameAm, nameAr]),
-    };
-  }
+  String nameFor(String languageCode) => localizedText(
+    languageCode: languageCode,
+    english: name,
+    amharic: nameAm,
+    arabic: nameAr,
+    oromo: nameOm,
+  );
 
   bool get hasCover => coverPath != null && coverPath!.isNotEmpty;
 }
-
-String _firstNonEmpty(List<String?> values) =>
-    values.firstWhere(
-      (String? v) => v != null && v.trim().isNotEmpty,
-      orElse: () => '',
-    ) ??
-    '';

@@ -384,6 +384,12 @@ abstract class AppLocalizations {
   /// **'Name (Arabic)'**
   String get adminCategoryNameAr;
 
+  /// No description provided for @adminCategoryNameOm.
+  ///
+  /// In en, this message translates to:
+  /// **'Name (Oromo)'**
+  String get adminCategoryNameOm;
+
   /// No description provided for @adminCategoryUpdated.
   ///
   /// In en, this message translates to:
@@ -834,6 +840,12 @@ abstract class AppLocalizations {
   /// **'Description (Amharic)'**
   String get adminProductDescriptionAm;
 
+  /// No description provided for @adminProductDescriptionOm.
+  ///
+  /// In en, this message translates to:
+  /// **'Description (Oromo)'**
+  String get adminProductDescriptionOm;
+
   /// No description provided for @adminProductDescription.
   ///
   /// In en, this message translates to:
@@ -857,6 +869,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Title (Amharic)'**
   String get adminProductTitleAm;
+
+  /// No description provided for @adminProductTitleOm.
+  ///
+  /// In en, this message translates to:
+  /// **'Title (Oromo)'**
+  String get adminProductTitleOm;
 
   /// No description provided for @adminProductTitle.
   ///

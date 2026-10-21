@@ -161,6 +161,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminCategoryNameAr => 'Name (Arabic)';
 
   @override
+  String get adminCategoryNameOm => 'Name (Oromo)';
+
+  @override
   String get adminCategoryUpdated => 'Category updated';
 
   @override
@@ -392,6 +395,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminProductDescriptionAm => 'Description (Amharic)';
 
   @override
+  String get adminProductDescriptionOm => 'Description (Oromo)';
+
+  @override
   String get adminProductDescription => 'Description (English)';
 
   @override
@@ -402,6 +408,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminProductTitleAm => 'Title (Amharic)';
+
+  @override
+  String get adminProductTitleOm => 'Title (Oromo)';
 
   @override
   String get adminProductTitle => 'Title (English)';

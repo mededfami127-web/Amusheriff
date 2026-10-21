@@ -44,6 +44,7 @@ erDiagram
         text name
         text name_am
         text name_ar
+        text name_om "optional"
         text slug UK
         text cover_path
         int sort_order
@@ -55,6 +56,8 @@ erDiagram
         text title
         text title_am
         text title_ar
+        text title_om "optional"
+        text description_om "optional"
         numeric price
         numeric compare_at_price
         boolean is_available
@@ -119,6 +122,7 @@ tiktok | youtube | website | location | other`.
 | `20260101000700_subcategories.sql` | `categories.parent_id` self-FK (`on delete restrict`), `(parent_id, sort_order)` index, `guard_category_nesting()` + trigger |
 | `20260101000800_site_content.sql` | `site_content` (`key`, `locale`) → owner-editable home copy, public read |
 | `20260101000900_admin_contact_settings.sql` | single-row `admin_contact_settings` for the owner's private contact channels, public read |
+| `20260101001000_catalogue_omoro_text.sql` | `products.title_om` / `description_om`, `categories.name_om`, Oromo trigram index, refreshed `v_products_public` / `v_categories_with_counts` and Oromo-aware `search_products()` |
 
 Migrations are idempotent — `create table if not exists`, `create or replace
 function` / view, `drop trigger if exists` before every `create trigger`, and
@@ -179,10 +183,10 @@ bypasses RLS carries its own authorisation check:
 
 ### `search_products(q text, p_limit int default 40) → setof products`
 
-Trigram (`%`) plus substring matching across `title`, `title_am`, `title_ar`
-and `description`, ranked by `similarity()`. Backed by three GIN
-`gin_trgm_ops` indexes. Filters to published products in visible categories, so
-it is safe for anonymous callers.
+Trigram (`%`) plus substring matching across `title`, `title_am`, `title_ar`,
+`title_om`, `description` and `description_om`, ranked by `similarity()`.
+Backed by four GIN `gin_trgm_ops` indexes. Filters to published products in
+visible categories, so it is safe for anonymous callers.
 
 ### `reorder_rows(p_table text, p_ids uuid[]) → void`
 

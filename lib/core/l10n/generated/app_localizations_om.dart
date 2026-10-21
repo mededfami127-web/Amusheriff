@@ -161,6 +161,9 @@ class AppLocalizationsOm extends AppLocalizations {
   String get adminCategoryNameAr => 'Maqaa (Arabiffa)';
 
   @override
+  String get adminCategoryNameOm => 'Maqaa (Oromoo)';
+
+  @override
   String get adminCategoryUpdated => 'Ramaddiin haaromfame';
 
   @override
@@ -394,6 +397,9 @@ class AppLocalizationsOm extends AppLocalizations {
   String get adminProductDescriptionAm => 'Ibsa (Amaariffa)';
 
   @override
+  String get adminProductDescriptionOm => 'Ibsa (Oromoo)';
+
+  @override
   String get adminProductDescription => 'Ibsa (Ingiliffa)';
 
   @override
@@ -404,6 +410,9 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get adminProductTitleAm => 'Mata-duree (Amaariffa)';
+
+  @override
+  String get adminProductTitleOm => 'Mata-duree (Oromoo)';
 
   @override
   String get adminProductTitle => 'Mata-duree (Ingiliffa)';

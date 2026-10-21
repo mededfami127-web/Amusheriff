@@ -59,6 +59,7 @@ class CategoryEditorState {
     this.name = '',
     this.nameAm = '',
     this.nameAr = '',
+    this.nameOm = '',
     this.slug = '',
     this.coverPath,
     this.parentId,
@@ -74,6 +75,7 @@ class CategoryEditorState {
   final String name;
   final String nameAm;
   final String nameAr;
+  final String nameOm;
   final String slug;
   final String? coverPath;
 
@@ -91,6 +93,7 @@ class CategoryEditorState {
     String? name,
     String? nameAm,
     String? nameAr,
+    String? nameOm,
     String? slug,
     String? coverPath,
     String? parentId,
@@ -105,6 +108,7 @@ class CategoryEditorState {
     name: name ?? this.name,
     nameAm: nameAm ?? this.nameAm,
     nameAr: nameAr ?? this.nameAr,
+    nameOm: nameOm ?? this.nameOm,
     slug: slug ?? this.slug,
     coverPath: coverPath ?? this.coverPath,
     parentId: parentId ?? this.parentId,
@@ -140,6 +144,7 @@ class CategoryEditorController extends _$CategoryEditorController {
       name: existing.name,
       nameAm: existing.nameAm ?? '',
       nameAr: existing.nameAr ?? '',
+      nameOm: existing.nameOm ?? '',
       slug: existing.slug,
       coverPath: existing.coverPath,
       parentId: existing.parentId,
@@ -168,6 +173,7 @@ class CategoryEditorController extends _$CategoryEditorController {
   );
   void setNameAm(String v) => state = state.copyWith(nameAm: v);
   void setNameAr(String v) => state = state.copyWith(nameAr: v);
+  void setNameOm(String v) => state = state.copyWith(nameOm: v);
   void setSlug(String v) => state = state.copyWith(slug: v);
   void setCoverPath(String? v) => state = state.copyWith(coverPath: v);
   void setParentId(String? v) => state = state.copyWith(parentId: v);
@@ -202,6 +208,7 @@ class CategoryEditorController extends _$CategoryEditorController {
       slug: state.slug.trim(),
       nameAm: state.nameAm.trim(),
       nameAr: state.nameAr.trim(),
+      nameOm: state.nameOm.trim(),
       coverPath: state.coverPath,
       parentId: state.parentId,
       sortOrder: state.sortOrder,
@@ -552,9 +559,11 @@ class ProductEditorState {
     this.title = '',
     this.titleAm = '',
     this.titleAr = '',
+    this.titleOm = '',
     this.description = '',
     this.descriptionAm = '',
     this.descriptionAr = '',
+    this.descriptionOm = '',
     this.price = 0,
     this.compareAtPrice = 0,
     this.currencyCode = 'ETB',
@@ -572,9 +581,11 @@ class ProductEditorState {
   final String title;
   final String titleAm;
   final String titleAr;
+  final String titleOm;
   final String description;
   final String descriptionAm;
   final String descriptionAr;
+  final String descriptionOm;
   final double price;
   final double compareAtPrice;
   final String currencyCode;
@@ -592,9 +603,11 @@ class ProductEditorState {
     String? title,
     String? titleAm,
     String? titleAr,
+    String? titleOm,
     String? description,
     String? descriptionAm,
     String? descriptionAr,
+    String? descriptionOm,
     double? price,
     double? compareAtPrice,
     String? currencyCode,
@@ -611,9 +624,11 @@ class ProductEditorState {
     title: title ?? this.title,
     titleAm: titleAm ?? this.titleAm,
     titleAr: titleAr ?? this.titleAr,
+    titleOm: titleOm ?? this.titleOm,
     description: description ?? this.description,
     descriptionAm: descriptionAm ?? this.descriptionAm,
     descriptionAr: descriptionAr ?? this.descriptionAr,
+    descriptionOm: descriptionOm ?? this.descriptionOm,
     price: price ?? this.price,
     compareAtPrice: compareAtPrice ?? this.compareAtPrice,
     currencyCode: currencyCode ?? this.currencyCode,
@@ -643,9 +658,11 @@ class ProductEditorController extends _$ProductEditorController {
       title: existing.title,
       titleAm: existing.titleAm ?? '',
       titleAr: existing.titleAr ?? '',
+      titleOm: existing.titleOm ?? '',
       description: existing.description ?? '',
       descriptionAm: existing.descriptionAm ?? '',
       descriptionAr: existing.descriptionAr ?? '',
+      descriptionOm: existing.descriptionOm ?? '',
       price: existing.price,
       compareAtPrice: existing.compareAtPrice ?? 0,
       currencyCode: existing.currencyCode,
@@ -686,9 +703,11 @@ class ProductEditorController extends _$ProductEditorController {
       title: state.title.trim(),
       titleAm: state.titleAm.trim(),
       titleAr: state.titleAr.trim(),
+      titleOm: state.titleOm.trim(),
       description: state.description.trim(),
       descriptionAm: state.descriptionAm.trim(),
       descriptionAr: state.descriptionAr.trim(),
+      descriptionOm: state.descriptionOm.trim(),
       price: state.price,
       compareAtPrice: state.compareAtPrice > 0 ? state.compareAtPrice : null,
       currencyCode: state.currencyCode,
@@ -728,9 +747,11 @@ class ProductEditorController extends _$ProductEditorController {
   void setTitle(String v) => state = state.copyWith(title: v);
   void setTitleAm(String v) => state = state.copyWith(titleAm: v);
   void setTitleAr(String v) => state = state.copyWith(titleAr: v);
+  void setTitleOm(String v) => state = state.copyWith(titleOm: v);
   void setDescription(String v) => state = state.copyWith(description: v);
   void setDescriptionAm(String v) => state = state.copyWith(descriptionAm: v);
   void setDescriptionAr(String v) => state = state.copyWith(descriptionAr: v);
+  void setDescriptionOm(String v) => state = state.copyWith(descriptionOm: v);
   void setPrice(double v) => state = state.copyWith(price: v);
   void setCompareAtPrice(double v) => state = state.copyWith(compareAtPrice: v);
   void setCurrencyCode(String v) => state = state.copyWith(currencyCode: v);

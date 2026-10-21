@@ -118,6 +118,14 @@ class CategoryEditorSheet extends ConsumerWidget {
             ),
             const SizedBox(height: 14),
             AdminTextField(
+              label: l10n.adminCategoryNameOm,
+              value: state.nameOm,
+              textInputAction: TextInputAction.next,
+              onChanged: controller.setNameOm,
+              error: localizeFieldKey(l10n, state.fieldErrors['nameOm']),
+            ),
+            const SizedBox(height: 14),
+            AdminTextField(
               label: l10n.adminSlug,
               value: state.slug,
               textInputAction: TextInputAction.done,

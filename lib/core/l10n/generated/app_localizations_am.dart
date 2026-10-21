@@ -161,6 +161,9 @@ class AppLocalizationsAm extends AppLocalizations {
   String get adminCategoryNameAr => 'ስም (በአረብኛ)';
 
   @override
+  String get adminCategoryNameOm => 'ስም (ኦሮምኛ)';
+
+  @override
   String get adminCategoryUpdated => 'ምድብ ተዘምኗል';
 
   @override
@@ -387,6 +390,9 @@ class AppLocalizationsAm extends AppLocalizations {
   String get adminProductDescriptionAm => 'መግለጫ (አማርኛ)';
 
   @override
+  String get adminProductDescriptionOm => 'መግለጫ (ኦሮምኛ)';
+
+  @override
   String get adminProductDescription => 'መግለጫ (እንግሊዝኛ)';
 
   @override
@@ -397,6 +403,9 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get adminProductTitleAm => 'ርዕስ (አማርኛ)';
+
+  @override
+  String get adminProductTitleOm => 'ርዕስ (ኦሮምኛ)';
 
   @override
   String get adminProductTitle => 'ርዕስ (እንግሊዝኛ)';

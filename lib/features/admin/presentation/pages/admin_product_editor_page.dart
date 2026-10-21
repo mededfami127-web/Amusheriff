@@ -219,6 +219,13 @@ class _AdminProductEditorPageState
           ),
           const SizedBox(height: 14),
           AdminTextField(
+            label: l10n.adminProductTitleOm,
+            value: state.titleOm,
+            textInputAction: TextInputAction.next,
+            onChanged: controller.setTitleOm,
+          ),
+          const SizedBox(height: 14),
+          AdminTextField(
             label: l10n.adminProductDescription,
             value: state.description,
             maxLines: 4,
@@ -237,6 +244,13 @@ class _AdminProductEditorPageState
             value: state.descriptionAr,
             maxLines: 3,
             onChanged: controller.setDescriptionAr,
+          ),
+          const SizedBox(height: 14),
+          AdminTextField(
+            label: l10n.adminProductDescriptionOm,
+            value: state.descriptionOm,
+            maxLines: 3,
+            onChanged: controller.setDescriptionOm,
           ),
           const SizedBox(height: 18),
           Row(
