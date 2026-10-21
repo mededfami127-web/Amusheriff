@@ -92,6 +92,9 @@ class AppLocalizationsAm extends AppLocalizations {
   String get actionSearch => 'ፈልግ';
 
   @override
+  String get actionSeeAll => 'ሁሉንም ይመልከቱ';
+
+  @override
   String get actionSelectImage => 'ምስል ይምረጡ';
 
   @override
@@ -650,6 +653,9 @@ class AppLocalizationsAm extends AppLocalizations {
   String get errorConstraintViolation => 'አንዳንድ እሴቶች አይፈቀዱም።';
 
   @override
+  String get errorDetailsLabel => 'የቴክኒካል ዝርዝሮች';
+
+  @override
   String get errorDuplicate => 'ያ እሴት አስቀድሞ ጥቅም ላይ ውሏል።';
 
   @override
@@ -784,6 +790,9 @@ class AppLocalizationsAm extends AppLocalizations {
   String inquiryMessageTemplate(String price, String product) {
     return 'ሰላም! በ“$product” ($price) ፍላጎት አለኝ።';
   }
+
+  @override
+  String get labelAll => 'ሁሉም';
 
   @override
   String get labelAvailable => 'ይገኛል';

@@ -193,3 +193,60 @@ abstract final class ErrorMapper {
   static int? _intOrNull(String? raw) =>
       raw == null ? null : int.tryParse(raw.trim());
 }
+
+/// One short technical line for a failure, or `null` when there is nothing
+/// worth showing.
+///
+/// "The service is temporarily unavailable" is the right sentence for a
+/// shopper and the wrong one for the owner whose Save was refused: it hides
+/// the SQLSTATE that names the fix (a missing column, a policy denial, a
+/// unique conflict). This turns the original Supabase exception back into
+/// `code: message` plus its hint, which is exactly what a Supabase error
+/// response carries, so the admin banner can print it under the friendly text.
+///
+/// Returns `null` for failures with no backend exception attached, and never
+/// echoes a session token or any other credential — Postgres error text and
+/// hints contain schema names and constraint names only.
+String? technicalDetailFor(AppFailure failure) {
+  final Object? cause = failure.cause;
+
+  if (cause is PostgrestException) {
+    final String code = (cause.code ?? '').trim();
+    final String message = cause.message.trim();
+    final String hint = (cause.hint ?? '').trim();
+    final String head = <String>[
+      if (code.isNotEmpty) code,
+      if (message.isNotEmpty) message,
+    ].join(': ');
+    if (head.isEmpty) return null;
+    return _shorten(hint.isEmpty ? head : '$head (hint: $hint)');
+  }
+
+  if (cause is StorageException) {
+    final String status = (cause.statusCode ?? '').trim();
+    final String message = cause.message.trim();
+    // Storage has no `hint`; `error` is the gateway's own code
+    // ("invalid_mime_type", "bucket not found", …) and is equally useful.
+    final String detail = (cause.error ?? '').trim();
+    final String head = <String>[
+      if (status.isNotEmpty) 'HTTP $status',
+      if (message.isNotEmpty) message,
+    ].join(': ');
+    if (head.isEmpty) return null;
+    return _shorten(detail.isEmpty ? head : '$head (error: $detail)');
+  }
+
+  // No Supabase exception: the debug message is still the most precise thing
+  // we have, but only if it says more than the localised sentence does.
+  final String debug = (failure.debugMessage ?? '').trim();
+  if (debug.isEmpty || debug == failure.messageKey) return null;
+  return _shorten(debug);
+}
+
+/// Keeps the banner line readable on a 320 dp screen: a Postgres message can
+/// quote a whole row, which nobody needs under a form.
+String _shorten(String value) {
+  const int max = 220;
+  if (value.length <= max) return value;
+  return '${value.substring(0, max - 1).trimRight()}…';
+}

@@ -91,6 +91,7 @@ class _AdminChangePasswordPageState
                   padding: const EdgeInsets.only(bottom: 16),
                   child: InlineFailureBanner(
                     failure: failure,
+                    showDetails: true,
                     onDismiss: () =>
                         ref.read(adminAuthControllerProvider.notifier).reset(),
                   ),

@@ -24,9 +24,29 @@ class StorageDataSource {
     required String extension,
   }) => 'products/$productId/${_uuid()}${_normaliseExtension(extension)}';
 
-  /// `brand/{name}-{uuid}.{ext}` for the logo and category covers.
-  static String brandPath({required String name, required String extension}) =>
-      'brand/${_safeName(name)}-${_uuid()}${_normaliseExtension(extension)}';
+  /// Folders the `brand` bucket's insert policy accepts as the first path
+  /// segment: `(storage.foldername(name))[1] in ('logo','categories','splash')`.
+  /// Anything else is refused with 42501, which reads as a permission error for
+  /// an upload the owner *is* allowed to make.
+  static const Set<String> brandFolders = <String>{
+    'logo',
+    'categories',
+    'splash',
+  };
+
+  /// `logo|categories|splash/{name}-{uuid}.{ext}` for the logo and the
+  /// category covers — bucket-relative, exactly the layout the storage policy
+  /// above requires.
+  static String brandPath({
+    required String folder,
+    required String name,
+    required String extension,
+  }) {
+    final String safeFolder = brandFolders.contains(folder) ? folder : 'logo';
+    return '$safeFolder/${_safeName(name)}-${_uuid()}${_normaliseExtension(
+      extension,
+    )}';
+  }
 
   /// Uploads bytes and returns the stored path (bucket-relative), which is
   /// what the catalogue rows store in `storage_path`.

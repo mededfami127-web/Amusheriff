@@ -252,6 +252,12 @@ abstract class AppLocalizations {
   /// **'Search'**
   String get actionSearch;
 
+  /// No description provided for @actionSeeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get actionSeeAll;
+
   /// No description provided for @actionSelectImage.
   ///
   /// In en, this message translates to:
@@ -1350,6 +1356,12 @@ abstract class AppLocalizations {
   /// **'Some values are not allowed.'**
   String get errorConstraintViolation;
 
+  /// No description provided for @errorDetailsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Technical details'**
+  String get errorDetailsLabel;
+
   /// No description provided for @errorDuplicate.
   ///
   /// In en, this message translates to:
@@ -1607,6 +1619,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hello! I am interested in “{product}” ({price}).'**
   String inquiryMessageTemplate(String price, String product);
+
+  /// No description provided for @labelAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get labelAll;
 
   /// No description provided for @labelAvailable.
   ///

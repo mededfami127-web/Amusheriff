@@ -1,12 +1,19 @@
+import 'dart:typed_data' show Uint8List;
+
+import 'package:image_picker/image_picker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/errors/app_failure.dart';
 import '../../../../core/errors/error_mapper.dart';
+import '../../../../core/utils/app_logger.dart';
 import '../../../../core/utils/validators.dart';
+import '../../../catalog/data/datasources/storage_datasource.dart';
 import '../../../catalog/domain/drafts/catalog_drafts.dart';
 import '../../../catalog/domain/entities/category.dart';
+import '../../../catalog/domain/entities/media_kind.dart';
 import '../../../catalog/domain/entities/product.dart';
 import '../../../catalog/domain/repositories/catalog_repositories.dart';
+import '../../../catalog/presentation/controllers/media_upload_controller.dart';
 import '../../../catalog/presentation/providers/catalog_providers.dart';
 import '../../../contacts/domain/drafts/contact_link_draft.dart';
 import '../../../contacts/domain/entities/contact_kind.dart';
@@ -62,6 +69,7 @@ class CategoryEditorState {
     this.nameOm = '',
     this.slug = '',
     this.coverPath,
+    this.coverUploading = false,
     this.parentId,
     this.isVisible = true,
     this.sortOrder = 0,
@@ -78,6 +86,10 @@ class CategoryEditorState {
   final String nameOm;
   final String slug;
   final String? coverPath;
+
+  /// True while the optional cover image is in the bucket, so the sheet can
+  /// disable the picker and spin instead of allowing a double upload.
+  final bool coverUploading;
 
   /// Mother category when this row is a subcategory; `null` when top-level.
   final String? parentId;
@@ -96,6 +108,7 @@ class CategoryEditorState {
     String? nameOm,
     String? slug,
     String? coverPath,
+    bool? coverUploading,
     String? parentId,
     bool? isVisible,
     int? sortOrder,
@@ -111,6 +124,7 @@ class CategoryEditorState {
     nameOm: nameOm ?? this.nameOm,
     slug: slug ?? this.slug,
     coverPath: coverPath ?? this.coverPath,
+    coverUploading: coverUploading ?? this.coverUploading,
     parentId: parentId ?? this.parentId,
     isVisible: isVisible ?? this.isVisible,
     sortOrder: sortOrder ?? this.sortOrder,
@@ -181,6 +195,86 @@ class CategoryEditorController extends _$CategoryEditorController {
   void setSortOrder(int v) => state = state.copyWith(sortOrder: v);
   void toggleSlugTouched() => state = state.copyWith(slugTouched: true);
 
+  /// Object that [pickCover] uploaded during this opening of the sheet but
+  /// that no row references yet. A cancel deletes it, a second pick replaces
+  /// it, and a successful save clears it.
+  String? _pendingCoverPath;
+
+  /// Uploads the optional cover image **before** the row is written.
+  ///
+  /// Storage first, row second: `cover_path` then points at an object that
+  /// already exists, a rejected upload leaves the form untouched, and a row
+  /// insert that fails afterwards can be retried without re-picking the photo.
+  /// A second pick removes the file the first one left behind.
+  Future<void> pickCover() async {
+    if (state.coverUploading) return;
+
+    final XFile? picked = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 90,
+    );
+    if (picked == null) return;
+
+    state = state.copyWith(coverUploading: true);
+    final StorageDataSource storage = ref.read(storageDataSourceProvider);
+    final String previous = _pendingCoverPath ?? '';
+    try {
+      final Uint8List bytes = await picked.readAsBytes();
+      if (bytes.length > MediaKind.maxImageBytes) {
+        state = state.copyWith(
+          coverUploading: false,
+          status: const AdminFormStatus(
+            failure: MediaFailure(messageKey: 'errorMediaImageTooLarge'),
+          ),
+        );
+        return;
+      }
+
+      final String extension = _extensionOf(picked.name);
+      final String uploaded = await storage.upload(
+        bucket: StorageDataSource.brandBucket,
+        path: StorageDataSource.brandPath(
+          folder: 'categories',
+          name: state.slug.isEmpty ? state.name : state.slug,
+          extension: extension,
+        ),
+        bytes: bytes,
+        contentType: _contentTypeOf(extension),
+      );
+      _pendingCoverPath = uploaded;
+      state = state.copyWith(coverPath: uploaded, coverUploading: false);
+      if (previous.isNotEmpty && previous != uploaded) {
+        await storage.removeQuietly(
+          StorageDataSource.brandBucket,
+          previous,
+        );
+      }
+    } on Object catch (error, stack) {
+      AppLog.error('CATEGORY COVER UPLOAD failed: ${error.runtimeType}', error);
+      state = state.copyWith(
+        coverUploading: false,
+        status: AdminFormStatus(
+          failure: ErrorMapper.map(error, stackTrace: stack),
+        ),
+      );
+    }
+  }
+
+  /// Closes the sheet without saving: the cover uploaded in this opening is
+  /// removed from the bucket instead of being stranded there.
+  Future<void> discardPendingCover() async {
+    final String path = _pendingCoverPath ?? '';
+    _pendingCoverPath = null;
+    if (path.isEmpty) return;
+    try {
+      await ref
+          .read(storageDataSourceProvider)
+          .removeQuietly(StorageDataSource.brandBucket, path);
+    } on Object catch (error) {
+      AppLog.error('CATEGORY COVER CLEANUP failed for $path', error);
+    }
+  }
+
   FieldErrors validate() {
     final FieldErrors errors = <String, String>{};
     final String? nameKey = Validators.categoryName(state.name);
@@ -203,25 +297,60 @@ class CategoryEditorController extends _$CategoryEditorController {
 
     state = state.copyWith(status: const AdminFormStatus(saving: true));
 
-    final CategoryDraft draft = CategoryDraft(
-      name: state.name.trim(),
-      slug: state.slug.trim(),
-      nameAm: state.nameAm.trim(),
-      nameAr: state.nameAr.trim(),
-      nameOm: state.nameOm.trim(),
-      coverPath: state.coverPath,
-      parentId: state.parentId,
-      sortOrder: state.sortOrder,
-      isVisible: state.isVisible,
-    );
+    final String baseSlug = state.slug.trim();
+    final CategoryRepository repo = ref.read(categoryRepositoryProvider);
 
     try {
-      final CategoryRepository repo = ref.read(categoryRepositoryProvider);
-      final Category category = state.isNew
-          ? await repo.create(draft)
-          : await repo.update(state.id!, draft);
+      // `slug` is NOT NULL UNIQUE. A generated slug colliding with an existing
+      // row used to surface as a bare "already in use" with no way forward;
+      // now the generated one steps aside (`curtain` → `curtain-2` →
+      // `curtain-3`) while a slug the owner typed themselves is never silently
+      // rewritten — that one gets the field error instead.
+      String slug = baseSlug;
+      Category? category;
+      for (int attempt = 0; category == null && attempt < 3; attempt++) {
+        final CategoryDraft draft = CategoryDraft(
+          name: state.name.trim(),
+          slug: slug,
+          nameAm: state.nameAm.trim(),
+          nameAr: state.nameAr.trim(),
+          nameOm: state.nameOm.trim(),
+          coverPath: state.coverPath,
+          parentId: state.parentId,
+          sortOrder: state.sortOrder,
+          isVisible: state.isVisible,
+        );
+        try {
+          category = state.isNew
+              ? await repo.create(draft)
+              : await repo.update(state.id!, draft);
+        } on ValidationFailure catch (failure) {
+          final bool duplicate =
+              failure.messageKey == 'errorDuplicate' && !state.slugTouched;
+          if (!duplicate || attempt == 2) {
+            if (duplicate) {
+              // Two attempts were not enough: say which field is at fault.
+              state = state.copyWith(
+                fieldErrors: <String, String>{'slug': 'errorDuplicate'},
+                status: AdminFormStatus(failure: failure),
+              );
+              return false;
+            }
+            rethrow;
+          }
+          slug = '$baseSlug-${attempt + 2}';
+        }
+      }
+
+      final Category saved = category!;
+      // The row now references the uploaded cover, so it is no longer pending.
+      _pendingCoverPath = null;
+      // The storefront reads through Realtime streams *and* one-shot futures;
+      // invalidating both means the dashboard cards and any open category page
+      // show the new row without the app being restarted.
+      invalidateCatalogue(ref.invalidate, includeCategories: true);
       state = state.copyWith(
-        id: category.id,
+        id: saved.id,
         isNew: false,
         status: const AdminFormStatus(saved: true),
       );
@@ -241,6 +370,46 @@ class CategoryEditorController extends _$CategoryEditorController {
 
   void acknowledge() => state = state.copyWith(status: const AdminFormStatus());
 }
+
+/// Refreshes every read the three catalogue forms can change.
+///
+/// Called after a successful create/update/delete. The Realtime streams would
+/// eventually deliver the change on their own, but a future-backed provider
+/// (search, a category page by slug, the dashboard counts) would not — and
+/// "saved, then nothing happened" is exactly the bug this exists for.
+///
+/// Takes the `invalidate` tear-off so a controller (`Ref`) and a page
+/// (`WidgetRef`) share one list of providers.
+void invalidateCatalogue(
+  void Function(ProviderOrFamily) invalidate, {
+  required bool includeCategories,
+}) {
+  invalidate(storefrontProductsProvider);
+  invalidate(adminProductsProvider);
+  invalidate(productDetailProvider);
+  invalidate(searchProductsProvider);
+  if (includeCategories) {
+    invalidate(visibleCategoriesProvider);
+    invalidate(allCategoriesProvider);
+    invalidate(categoryProductCountsProvider);
+    invalidate(categoryBySlugProvider);
+    invalidate(categoryByIdProvider);
+  }
+}
+
+/// `photo.JPG` → `jpg`; a name with no extension falls back to `png`, which is
+/// what the brand bucket's MIME allow-list accepts.
+String _extensionOf(String fileName) {
+  final int dot = fileName.lastIndexOf('.');
+  if (dot < 0 || dot == fileName.length - 1) return 'png';
+  return fileName.substring(dot + 1).toLowerCase();
+}
+
+String _contentTypeOf(String extension) => switch (extension) {
+  'jpg' || 'jpeg' => 'image/jpeg',
+  'webp' => 'image/webp',
+  _ => 'image/png',
+};
 
 /// Validates a link value for its channel.
 String? validateContactValue(ContactKind kind, String raw) {
@@ -722,6 +891,11 @@ class ProductEditorController extends _$ProductEditorController {
       final Product product = state.isNew
           ? await repo.create(draft)
           : await repo.update(state.id!, draft);
+      // The grid, the per-category counts, the detail page and the search index
+      // are read through one-shot futures as well as streams: refresh them all
+      // so "All products", the category views and the dashboard answer with the
+      // new row immediately.
+      invalidateCatalogue(ref.invalidate, includeCategories: true);
       state = state.copyWith(
         id: product.id,
         isNew: false,

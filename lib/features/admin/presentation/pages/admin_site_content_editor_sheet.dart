@@ -99,6 +99,7 @@ class _AdminSiteContentEditorSheetState
             if (state.status.failure != null)
               InlineFailureBanner(
                 failure: state.status.failure!,
+                showDetails: true,
                 onDismiss: controller.acknowledge,
               ),
             const SizedBox(height: 14),

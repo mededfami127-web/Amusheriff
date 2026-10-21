@@ -51,6 +51,7 @@ class AdminSiteSettingsPage extends ConsumerWidget {
               padding: const EdgeInsets.only(bottom: 16),
               child: InlineFailureBanner(
                 failure: state.status.failure!,
+                showDetails: true,
                 onDismiss: controller.acknowledge,
               ),
             ),
@@ -324,6 +325,7 @@ class _LogoPickerState extends ConsumerState<_LogoPicker> {
           .upload(
             bucket: StorageDataSource.brandBucket,
             path: StorageDataSource.brandPath(
+              folder: 'logo',
               name: 'logo',
               extension: extension,
             ),

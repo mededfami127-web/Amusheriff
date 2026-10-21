@@ -129,6 +129,9 @@ class OverridableAppLocalizations extends AppLocalizations {
   String get actionSearch => _text('actionSearch', _base.actionSearch);
 
   @override
+  String get actionSeeAll => _text('actionSeeAll', _base.actionSeeAll);
+
+  @override
   String get actionSelectImage =>
       _text('actionSelectImage', _base.actionSelectImage);
 
@@ -806,6 +809,10 @@ class OverridableAppLocalizations extends AppLocalizations {
       _text('errorConstraintViolation', _base.errorConstraintViolation);
 
   @override
+  String get errorDetailsLabel =>
+      _text('errorDetailsLabel', _base.errorDetailsLabel);
+
+  @override
   String get errorDuplicate => _text('errorDuplicate', _base.errorDuplicate);
 
   @override
@@ -950,6 +957,9 @@ class OverridableAppLocalizations extends AppLocalizations {
     _base.inquiryMessageTemplate(price, product),
     <String, String>{'price': '${price}', 'product': '${product}'},
   );
+
+  @override
+  String get labelAll => _text('labelAll', _base.labelAll);
 
   @override
   String get labelAvailable => _text('labelAvailable', _base.labelAvailable);

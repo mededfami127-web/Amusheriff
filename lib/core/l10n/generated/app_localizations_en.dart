@@ -92,6 +92,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actionSearch => 'Search';
 
   @override
+  String get actionSeeAll => 'See all';
+
+  @override
   String get actionSelectImage => 'Select image';
 
   @override
@@ -659,6 +662,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorConstraintViolation => 'Some values are not allowed.';
 
   @override
+  String get errorDetailsLabel => 'Technical details';
+
+  @override
   String get errorDuplicate => 'That value is already in use.';
 
   @override
@@ -799,6 +805,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String inquiryMessageTemplate(String price, String product) {
     return 'Hello! I am interested in “$product” ($price).';
   }
+
+  @override
+  String get labelAll => 'All';
 
   @override
   String get labelAvailable => 'Available';

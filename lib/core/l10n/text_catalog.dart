@@ -328,6 +328,16 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
     },
   ),
   AppTextEntry(
+    key: 'actionSeeAll',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'See all',
+      'am': 'ሁሉንም ይመልከቱ',
+      'ar': 'عرض الكل',
+      'om': 'Hunda ilaali',
+    },
+  ),
+  AppTextEntry(
     key: 'actionSelectImage',
     sectionKey: 'groupCommon',
     defaults: <String, String>{
@@ -2311,6 +2321,16 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
     },
   ),
   AppTextEntry(
+    key: 'errorDetailsLabel',
+    sectionKey: 'groupErrors',
+    defaults: <String, String>{
+      'en': 'Technical details',
+      'am': 'የቴክኒካል ዝርዝሮች',
+      'ar': 'التفاصيل التقنية',
+      'om': 'Bal\'ina teeknikaalii',
+    },
+  ),
+  AppTextEntry(
     key: 'errorDuplicate',
     sectionKey: 'groupErrors',
     defaults: <String, String>{
@@ -2741,6 +2761,16 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
       'om': 'Akkam! “{product}” ({price}) xiyyeeffannaa qaba.',
     },
     placeholders: <String>['price', 'product'],
+  ),
+  AppTextEntry(
+    key: 'labelAll',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'All',
+      'am': 'ሁሉም',
+      'ar': 'الكل',
+      'om': 'Hunda',
+    },
   ),
   AppTextEntry(
     key: 'labelAvailable',

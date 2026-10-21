@@ -44,6 +44,7 @@ class AdminTextEditorPage extends ConsumerWidget {
               padding: const EdgeInsets.only(bottom: 14),
               child: InlineFailureBanner(
                 failure: status.failure!,
+                showDetails: true,
                 onDismiss: ref
                     .read(textEditorControllerProvider.notifier)
                     .acknowledge,

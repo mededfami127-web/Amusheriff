@@ -92,6 +92,9 @@ class AppLocalizationsOm extends AppLocalizations {
   String get actionSearch => 'Barbaadi';
 
   @override
+  String get actionSeeAll => 'Hunda ilaali';
+
+  @override
   String get actionSelectImage => 'Suuraa filadhu';
 
   @override
@@ -663,6 +666,9 @@ class AppLocalizationsOm extends AppLocalizations {
   String get errorConstraintViolation => 'Gatiiwwan tokko tokko hin hayyamamu.';
 
   @override
+  String get errorDetailsLabel => 'Bal\'ina teeknikaalii';
+
+  @override
   String get errorDuplicate => 'Gatiin sun duraan tajaajila keessa jira.';
 
   @override
@@ -808,6 +814,9 @@ class AppLocalizationsOm extends AppLocalizations {
   String inquiryMessageTemplate(String price, String product) {
     return 'Akkam! “$product” ($price) xiyyeeffannaa qaba.';
   }
+
+  @override
+  String get labelAll => 'Hunda';
 
   @override
   String get labelAvailable => 'Jira';

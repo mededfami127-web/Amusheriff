@@ -64,6 +64,7 @@ class _AdminContactSettingsSectionState
             InlineFailureBanner(
               failure: _failure!,
               onDismiss: () => setState(() => _failure = null),
+              showDetails: true,
             ),
             const SizedBox(height: 14),
           ],

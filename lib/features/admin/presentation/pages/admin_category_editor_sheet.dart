@@ -1,8 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/error_localizer.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
+import '../../../../core/network/storage_urls.dart';
 import '../../../../core/theme/brand_colors.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/inline_failure_banner.dart';
@@ -89,6 +91,7 @@ class CategoryEditorSheet extends ConsumerWidget {
               InlineFailureBanner(
                 failure: state.status.failure!,
                 onDismiss: controller.acknowledge,
+                showDetails: true,
               ),
             ],
             const SizedBox(height: 18),
@@ -137,7 +140,9 @@ class CategoryEditorSheet extends ConsumerWidget {
             ),
             const SizedBox(height: 6),
             Text(l10n.adminSlugAuto, style: BrandTypography.bodySmall),
-            const SizedBox(height: 10),
+            const SizedBox(height: 14),
+            _CoverField(state: state, controller: controller),
+            const SizedBox(height: 6),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
               value: state.isVisible,
@@ -157,7 +162,12 @@ class CategoryEditorSheet extends ConsumerWidget {
               label: Text(l10n.actionSave),
             ),
             TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
+              onPressed: () async {
+                // The photo may already be in the bucket; a cancelled form
+                // must not strand it there.
+                await controller.discardPendingCover();
+                if (context.mounted) Navigator.of(context).pop(false);
+              },
               child: Text(l10n.actionCancel),
             ),
           ],
@@ -202,5 +212,97 @@ class CategoryEditorSheet extends ConsumerWidget {
         context,
       ).showSnackBar(SnackBar(content: Text(localizeFailure(l10n, failure))));
     }
+  }
+}
+
+/// Optional cover image: pick → upload to the `brand` bucket → the row stores
+/// the path on Save.
+///
+/// The upload happens while picking (storage first, row second), so the sheet
+/// never writes a `cover_path` that points at nothing, and cancelling the sheet
+/// deletes the file this opening uploaded.
+class _CoverField extends ConsumerWidget {
+  const _CoverField({required this.state, required this.controller});
+
+  final CategoryEditorState state;
+  final CategoryEditorController controller;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final bool dark = Theme.of(context).brightness == Brightness.dark;
+    final String? cover = state.coverPath;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          l10n.adminCoverImage,
+          style: BrandTypography.labelLarge.copyWith(
+            color: BrandColors.goldLight,
+          ),
+        ),
+        const SizedBox(height: 8),
+        if (cover != null) ...<Widget>[
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: SizedBox(
+              width: double.infinity,
+              height: 96,
+              child: CachedNetworkImage(
+                imageUrl: ref.read(storageUrlsProvider).categoryCover(cover),
+                fit: BoxFit.cover,
+                placeholder: (_, __) => const ColoredBox(
+                  color: BrandColors.plumSurface,
+                ),
+                errorWidget: (_, __, ___) => const ColoredBox(
+                  color: BrandColors.plumSurface,
+                  child: Icon(Icons.broken_image_outlined),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+        Material(
+          color: dark ? BrandColors.plumSurface : BrandColors.ivory,
+          borderRadius: BorderRadius.circular(12),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: state.coverUploading ? null : controller.pickCover,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  state.coverUploading
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2.2),
+                        )
+                      : const Icon(
+                          Icons.upload_outlined,
+                          size: 18,
+                          color: BrandColors.gold,
+                        ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      cover == null
+                          ? l10n.actionSelectImage
+                          : l10n.adminCover,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: BrandTypography.bodyMedium,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

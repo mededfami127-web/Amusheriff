@@ -344,6 +344,7 @@ class _CategoryTile extends ConsumerWidget {
     final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
     try {
       await ref.read(categoryRepositoryProvider).delete(category.id);
+      invalidateCatalogue(ref.invalidate, includeCategories: true);
       messenger.showSnackBar(
         SnackBar(content: Text(l10n.adminCategoryDeleted)),
       );

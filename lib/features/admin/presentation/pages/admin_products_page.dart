@@ -355,6 +355,10 @@ class _ProductTile extends ConsumerWidget {
             SnackBar(content: Text(l10n.adminProductDeleted)),
           );
       }
+      // Publish/feature/availability/delete all change what the storefront
+      // grid and the per-category counts read, so refresh them here rather
+      // than waiting for a restart.
+      invalidateCatalogue(ref.invalidate, includeCategories: true);
     } on Object catch (error) {
       messenger.showSnackBar(
         SnackBar(content: Text(localizeFailure(l10n, ErrorMapper.map(error)))),

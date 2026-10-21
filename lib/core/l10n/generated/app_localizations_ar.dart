@@ -92,6 +92,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get actionSearch => 'بحث';
 
   @override
+  String get actionSeeAll => 'عرض الكل';
+
+  @override
   String get actionSelectImage => 'اختر صورة';
 
   @override
@@ -659,6 +662,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get errorConstraintViolation => 'بعض القيم غير مسموح بها.';
 
   @override
+  String get errorDetailsLabel => 'التفاصيل التقنية';
+
+  @override
   String get errorDuplicate => 'هذه القيمة مستخدمة بالفعل.';
 
   @override
@@ -798,6 +804,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String inquiryMessageTemplate(String price, String product) {
     return 'مرحبًا! أنا مهتم بـ «$product» ($price).';
   }
+
+  @override
+  String get labelAll => 'الكل';
 
   @override
   String get labelAvailable => 'متوفر';

@@ -15,10 +15,20 @@ import 'favourite_button.dart';
 
 /// A single catalogue tile. Tapping opens the product detail route.
 class ProductCard extends ConsumerWidget {
-  const ProductCard({super.key, required this.product, this.width});
+  const ProductCard({
+    super.key,
+    required this.product,
+    this.width,
+    this.categoryLabel,
+  });
 
   final Product product;
   final double? width;
+
+  /// Category name in the current language, shown as a small gold line above
+  /// the title. Only the home grid's mixed "All" list passes it — a card on a
+  /// category's own page already knows where it is.
+  final String? categoryLabel;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -114,6 +124,18 @@ class ProductCard extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
+                    if (categoryLabel != null) ...<Widget>[
+                      Text(
+                        categoryLabel!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: BrandTypography.labelSmall.copyWith(
+                          color: BrandColors.gold,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                    ],
                     Text(
                       title,
                       maxLines: 2,

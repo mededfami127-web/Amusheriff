@@ -150,6 +150,9 @@ class _AdminProductEditorPageState
               child: InlineFailureBanner(
                 failure: state.status.failure!,
                 onDismiss: controller.acknowledge,
+                // The owner needs the SQLSTATE under the friendly sentence;
+                // "service unavailable" alone names no column and no policy.
+                showDetails: true,
               ),
             ),
           if (categories.isEmpty) ...<Widget>[

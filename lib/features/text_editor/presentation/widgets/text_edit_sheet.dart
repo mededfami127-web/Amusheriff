@@ -178,6 +178,7 @@ class _TextEditSheetState extends ConsumerState<_TextEditSheet> {
               const SizedBox(height: 12),
               InlineFailureBanner(
                 failure: status.failure!,
+                showDetails: true,
                 onDismiss: ref
                     .read(textEditorControllerProvider.notifier)
                     .acknowledge,
