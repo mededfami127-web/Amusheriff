@@ -123,7 +123,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboutFallback.
   ///
   /// In en, this message translates to:
-  /// **'Amu Sharif Arabiyan Majlis crafts premium majlis seating, floor cushions and furnishings in the Arabian tradition.'**
+  /// **'Amusheriff Arabiyan Mejlis and Furniture crafts premium majlis seating, floor cushions and furnishings in the Arabian tradition.'**
   String get aboutFallback;
 
   /// No description provided for @actionAdd.
@@ -1233,7 +1233,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:
-  /// **'Amu Sharif Arabiyan Majlis'**
+  /// **'Amusheriff Arabiyan Mejlis and Furniture'**
   String get appTitle;
 
   /// No description provided for @brandMonogram.
@@ -1245,19 +1245,19 @@ abstract class AppLocalizations {
   /// No description provided for @brandNameAm.
   ///
   /// In en, this message translates to:
-  /// **'አሙ ሸሪፍ አረቢያን መጅሊስ'**
+  /// **'አሙሸሪፍ አረቢያን መጅሊስ እና ፈርኒቸር'**
   String get brandNameAm;
 
   /// No description provided for @brandNameAr.
   ///
   /// In en, this message translates to:
-  /// **'المجلس العربي عمو شريف'**
+  /// **'أمشريف عربيان مجلس والأثاث'**
   String get brandNameAr;
 
   /// No description provided for @brandNameEn.
   ///
   /// In en, this message translates to:
-  /// **'Amu Sharif Arabiyan Majlis'**
+  /// **'Amusheriff Arabiyan Mejlis and Furniture'**
   String get brandNameEn;
 
   /// No description provided for @contactEmail.

@@ -116,16 +116,22 @@ void main() {
 
   group('SiteSettings', () {
     test('fallback carries the exact brand names from the logo', () {
-      expect(SiteSettings.fallback.storeNameEn, 'Amu Sharif Arabiyan Majlis');
-      expect(SiteSettings.fallback.storeNameAm, 'አሙ ሸሪፍ አረቢያን መጅሊስ');
-      expect(SiteSettings.fallback.storeNameAr, 'المجلس العربي عمو شريف');
+      expect(
+        SiteSettings.fallback.storeNameEn,
+        'Amusheriff Arabiyan Mejlis and Furniture',
+      );
+      expect(SiteSettings.fallback.storeNameAm, 'አሙሸሪፍ አረቢያን መጅሊስ እና ፈርኒቸር');
+      expect(SiteSettings.fallback.storeNameAr, 'أمشريف عربيان مجلس والأثاث');
       expect(SiteSettings.fallback.currencyCode, 'ETB');
     });
 
     test('storeNameFor falls back to English when a translation is blank', () {
       const SiteSettings settings = SiteSettings(storeNameAm: '');
-      expect(settings.storeNameFor('am'), 'Amu Sharif Arabiyan Majlis');
-      expect(settings.storeNameFor('ar'), 'المجلس العربي عمو شريف');
+      expect(
+        settings.storeNameFor('am'),
+        'Amusheriff Arabiyan Mejlis and Furniture',
+      );
+      expect(settings.storeNameFor('ar'), 'أمشريف عربيان مجلس والأثاث');
     });
   });
 

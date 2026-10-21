@@ -244,10 +244,7 @@ class CategoryEditorController extends _$CategoryEditorController {
       _pendingCoverPath = uploaded;
       state = state.copyWith(coverPath: uploaded, coverUploading: false);
       if (previous.isNotEmpty && previous != uploaded) {
-        await storage.removeQuietly(
-          StorageDataSource.brandBucket,
-          previous,
-        );
+        await storage.removeQuietly(StorageDataSource.brandBucket, previous);
       }
     } on Object catch (error, stack) {
       AppLog.error('CATEGORY COVER UPLOAD failed: ${error.runtimeType}', error);

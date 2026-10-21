@@ -57,13 +57,19 @@ class BrandWordmark extends StatelessWidget {
   const BrandWordmark({
     super.key,
     required this.english,
+    this.secondary,
     this.amharic,
     this.arabic,
     this.alignment = CrossAxisAlignment.start,
     this.compact = false,
   });
 
+  /// First line of the name, set large — "Amusheriff".
   final String english;
+
+  /// The rest of the name, set smaller underneath when the full name is too
+  /// long for one line — "Arabiyan Mejlis and Furniture".
+  final String? secondary;
   final String? amharic;
   final String? arabic;
   final CrossAxisAlignment alignment;
@@ -73,6 +79,10 @@ class BrandWordmark extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool dark = Theme.of(context).brightness == Brightness.dark;
     final Color heading = dark ? BrandColors.goldLight : BrandColors.charcoal;
+    final TextAlign textAlign = alignment == CrossAxisAlignment.center
+        ? TextAlign.center
+        : TextAlign.start;
+    final String? under = secondary?.trim();
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -82,20 +92,33 @@ class BrandWordmark extends StatelessWidget {
           shaderCallback: BrandGradients.goldHorizontal.createShader,
           blendMode: BlendMode.srcIn,
           child: Text(
-            english.toUpperCase(),
-            textAlign: alignment == CrossAxisAlignment.center
-                ? TextAlign.center
-                : TextAlign.start,
+            english,
+            textAlign: textAlign,
             style:
                 (compact
                         ? BrandTypography.displayWeighted(700, size: 17)
                         : BrandTypography.brandTitle)
                     .copyWith(
                       color: BrandColors.gold,
-                      letterSpacing: compact ? 2.4 : 3.2,
+                      letterSpacing: compact ? 1.0 : 2.4,
                     ),
           ),
         ),
+        // Second line of the shop name. Never ellipsised: the app bar shows
+        // the whole name, so it stays legible on a narrow phone.
+        if (under != null && under.isNotEmpty)
+          Text(
+            under,
+            textAlign: textAlign,
+            softWrap: true,
+            style: BrandTypography.bodySmall.copyWith(
+              color: heading.withValues(alpha: 0.85),
+              fontWeight: FontWeight.w600,
+              fontSize: compact ? 10.5 : 12,
+              height: 1.15,
+              letterSpacing: 0.2,
+            ),
+          ),
         if (!compact && (amharic != null || arabic != null)) ...<Widget>[
           const SizedBox(height: 6),
           if (amharic != null && amharic!.trim().isNotEmpty)
@@ -126,6 +149,7 @@ class BrandLockup extends StatelessWidget {
   const BrandLockup({
     super.key,
     required this.english,
+    this.secondary,
     this.amharic,
     this.arabic,
     this.logoSize = 40,
@@ -133,6 +157,7 @@ class BrandLockup extends StatelessWidget {
   });
 
   final String english;
+  final String? secondary;
   final String? amharic;
   final String? arabic;
   final double logoSize;
@@ -148,6 +173,7 @@ class BrandLockup extends StatelessWidget {
         Flexible(
           child: BrandWordmark(
             english: english,
+            secondary: secondary,
             amharic: amharic,
             arabic: arabic,
             compact: compact,

@@ -40,6 +40,17 @@ class AppScaffold extends ConsumerWidget {
     final SiteSettings settings = ref.watch(siteSettingsValueProvider);
     final bool canPop = onBack != null || Navigator.of(context).canPop();
 
+    // The shop name is too long for one app-bar line, so it is split after the
+    // first word: "Amusheriff" large, "Arabiyan Mejlis and Furniture" under it.
+    // Splitting the name the owner typed keeps the two lines in step with the
+    // site settings instead of hard-coding them here.
+    final String brand = title ?? settings.storeNameEn;
+    final int splitAt = brand.indexOf(' ');
+    final String brandHead = splitAt <= 0 ? brand : brand.substring(0, splitAt);
+    final String? brandTail = splitAt <= 0
+        ? null
+        : brand.substring(splitAt + 1).trim();
+
     return Scaffold(
       resizeToAvoidBottomInset: resizeToAvoidBottomInset,
       floatingActionButton: floatingActionButton,
@@ -57,7 +68,8 @@ class AppScaffold extends ConsumerWidget {
             // Five taps on the badge open the owner panel.
             ? AdminGateTaps(
                 child: BrandLockup(
-                  english: title ?? settings.storeNameEn,
+                  english: brandHead,
+                  secondary: brandTail,
                   amharic: title == null ? settings.storeNameAm : null,
                   arabic: title == null ? settings.storeNameAr : null,
                 ),

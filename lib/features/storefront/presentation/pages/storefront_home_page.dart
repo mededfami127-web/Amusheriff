@@ -348,14 +348,16 @@ class _Hero extends ConsumerWidget {
               errorBuilder: (_, __, ___) => const _HeroFallbackLogo(),
             ),
             const SizedBox(height: 4),
+            // The brand is a full shop name now, so it wraps onto two or
+            // three lines instead of being cut off with an ellipsis.
             Text(
-              heroTitle(settings.storeNameFor(language).toUpperCase()),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+              heroTitle(settings.storeNameFor(language)),
+              softWrap: true,
               style: BrandTypography.titleLarge.copyWith(
                 color: BrandColors.ivory,
                 fontSize: 18,
-                letterSpacing: 1.2,
+                height: 1.15,
+                letterSpacing: 0.4,
               ),
             ),
             const SizedBox(height: 4),
@@ -476,11 +478,7 @@ class _HeroAction extends StatelessWidget {
 }
 
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({
-    required this.title,
-    this.textKey,
-    this.onSeeAll,
-  });
+  const _SectionHeader({required this.title, this.textKey, this.onSeeAll});
 
   final String title;
 
@@ -495,12 +493,15 @@ class _SectionHeader extends StatelessWidget {
     final TextStyle style = BrandTypography.displayForLocale(
       Localizations.localeOf(context),
       base: BrandTypography.displaySmall,
-    ).copyWith(
-      color: dark ? BrandColors.goldLight : BrandColors.charcoal,
-    );
+    ).copyWith(color: dark ? BrandColors.goldLight : BrandColors.charcoal);
 
     final Widget heading = textKey == null
-        ? Text(title, maxLines: 2, overflow: TextOverflow.ellipsis, style: style)
+        ? Text(
+            title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: style,
+          )
         : LiveEditableText(
             textKey: textKey!,
             text: title,
@@ -681,20 +682,18 @@ class _GroupedSectionHeader extends StatelessWidget {
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: BrandTypography.displayForLocale(
-                    Localizations.localeOf(context),
-                    base: BrandTypography.displaySmall,
-                  ).copyWith(
-                    color: dark
-                        ? BrandColors.goldLight
-                        : BrandColors.charcoal,
-                  ),
+                  style:
+                      BrandTypography.displayForLocale(
+                        Localizations.localeOf(context),
+                        base: BrandTypography.displaySmall,
+                      ).copyWith(
+                        color: dark
+                            ? BrandColors.goldLight
+                            : BrandColors.charcoal,
+                      ),
                 ),
               ),
-              TextButton(
-                onPressed: onSeeAll,
-                child: Text(l10n.actionSeeAll),
-              ),
+              TextButton(onPressed: onSeeAll, child: Text(l10n.actionSeeAll)),
             ],
           ),
           const SizedBox(width: 64, child: GoldDivider()),
@@ -859,8 +858,7 @@ class _ProductGrid extends StatelessWidget {
                 child: ProductCard(
                   key: ValueKey<String>(page[index].id),
                   product: page[index],
-                  categoryLabel:
-                      categoryLabels?[page[index].categoryId],
+                  categoryLabel: categoryLabels?[page[index].categoryId],
                 ),
               ),
               childCount: page.length,

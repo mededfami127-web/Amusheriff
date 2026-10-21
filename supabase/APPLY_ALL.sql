@@ -25,6 +25,7 @@
 --     009 · admin_contact_settings
 --     010 · the Afaan Oromo catalogue columns
 --     011 · products.subcategory_id
+--     012 · the shop's brand name
 --   001 (core schema) is left out because every table and column it defines is
 --   already answering reads on the project — the storefront loads products,
 --   categories, contact links and site settings — so it has been applied.
@@ -687,7 +688,7 @@ $$;
 -- 1. Oromo in site_settings
 
 alter table public.site_settings
-  add column if not exists store_name_om text default 'Aamu Sharif Arabiyaan Majlis';
+  add column if not exists store_name_om text default 'Amusheriff Arabiyaan Majlis fi Meeshaa Manaa';
 
 -- Widen the language check to include Oromo. Dropped by its generated name
 -- first, so re-applying the migration is a no-op.
@@ -699,7 +700,7 @@ alter table public.site_settings
   check (default_language in ('en', 'am', 'ar', 'om'));
 
 update public.site_settings
-   set store_name_om = coalesce(store_name_om, 'Aamu Sharif Arabiyaan Majlis')
+   set store_name_om = coalesce(store_name_om, 'Amusheriff Arabiyaan Majlis fi Meeshaa Manaa')
  where id = 1;
 
 -- 2. text_overrides
@@ -1257,6 +1258,35 @@ create index if not exists products_subcategory_idx
 
 -- A new column changes no policy: RLS and grants are table-wide, and the
 -- admin-only write policies in 003 already cover this table.
+
+-- ───────────────────────────────────────────────────────────────────────────
+-- 012 · the shop's brand name
+-- ───────────────────────────────────────────────────────────────────────────
+--
+-- The app bar and the hero render site_settings.store_name_*, so the row has
+-- to change too: the database value wins over the compiled default. Only rows
+-- still holding the shipped wording are touched, so a name the owner typed in
+-- the gateway is never overwritten.
+
+alter table public.site_settings
+  alter column store_name_en
+  set default 'Amusheriff Arabiyan Mejlis and Furniture';
+
+update public.site_settings
+   set store_name_en = 'Amusheriff Arabiyan Mejlis and Furniture'
+ where store_name_en = 'Amu Sharif Arabiyan Majlis';
+
+update public.site_settings
+   set store_name_am = 'አሙሸሪፍ አረቢያን መጅሊስ እና ፈርኒቸር'
+ where store_name_am = 'አሙ ሸሪፍ አረቢያን መጅሊስ';
+
+update public.site_settings
+   set store_name_ar = 'أمشريف عربيان مجلس والأثاث'
+ where store_name_ar = 'المجلس العربي عمو شريف';
+
+update public.site_settings
+   set store_name_om = 'Amusheriff Arabiyaan Majlis fi Meeshaa Manaa'
+ where store_name_om = 'Aamu Sharif Arabiyaan Majlis';
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- Done. Reload PostgREST's schema cache so the app stops answering

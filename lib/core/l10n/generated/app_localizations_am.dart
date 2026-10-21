@@ -26,7 +26,7 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get aboutFallback =>
-      'አሙ ሸሪፍ አረቢያን መጅሊስ በአረብ ወግ መሰረት ጥራት ያላቸው የመጅሊስ ወንበሮች፣ የመሬት ትራሶች እና የቤት እቃዎችን ያመርታል።';
+      'አሙሸሪፍ አረቢያን መጅሊስ እና ፈርኒቸር በአረብ ወግ መሰረት ጥራት ያላቸው የመጅሊስ ወንበሮች፣ የመሬት ትራሶች እና የቤት እቃዎችን ያመርታል።';
 
   @override
   String get actionAdd => 'ጨምር';
@@ -589,19 +589,19 @@ class AppLocalizationsAm extends AppLocalizations {
   String get adminWhen => 'መቼ';
 
   @override
-  String get appTitle => 'አሙ ሸሪፍ አረቢያን መጅሊስ';
+  String get appTitle => 'አሙሸሪፍ አረቢያን መጅሊስ እና ፈርኒቸር';
 
   @override
   String get brandMonogram => 'ASM';
 
   @override
-  String get brandNameAm => 'አሙ ሸሪፍ አረቢያን መጅሊስ';
+  String get brandNameAm => 'አሙሸሪፍ አረቢያን መጅሊስ እና ፈርኒቸር';
 
   @override
-  String get brandNameAr => 'المجلس العربي عمو شريف';
+  String get brandNameAr => 'أمشريف عربيان مجلس والأثاث';
 
   @override
-  String get brandNameEn => 'Amu Sharif Arabiyan Majlis';
+  String get brandNameEn => 'Amusheriff Arabiyan Mejlis and Furniture';
 
   @override
   String get contactEmail => 'ኢሜይል';

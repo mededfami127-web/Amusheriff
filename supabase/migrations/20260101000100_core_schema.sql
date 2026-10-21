@@ -106,9 +106,9 @@ create trigger profiles_guard_is_admin
 -- ───────────────────────────────────────────────────────────────────────────
 create table if not exists public.site_settings (
   id                smallint primary key default 1 check (id = 1),
-  store_name_en     text not null default 'Amu Sharif Arabiyan Majlis',
-  store_name_am     text default 'አሙ ሸሪፍ አረቢያን መጅሊስ',
-  store_name_ar     text default 'المجلس العربي عمو شريف',
+  store_name_en     text not null default 'Amusheriff Arabiyan Mejlis and Furniture',
+  store_name_am     text default 'አሙሸሪፍ አረቢያን መጅሊስ እና ፈርኒቸር',
+  store_name_ar     text default 'أمشريف عربيان مجلس والأثاث',
   tagline           text,
   about             text,
   logo_path         text,

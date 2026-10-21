@@ -225,7 +225,7 @@ return $default(_that.id,_that.storeNameEn,_that.storeNameAm,_that.storeNameAr,_
 
 @JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: false)
 class _SiteSettings extends SiteSettings {
-  const _SiteSettings({this.id = 1, this.storeNameEn = 'Amu Sharif Arabiyan Majlis', this.storeNameAm = 'አሙ ሸሪፍ አረቢያን መጅሊስ', this.storeNameAr = 'المجلس العربي عمو شريف', this.storeNameOm = 'Aamu Sharif Arabiyaan Majlis', this.tagline, this.about, this.logoPath, this.currencyCode = 'ETB', this.defaultLanguage = 'en', this.updatedAt}): super._();
+  const _SiteSettings({this.id = 1, this.storeNameEn = 'Amusheriff Arabiyan Mejlis and Furniture', this.storeNameAm = 'አሙሸሪፍ አረቢያን መጅሊስ እና ፈርኒቸር', this.storeNameAr = 'أمشريف عربيان مجلس والأثاث', this.storeNameOm = 'Amusheriff Arabiyaan Majlis fi Meeshaa Manaa', this.tagline, this.about, this.logoPath, this.currencyCode = 'ETB', this.defaultLanguage = 'en', this.updatedAt}): super._();
   factory _SiteSettings.fromJson(Map<String, dynamic> json) => _$SiteSettingsFromJson(json);
 
 @override@JsonKey() final  int id;

@@ -43,9 +43,7 @@ class StorageDataSource {
     required String extension,
   }) {
     final String safeFolder = brandFolders.contains(folder) ? folder : 'logo';
-    return '$safeFolder/${_safeName(name)}-${_uuid()}${_normaliseExtension(
-      extension,
-    )}';
+    return '$safeFolder/${_safeName(name)}-${_uuid()}${_normaliseExtension(extension)}';
   }
 
   /// Uploads bytes and returns the stored path (bucket-relative), which is

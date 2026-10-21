@@ -27,7 +27,7 @@
 -- 1. Oromo in site_settings
 
 alter table public.site_settings
-  add column if not exists store_name_om text default 'Aamu Sharif Arabiyaan Majlis';
+  add column if not exists store_name_om text default 'Amusheriff Arabiyaan Majlis fi Meeshaa Manaa';
 
 -- Widen the language check to include Oromo. Dropped by its generated name
 -- first, so re-applying the migration is a no-op.
@@ -39,7 +39,7 @@ alter table public.site_settings
   check (default_language in ('en', 'am', 'ar', 'om'));
 
 update public.site_settings
-   set store_name_om = coalesce(store_name_om, 'Aamu Sharif Arabiyaan Majlis')
+   set store_name_om = coalesce(store_name_om, 'Amusheriff Arabiyaan Majlis fi Meeshaa Manaa')
  where id = 1;
 
 -- 2. text_overrides

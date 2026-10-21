@@ -26,7 +26,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get aboutFallback =>
-      'المجلس العربي عمو شريف يصنع مجالس وكنب وأثاثًا فاخرًا وفق التقاليد العربية.';
+      'أمشريف عربيان مجلس والأثاث يصنع مجالس وكنب وأثاثًا فاخرًا وفق التقاليد العربية.';
 
   @override
   String get actionAdd => 'إضافة';
@@ -598,19 +598,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String get adminWhen => 'متى';
 
   @override
-  String get appTitle => 'المجلس العربي عمو شريف';
+  String get appTitle => 'أمشريف عربيان مجلس والأثاث';
 
   @override
   String get brandMonogram => 'ASM';
 
   @override
-  String get brandNameAm => 'አሙ ሸሪፍ አረቢያን መጅሊስ';
+  String get brandNameAm => 'አሙሸሪፍ አረቢያን መጅሊስ እና ፈርኒቸር';
 
   @override
-  String get brandNameAr => 'المجلس العربي عمو شريف';
+  String get brandNameAr => 'أمشريف عربيان مجلس والأثاث';
 
   @override
-  String get brandNameEn => 'Amu Sharif Arabiyan Majlis';
+  String get brandNameEn => 'Amusheriff Arabiyan Mejlis and Furniture';
 
   @override
   String get contactEmail => 'البريد الإلكتروني';

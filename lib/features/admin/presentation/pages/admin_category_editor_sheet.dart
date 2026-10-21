@@ -252,9 +252,8 @@ class _CoverField extends ConsumerWidget {
               child: CachedNetworkImage(
                 imageUrl: ref.read(storageUrlsProvider).categoryCover(cover),
                 fit: BoxFit.cover,
-                placeholder: (_, __) => const ColoredBox(
-                  color: BrandColors.plumSurface,
-                ),
+                placeholder: (_, __) =>
+                    const ColoredBox(color: BrandColors.plumSurface),
                 errorWidget: (_, __, ___) => const ColoredBox(
                   color: BrandColors.plumSurface,
                   child: Icon(Icons.broken_image_outlined),
@@ -289,9 +288,7 @@ class _CoverField extends ConsumerWidget {
                   const SizedBox(width: 8),
                   Flexible(
                     child: Text(
-                      cover == null
-                          ? l10n.actionSelectImage
-                          : l10n.adminCover,
+                      cover == null ? l10n.actionSelectImage : l10n.adminCover,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: BrandTypography.bodyMedium,

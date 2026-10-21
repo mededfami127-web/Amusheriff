@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════════════
--- seed.sql — Amu Sharif Arabiyan Majlis
+-- seed.sql — Amusheriff Arabiyan Mejlis and Furniture
 --
 -- Idempotent: every insert has a deterministic id and `on conflict do nothing`,
 -- so running it twice is safe, and re-running after a `supabase db reset`
@@ -12,11 +12,11 @@
 
 -- ── Branding ───────────────────────────────────────────────────────────────
 update public.site_settings
-   set store_name_en = 'Amu Sharif Arabiyan Majlis',
-       store_name_am = 'አሙ ሸሪፍ አረቢያን መጅሊስ',
-       store_name_ar = 'المجلس العربي عمو شريف',
+   set store_name_en = 'Amusheriff Arabiyan Mejlis and Furniture',
+       store_name_am = 'አሙሸሪፍ አረቢያን መጅሊስ እና ፈርኒቸር',
+       store_name_ar = 'أمشريف عربيان مجلس والأثاث',
        tagline       = 'Luxury Arabic majlis & sofas, handcrafted for your home',
-       about         = 'Amu Sharif Arabiyan Majlis builds premium majlis seating, '
+       about         = 'Amusheriff Arabiyan Mejlis and Furniture builds premium majlis seating, '
                        'floor cushions and furnishings in the Arabian tradition — '
                        'made in Ethiopia, shipped nationwide.',
        currency_code = 'ETB',

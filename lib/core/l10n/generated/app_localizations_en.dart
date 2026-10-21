@@ -26,7 +26,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aboutFallback =>
-      'Amu Sharif Arabiyan Majlis crafts premium majlis seating, floor cushions and furnishings in the Arabian tradition.';
+      'Amusheriff Arabiyan Mejlis and Furniture crafts premium majlis seating, floor cushions and furnishings in the Arabian tradition.';
 
   @override
   String get actionAdd => 'Add';
@@ -598,19 +598,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminWhen => 'When';
 
   @override
-  String get appTitle => 'Amu Sharif Arabiyan Majlis';
+  String get appTitle => 'Amusheriff Arabiyan Mejlis and Furniture';
 
   @override
   String get brandMonogram => 'ASM';
 
   @override
-  String get brandNameAm => 'አሙ ሸሪፍ አረቢያን መጅሊስ';
+  String get brandNameAm => 'አሙሸሪፍ አረቢያን መጅሊስ እና ፈርኒቸር';
 
   @override
-  String get brandNameAr => 'المجلس العربي عمو شريف';
+  String get brandNameAr => 'أمشريف عربيان مجلس والأثاث';
 
   @override
-  String get brandNameEn => 'Amu Sharif Arabiyan Majlis';
+  String get brandNameEn => 'Amusheriff Arabiyan Mejlis and Furniture';
 
   @override
   String get contactEmail => 'Email';

@@ -11,10 +11,10 @@ abstract class SiteSettings with _$SiteSettings {
   @JsonSerializable(fieldRename: FieldRename.snake, includeIfNull: false)
   const factory SiteSettings({
     @Default(1) int id,
-    @Default('Amu Sharif Arabiyan Majlis') String storeNameEn,
-    @Default('አሙ ሸሪፍ አረቢያን መጅሊስ') String storeNameAm,
-    @Default('المجلس العربي عمو شريف') String storeNameAr,
-    @Default('Aamu Sharif Arabiyaan Majlis') String storeNameOm,
+    @Default('Amusheriff Arabiyan Mejlis and Furniture') String storeNameEn,
+    @Default('አሙሸሪፍ አረቢያን መጅሊስ እና ፈርኒቸር') String storeNameAm,
+    @Default('أمشريف عربيان مجلس والأثاث') String storeNameAr,
+    @Default('Amusheriff Arabiyaan Majlis fi Meeshaa Manaa') String storeNameOm,
     String? tagline,
     String? about,
     String? logoPath,

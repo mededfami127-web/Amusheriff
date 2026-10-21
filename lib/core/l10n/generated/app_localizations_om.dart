@@ -26,7 +26,7 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get aboutFallback =>
-      'Aamu Sharif Arabiyaan Majlis teessoo majlisii, boraatiiwwanii fi meeshaalee mana keessaa sadarkaa olaanaa haala Arabiyaan harkaan hojjeta.';
+      'Amusheriff Arabiyaan Majlis fi Meeshaa Manaa teessoo majlisii, boraatiiwwanii fi meeshaalee mana keessaa sadarkaa olaanaa haala Arabiyaan harkaan hojjeta.';
 
   @override
   String get actionAdd => 'Ida\'i';
@@ -601,19 +601,19 @@ class AppLocalizationsOm extends AppLocalizations {
   String get adminWhen => 'Yeroo';
 
   @override
-  String get appTitle => 'Aamu Sharif Arabiyaan Majlis';
+  String get appTitle => 'Amusheriff Arabiyaan Majlis fi Meeshaa Manaa';
 
   @override
   String get brandMonogram => 'ASM';
 
   @override
-  String get brandNameAm => 'አሙ ሸሪፍ አረቢያን መጅሊስ';
+  String get brandNameAm => 'አሙሸሪፍ አረቢያን መጅሊስ እና ፈርኒቸር';
 
   @override
-  String get brandNameAr => 'المجلس العربي عمو شريف';
+  String get brandNameAr => 'أمشريف عربيان مجلس والأثاث';
 
   @override
-  String get brandNameEn => 'Amu Sharif Arabiyan Majlis';
+  String get brandNameEn => 'Amusheriff Arabiyan Mejlis and Furniture';
 
   @override
   String get contactEmail => 'Imeelii';
