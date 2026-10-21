@@ -6,7 +6,14 @@
 -- `security_invoker = true` (PostgreSQL 15+) means the view is evaluated with
 -- the CALLER's privileges, so RLS still applies. Without it, a view owned by
 -- the migration role would leak unpublished rows to anonymous visitors.
-create or replace view public.v_products_public
+--
+-- `drop ... if exists` rather than `create or replace`: a later migration
+-- (010, the Oromo columns) appends columns to this view, and `create or
+-- replace` refuses to *remove* a column. Re-applying the whole set would then
+-- fail on this file. Dropping first keeps the set re-runnable; the select
+-- grant lives in 003, which runs again in the same pass.
+drop view if exists public.v_products_public;
+create view public.v_products_public
 with (security_invoker = true)
 as
 select
@@ -56,7 +63,8 @@ comment on view public.v_products_public is
   'Storefront read model: published products in visible categories with cover media.';
 
 -- v_categories_with_counts - categories plus their published-product counts
-create or replace view public.v_categories_with_counts
+drop view if exists public.v_categories_with_counts;
+create view public.v_categories_with_counts
 with (security_invoker = true)
 as
 select
