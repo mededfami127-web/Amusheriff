@@ -102,7 +102,18 @@ class _AdminProductEditorPageState
     );
     final List<Category> categories =
         ref.watch(allCategoriesProvider).value ?? const <Category>[];
-    final List<Category> pickable = _withSubcategoriesUnderParents(categories);
+    // Top-level categories only: a subcategory is chosen in its own dropdown,
+    // which appears once a mother has been picked.
+    final List<Category> parentOptions =
+        categories
+            .where((Category c) => c.parentId == null || c.parentId!.isEmpty)
+            .toList(growable: false)
+          ..sort(_bySortThenName);
+    final _CategorySelection selection = _resolveSelection(
+      categories,
+      state.categoryId,
+    );
+    final String locale = Localizations.localeOf(context).languageCode;
 
     if (_missing) {
       return AdminScaffold(
@@ -170,7 +181,12 @@ class _AdminProductEditorPageState
             const SizedBox(height: 16),
           ],
           DropdownButtonFormField<String>(
-            initialValue: state.categoryId.isEmpty ? null : state.categoryId,
+            // Re-keyed when the resolved parent changes, so a deep link that
+            // loads the row before the category stream still opens filled in.
+            key: ValueKey<String>(
+              'product-category-${selection.parent?.id ?? 'none'}',
+            ),
+            initialValue: selection.parent?.id,
             isExpanded: true,
             decoration: InputDecoration(
               labelText: l10n.adminCategories,
@@ -179,16 +195,12 @@ class _AdminProductEditorPageState
                 state.fieldErrors['categoryId'],
               ),
             ),
-            items: pickable
+            items: parentOptions
                 .map(
                   (Category category) => DropdownMenuItem<String>(
                     value: category.id,
                     child: Text(
-                      category.parentId == null
-                          ? category.nameFor(
-                              Localizations.localeOf(context).languageCode,
-                            )
-                          : '— ${category.nameFor(Localizations.localeOf(context).languageCode)}',
+                      category.nameFor(locale),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -198,6 +210,43 @@ class _AdminProductEditorPageState
               if (value != null) controller.setCategoryId(value);
             },
           ),
+          // A mother with children offers the second level; picking the mother
+          // itself means "no subcategory".
+          if (selection.hasChildren) ...<Widget>[
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              key: ValueKey<String>(
+                'product-subcategory-${selection.child?.id ?? 'none'}',
+              ),
+              initialValue: selection.child?.id ?? '',
+              isExpanded: true,
+              decoration: InputDecoration(
+                labelText: l10n.adminProductSubcategory,
+              ),
+              items: <DropdownMenuItem<String>>[
+                DropdownMenuItem<String>(
+                  value: '',
+                  child: Text(
+                    selection.parent!.nameFor(locale),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                for (final Category child in selection.children)
+                  DropdownMenuItem<String>(
+                    value: child.id,
+                    child: Text(
+                      '— ${child.nameFor(locale)}',
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+              ],
+              onChanged: (String? value) {
+                controller.setCategoryId(
+                  value == null || value.isEmpty ? selection.parent!.id : value,
+                );
+              },
+            ),
+          ],
           const SizedBox(height: 16),
           AdminTextField(
             label: l10n.adminProductTitle,
@@ -384,6 +433,9 @@ class _MediaSection extends ConsumerWidget {
     final List<MediaUploadItem> queue = ref.watch(
       mediaUploadControllerProvider,
     );
+    // A second tap while a file is still processing would open a second picker
+    // and queue the same photos twice, so the buttons wait for the queue.
+    final bool busy = queue.any((MediaUploadItem item) => !item.isFinished);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -402,12 +454,26 @@ class _MediaSection extends ConsumerWidget {
               contentPadding: EdgeInsets.zero,
               leading: Icon(_iconFor(item.phase)),
               title: Text(item.fileName, style: BrandTypography.bodySmall),
-              subtitle: Text(
-                item.failure == null
-                    ? item.phase.name
-                    : localizeFailure(l10n, item.failure!),
-                style: BrandTypography.bodySmall,
-              ),
+              subtitle: item.failure == null
+                  ? Text(item.phase.name, style: BrandTypography.bodySmall)
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          localizeFailure(l10n, item.failure!),
+                          style: BrandTypography.bodySmall,
+                        ),
+                        // The storage gateway's own words: a 403, a rejected
+                        // MIME type or a missing bucket names the fix, while
+                        // "could not upload" does not.
+                        if (technicalDetailFor(item.failure!)
+                            case final String d)
+                          Text(
+                            '${l10n.errorDetailsLabel}: $d',
+                            style: BrandTypography.labelSmall,
+                          ),
+                      ],
+                    ),
               trailing: item.isFinished && item.phase != UploadPhase.done
                   ? IconButton(
                       icon: const Icon(Icons.refresh_rounded),
@@ -466,12 +532,12 @@ class _MediaSection extends ConsumerWidget {
             OutlinedButton.icon(
               icon: const Icon(Icons.photo_library_outlined),
               label: Text(l10n.adminAddImages),
-              onPressed: () => _pick(ref, MediaKind.image),
+              onPressed: busy ? null : () => _pick(ref, MediaKind.image),
             ),
             OutlinedButton.icon(
               icon: const Icon(Icons.videocam_outlined),
               label: Text(l10n.adminAddVideo),
-              onPressed: () => _pick(ref, MediaKind.video),
+              onPressed: busy ? null : () => _pick(ref, MediaKind.video),
             ),
           ],
         ),
@@ -608,6 +674,7 @@ class _MediaCard extends ConsumerWidget {
       await ref
           .read(productMediaRepositoryProvider)
           .setCover(productId, media.id);
+      invalidateCatalogue(ref.invalidate, includeCategories: false);
       messenger.showSnackBar(SnackBar(content: Text(l10n.adminCover)));
     } on Object catch (error) {
       messenger.showSnackBar(
@@ -658,6 +725,7 @@ class _MediaCard extends ConsumerWidget {
             .read(storageDataSourceProvider)
             .removeQuietly(StorageDataSource.productMediaBucket, path);
       }
+      invalidateCatalogue(ref.invalidate, includeCategories: false);
       messenger.showSnackBar(SnackBar(content: Text(l10n.adminRemoveMedia)));
     } on Object catch (error) {
       messenger.showSnackBar(
@@ -667,38 +735,60 @@ class _MediaCard extends ConsumerWidget {
   }
 }
 
-/// Mother categories with their subcategories directly underneath, so the
-/// owner can file a product under a child without hunting for it in a flat
-/// list. Children of a hidden mother stay pickable, and a child whose mother is
-/// missing from the list is kept at the end rather than dropped.
-List<Category> _withSubcategoriesUnderParents(List<Category> categories) {
-  final List<Category> ordered = <Category>[];
-  final Set<String> seen = <String>{};
+/// The two dropdowns' current state: the mother category, the child filed under
+/// it (when the product sits on a subcategory), and that mother's children.
+class _CategorySelection {
+  const _CategorySelection({
+    this.parent,
+    this.child,
+    this.children = const <Category>[],
+  });
 
-  final List<Category> roots =
-      categories
-          .where((Category c) => c.parentId == null || c.parentId!.isEmpty)
-          .toList(growable: false)
-        ..sort(_bySortThenName);
+  final Category? parent;
+  final Category? child;
+  final List<Category> children;
 
-  for (final Category root in roots) {
-    ordered.add(root);
-    seen.add(root.id);
-    final List<Category> children =
-        categories
-            .where((Category c) => c.parentId == root.id)
-            .toList(growable: false)
-          ..sort(_bySortThenName);
-    for (final Category child in children) {
-      ordered.add(child);
-      seen.add(child.id);
+  bool get hasChildren => children.isNotEmpty;
+}
+
+/// Resolves the draft's `categoryId` — which is always the id stored on the
+/// product — back into the parent/child pair the form shows.
+_CategorySelection _resolveSelection(List<Category> categories, String id) {
+  if (id.isEmpty) return const _CategorySelection();
+
+  Category? match;
+  for (final Category candidate in categories) {
+    if (candidate.id == id) {
+      match = candidate;
+      break;
     }
   }
+  if (match == null) return const _CategorySelection();
 
-  for (final Category leftover in categories) {
-    if (!seen.contains(leftover.id)) ordered.add(leftover);
+  if (match.parentId == null || match.parentId!.isEmpty) {
+    final List<Category> children =
+        categories
+            .where((Category c) => c.parentId == match!.id)
+            .toList(growable: false)
+          ..sort(_bySortThenName);
+    return _CategorySelection(parent: match, children: children);
   }
-  return ordered;
+
+  Category? mother;
+  for (final Category candidate in categories) {
+    if (candidate.id == match.parentId) {
+      mother = candidate;
+      break;
+    }
+  }
+  if (mother == null) return _CategorySelection(parent: match);
+
+  final List<Category> siblings =
+      categories
+          .where((Category c) => c.parentId == mother!.id)
+          .toList(growable: false)
+        ..sort(_bySortThenName);
+  return _CategorySelection(parent: mother, child: match, children: siblings);
 }
 
 int _bySortThenName(Category a, Category b) {

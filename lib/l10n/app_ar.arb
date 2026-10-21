@@ -122,6 +122,7 @@
   "adminProductDescriptionOm": "الوصف (أورومو)",
   "adminProductDescription": "الوصف (الإنجليزية)",
   "adminProductSaved": "تم حفظ المنتج",
+  "adminProductSubcategory": "الفئة الفرعية (اختياري)",
   "adminProductTitleAr": "العنوان (العربية)",
   "adminProductTitleAm": "العنوان (الأمهرية)",
   "adminProductTitleOm": "العنوان (أورومو)",

@@ -1055,7 +1055,20 @@ select set_config('request.jwt.claim.sub', 'aaaaaaaa-0000-4000-8000-000000000001
 do $$
 declare
   v_state text;
+  v_id    uuid;
 begin
+  -- The admin CAN create a subcategory: the add-subcategory form writes
+  -- exactly this row, and the categories_admin_insert policy has to allow it.
+  insert into public.categories (name, slug, parent_id)
+  values ('RLS Admin Subcategory', 'rls-admin-sub',
+          'e0000000-0000-4000-8000-000000000001')
+  returning id into v_id;
+  perform test.assert_eq(
+    (select parent_id from public.categories where id = v_id),
+    'e0000000-0000-4000-8000-000000000001'::uuid,
+    'the admin CAN create a subcategory under a top-level category');
+  delete from public.categories where id = v_id;
+
   -- One level only: guard_category_nesting() rejects a grandchild.
   begin
     insert into public.categories (name, slug, parent_id)

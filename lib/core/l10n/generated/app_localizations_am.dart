@@ -402,6 +402,9 @@ class AppLocalizationsAm extends AppLocalizations {
   String get adminProductSaved => 'ምርት ተቀምጧል';
 
   @override
+  String get adminProductSubcategory => 'ንዑስ ምድብ (አማራጭ)';
+
+  @override
   String get adminProductTitleAr => 'ርዕስ (አረብኛ)';
 
   @override

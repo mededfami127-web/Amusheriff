@@ -1410,6 +1410,16 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
     },
   ),
   AppTextEntry(
+    key: 'adminProductSubcategory',
+    sectionKey: 'adminProducts',
+    defaults: <String, String>{
+      'en': 'Subcategory (optional)',
+      'am': 'ንዑስ ምድብ (አማራጭ)',
+      'ar': 'الفئة الفرعية (اختياري)',
+      'om': 'Ramaddii xiqqaa (filannoo)',
+    },
+  ),
+  AppTextEntry(
     key: 'adminProductTitle',
     sectionKey: 'adminProducts',
     defaults: <String, String>{

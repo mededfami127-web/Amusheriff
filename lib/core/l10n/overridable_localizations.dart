@@ -511,6 +511,10 @@ class OverridableAppLocalizations extends AppLocalizations {
       _text('adminProductSaved', _base.adminProductSaved);
 
   @override
+  String get adminProductSubcategory =>
+      _text('adminProductSubcategory', _base.adminProductSubcategory);
+
+  @override
   String get adminProductTitleAr =>
       _text('adminProductTitleAr', _base.adminProductTitleAr);
 

@@ -409,6 +409,9 @@ class AppLocalizationsOm extends AppLocalizations {
   String get adminProductSaved => 'Oomishni olkaa\'ame';
 
   @override
+  String get adminProductSubcategory => 'Ramaddii xiqqaa (filannoo)';
+
+  @override
   String get adminProductTitleAr => 'Mata-duree (Arabiffa)';
 
   @override

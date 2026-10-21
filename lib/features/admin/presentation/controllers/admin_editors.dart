@@ -1,5 +1,3 @@
-import 'dart:typed_data' show Uint8List;
-
 import 'package:image_picker/image_picker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -8,6 +6,7 @@ import '../../../../core/errors/error_mapper.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../catalog/data/datasources/storage_datasource.dart';
+import '../../../catalog/data/media/media_processor.dart';
 import '../../../catalog/domain/drafts/catalog_drafts.dart';
 import '../../../catalog/domain/entities/category.dart';
 import '../../../catalog/domain/entities/media_kind.dart';
@@ -219,27 +218,23 @@ class CategoryEditorController extends _$CategoryEditorController {
     final StorageDataSource storage = ref.read(storageDataSourceProvider);
     final String previous = _pendingCoverPath ?? '';
     try {
-      final Uint8List bytes = await picked.readAsBytes();
-      if (bytes.length > MediaKind.maxImageBytes) {
-        state = state.copyWith(
-          coverUploading: false,
-          status: const AdminFormStatus(
-            failure: MediaFailure(messageKey: 'errorMediaImageTooLarge'),
-          ),
-        );
-        return;
-      }
+      // Compress and downscale exactly like a product photo. A phone JPEG is
+      // routinely over the bucket's 5 MB cap, and uploading the raw bytes made
+      // an otherwise valid cover fail with `errorMediaImageTooLarge`.
+      final ProcessedMedia processed = await const MediaProcessor().process(
+        file: picked,
+        kind: MediaKind.image,
+      );
 
-      final String extension = _extensionOf(picked.name);
       final String uploaded = await storage.upload(
         bucket: StorageDataSource.brandBucket,
         path: StorageDataSource.brandPath(
           folder: 'categories',
           name: state.slug.isEmpty ? state.name : state.slug,
-          extension: extension,
+          extension: processed.extension,
         ),
-        bytes: bytes,
-        contentType: _contentTypeOf(extension),
+        bytes: processed.bytes,
+        contentType: processed.contentType,
       );
       _pendingCoverPath = uploaded;
       state = state.copyWith(coverPath: uploaded, coverUploading: false);
@@ -289,6 +284,11 @@ class CategoryEditorController extends _$CategoryEditorController {
   }
 
   Future<bool> save() async {
+    // A second tap that lands before the button repaints must not write the row
+    // twice: the form disables itself, and the controller refuses the re-entry
+    // that a same-frame double tap can still produce.
+    if (state.status.saving) return false;
+
     final FieldErrors errors = validate();
     if (errors.isNotEmpty) return false;
 
@@ -393,20 +393,6 @@ void invalidateCatalogue(
     invalidate(categoryByIdProvider);
   }
 }
-
-/// `photo.JPG` → `jpg`; a name with no extension falls back to `png`, which is
-/// what the brand bucket's MIME allow-list accepts.
-String _extensionOf(String fileName) {
-  final int dot = fileName.lastIndexOf('.');
-  if (dot < 0 || dot == fileName.length - 1) return 'png';
-  return fileName.substring(dot + 1).toLowerCase();
-}
-
-String _contentTypeOf(String extension) => switch (extension) {
-  'jpg' || 'jpeg' => 'image/jpeg',
-  'webp' => 'image/webp',
-  _ => 'image/png',
-};
 
 /// Validates a link value for its channel.
 String? validateContactValue(ContactKind kind, String raw) {
@@ -861,6 +847,8 @@ class ProductEditorController extends _$ProductEditorController {
   }
 
   Future<bool> save() async {
+    // Same-frame double tap guard: one product, one write.
+    if (state.status.saving) return false;
     if (validate().isNotEmpty) return false;
     state = state.copyWith(status: const AdminFormStatus(saving: true));
 

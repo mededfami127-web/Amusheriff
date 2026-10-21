@@ -407,6 +407,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get adminProductSaved => 'تم حفظ المنتج';
 
   @override
+  String get adminProductSubcategory => 'الفئة الفرعية (اختياري)';
+
+  @override
   String get adminProductTitleAr => 'العنوان (العربية)';
 
   @override

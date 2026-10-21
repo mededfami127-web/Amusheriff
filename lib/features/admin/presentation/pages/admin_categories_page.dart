@@ -1,9 +1,12 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/errors/app_failure.dart';
 import '../../../../core/errors/error_localizer.dart';
 import '../../../../core/errors/error_mapper.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
+import '../../../../core/network/storage_urls.dart';
 import '../../../../core/router/routes.dart';
 import '../../../../core/theme/brand_colors.dart';
 import '../../../../core/theme/typography.dart';
@@ -11,6 +14,7 @@ import '../../../../core/utils/stream_utils.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../catalog/domain/entities/category.dart';
+import '../../../catalog/domain/entities/product.dart';
 import '../../../catalog/presentation/providers/catalog_providers.dart';
 import '../controllers/admin_editors.dart';
 import '../widgets/admin_scaffold.dart';
@@ -132,6 +136,12 @@ class _CategoryList extends ConsumerWidget {
     for (final List<Category> siblings in children.values) {
       siblings.sort(_byOrderThenName);
     }
+    // Every product, drafts included: the delete prompt must know about the
+    // unpublished ones too, which the published-only count on the row misses.
+    final List<Product> products =
+        ref.watch(adminProductsProvider()).value ?? const <Product>[];
+    int productsIn(String categoryId) =>
+        products.where((Product p) => p.categoryId == categoryId).length;
 
     return ReorderableListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
@@ -152,6 +162,7 @@ class _CategoryList extends ConsumerWidget {
               _CategoryTile(
                 category: root,
                 childCount: children[root.id]?.length ?? 0,
+                productCount: productsIn(root.id),
                 onEdit: () => onEditRequested(root),
                 onAddSubcategory: () => onAddSubcategoryRequested(root),
               ),
@@ -161,6 +172,7 @@ class _CategoryList extends ConsumerWidget {
                   key: ValueKey<String>(child.id),
                   category: child,
                   isSubcategory: true,
+                  productCount: productsIn(child.id),
                   onEdit: () => onEditRequested(child),
                 ),
             ],
@@ -185,6 +197,7 @@ class _CategoryTile extends ConsumerWidget {
     required this.onEdit,
     this.isSubcategory = false,
     this.childCount = 0,
+    this.productCount = 0,
     this.onAddSubcategory,
   });
 
@@ -196,6 +209,10 @@ class _CategoryTile extends ConsumerWidget {
 
   /// Subcategories directly under [category]; only used for the delete prompt.
   final int childCount;
+
+  /// Products filed here, published or not. `on delete restrict` refuses the
+  /// write while any exist, so the prompt has to count the drafts too.
+  final int productCount;
   final VoidCallback? onAddSubcategory;
 
   @override
@@ -221,12 +238,18 @@ class _CategoryTile extends ConsumerWidget {
               leading: category.hasCover
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(10),
-                      child: Image.asset(
-                        category.coverPath!,
+                      // `cover_path` is a path inside the public `brand` bucket,
+                      // not a packaged asset: `Image.asset` could never decode
+                      // it, so an uploaded cover was invisible here.
+                      child: CachedNetworkImage(
+                        imageUrl: ref
+                            .read(storageUrlsProvider)
+                            .categoryCover(category.coverPath!),
                         width: isSubcategory ? 36 : 44,
                         height: isSubcategory ? 36 : 44,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const _CategoryAvatar(),
+                        placeholder: (_, __) => const _CategoryAvatar(),
+                        errorWidget: (_, __, ___) => const _CategoryAvatar(),
                       ),
                     )
                   : const _CategoryAvatar(),
@@ -309,18 +332,28 @@ class _CategoryTile extends ConsumerWidget {
     WidgetRef ref,
     AppLocalizations l10n,
   ) async {
+    // `on delete restrict` refuses both cases, so explain them instead of
+    // offering a Delete button that can only fail. A raw "related data is
+    // missing" from Postgres is exactly what the owner should never read.
+    if (childCount > 0) {
+      await _explain(context, l10n, l10n.adminCategoryHasSubcategories);
+      return;
+    }
+    if (productCount > 0) {
+      await _explain(
+        context,
+        l10n,
+        l10n.adminCategoryHasProducts(productCount),
+      );
+      return;
+    }
+
     final bool confirmed =
         await showDialog<bool>(
           context: context,
           builder: (BuildContext dialogContext) => AlertDialog(
             title: Text(l10n.adminConfirmDeleteCategory),
-            content: Text(
-              childCount > 0
-                  ? l10n.adminCategoryHasSubcategories
-                  : category.productCount == 0
-                  ? l10n.adminConfirmDeleteMessage
-                  : l10n.adminCategoryHasProducts(category.productCount),
-            ),
+            content: Text(l10n.adminConfirmDeleteMessage),
             actions: <Widget>[
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -349,11 +382,36 @@ class _CategoryTile extends ConsumerWidget {
         SnackBar(content: Text(l10n.adminCategoryDeleted)),
       );
     } on Object catch (error) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(localizeFailure(l10n, ErrorMapper.map(error)))),
-      );
+      final AppFailure failure = ErrorMapper.map(error);
+      // Another device may have filed a product here between the tap and the
+      // write; the restrict violation then still names the real blocker.
+      final String message =
+          failure is ValidationFailure &&
+              failure.messageKey == 'errorForeignKey'
+          ? l10n.adminCategoryHasProducts(1)
+          : localizeFailure(l10n, failure);
+      messenger.showSnackBar(SnackBar(content: Text(message)));
     }
   }
+
+  /// A one-button dialog for a delete the database will not allow.
+  Future<void> _explain(
+    BuildContext context,
+    AppLocalizations l10n,
+    String message,
+  ) => showDialog<void>(
+    context: context,
+    builder: (BuildContext dialogContext) => AlertDialog(
+      title: Text(l10n.adminConfirmDeleteCategory),
+      content: Text(message),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () => Navigator.of(dialogContext).pop(),
+          child: Text(l10n.actionClose),
+        ),
+      ],
+    ),
+  );
 }
 
 class _CategoryAvatar extends StatelessWidget {

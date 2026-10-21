@@ -85,7 +85,13 @@ class MediaUploadController extends _$MediaUploadController {
   /// Concurrency limit required by the brief.
   static const int maxConcurrent = 2;
 
-  static const MediaProcessor _processor = MediaProcessor();
+  /// The compressor that turns a picked file into uploadable bytes.
+  ///
+  /// A mutable field rather than a `const` so a test can substitute a fake:
+  /// `flutter_image_compress` and `video_compress` are native plugins and can
+  /// not run on the Dart VM, which is where the upload tests execute.
+  @visibleForTesting
+  static MediaProcessor processor = const MediaProcessor();
 
   final Map<String, bool> _cancelled = <String, bool>{};
   int _seq = 0;
@@ -152,7 +158,7 @@ class MediaUploadController extends _$MediaUploadController {
     try {
       _patch(itemId, phase: UploadPhase.processing, clearFailure: true);
 
-      final ProcessedMedia processed = await _processor.process(
+      final ProcessedMedia processed = await processor.process(
         file: start.file,
         kind: start.kind,
       );
@@ -222,6 +228,14 @@ class MediaUploadController extends _$MediaUploadController {
       );
 
       _patch(itemId, phase: UploadPhase.done, mediaId: media.id);
+      // The tile, the product page and the admin list read media through
+      // providers as well as Realtime. Refreshing them means the photo is on the
+      // card the moment the row lands, with no restart and no waiting for the
+      // websocket.
+      ref.invalidate(adminProductsProvider);
+      ref.invalidate(storefrontProductsProvider);
+      ref.invalidate(productDetailProvider);
+      ref.invalidate(categoryThumbnailPathsProvider);
     } on AppFailure catch (failure) {
       await _compensate(storage, uploadedPath, uploadedThumb);
       _patch(itemId, phase: UploadPhase.failed, failure: failure);

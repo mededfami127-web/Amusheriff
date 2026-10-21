@@ -213,6 +213,7 @@
   "adminProductDescriptionOm": "Description (Oromo)",
   "adminProductDescription": "Description (English)",
   "adminProductSaved": "Product saved",
+  "adminProductSubcategory": "Subcategory (optional)",
   "adminProductTitleAr": "Title (Arabic)",
   "adminProductTitleAm": "Title (Amharic)",
   "adminProductTitleOm": "Title (Oromo)",

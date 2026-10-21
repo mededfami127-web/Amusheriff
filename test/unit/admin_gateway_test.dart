@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:amu_sharif_majlis/core/errors/app_failure.dart';
 import 'package:amu_sharif_majlis/core/l10n/generated/app_localizations.dart';
 import 'package:amu_sharif_majlis/core/router/routes.dart';
 import 'package:amu_sharif_majlis/features/admin/presentation/pages/admin_categories_page.dart';
@@ -14,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Widget-level coverage for the admin gateway.
 ///
@@ -86,6 +90,14 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
     await tester.pump(const Duration(milliseconds: 50));
+  }
+
+  /// The forms are taller than the 800x600 default test window, and a tap on an
+  /// off-screen button is silently missed. Give the sheet and the editor room.
+  void useTallScreen(WidgetTester tester) {
+    tester.view.physicalSize = const Size(900, 1800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
   }
 
   testWidgets('products list renders the repository rows', (
@@ -217,7 +229,15 @@ void main() {
       const Locale('en'),
     );
 
-    await tester.tap(find.byType(DropdownButtonFormField<String>));
+    // The category dropdown lists mothers only; the subcategory one appears
+    // after a mother that has children is chosen.
+    await tester.tap(find.byType(DropdownButtonFormField<String>).first);
+    await settle(tester);
+    await tester.tap(find.text('Majlis').last);
+    await settle(tester);
+
+    expect(find.byType(DropdownButtonFormField<String>), findsNWidgets(2));
+    await tester.tap(find.byType(DropdownButtonFormField<String>).last);
     await settle(tester);
 
     // The child is offered indented, directly under its mother, so the owner
@@ -380,6 +400,140 @@ void main() {
     expect(categories.saved.single.slug, 'sectionals');
   });
 
+  testWidgets('a refused save shows the database code and message', (
+    WidgetTester tester,
+  ) async {
+    useTallScreen(tester);
+    categories.failure = const ValidationFailure(
+      messageKey: 'errorDuplicate',
+      debugMessage: 'duplicate key value',
+      cause: PostgrestException(
+        message: 'duplicate key value violates unique constraint "categories_slug_key"',
+        code: '23505',
+      ),
+    );
+    await tester.pumpWidget(harness(location: Routes.adminCategories));
+    await settle(tester);
+
+    await tester.tap(find.byType(FloatingActionButton));
+    await settle(tester);
+
+    final AppLocalizations l10n = await AppLocalizations.delegate.load(
+      const Locale('en'),
+    );
+
+    await tester.enterText(find.byType(TextField).first, 'Chaise');
+    await tester.ensureVisible(find.text(l10n.actionSave));
+    await settle(tester);
+    await tester.tap(find.text(l10n.actionSave));
+    await settle(tester);
+
+    // The banner keeps the friendly sentence *and* the backend's own words.
+    expect(find.text(l10n.errorDuplicate), findsWidgets);
+    expect(find.textContaining('23505'), findsOneWidget);
+    expect(find.textContaining('categories_slug_key'), findsOneWidget);
+  });
+
+  testWidgets('a double tap on Save creates one category', (
+    WidgetTester tester,
+  ) async {
+    useTallScreen(tester);
+    categories.gate = Completer<void>();
+    await tester.pumpWidget(harness(location: Routes.adminCategories));
+    await settle(tester);
+
+    await tester.tap(find.byType(FloatingActionButton));
+    await settle(tester);
+
+    final AppLocalizations l10n = await AppLocalizations.delegate.load(
+      const Locale('en'),
+    );
+
+    await tester.enterText(find.byType(TextField).first, 'Chaise');
+    await tester.ensureVisible(find.text(l10n.actionSave));
+    await settle(tester);
+
+    // Two taps in the same frame, before the button can repaint as disabled.
+    await tester.tap(find.text(l10n.actionSave));
+    await tester.tap(find.text(l10n.actionSave));
+    await settle(tester);
+
+    categories.gate!.complete();
+    await settle(tester);
+
+    expect(categories.saved, hasLength(1));
+  });
+
+  testWidgets('a refused product save shows the database code and message', (
+    WidgetTester tester,
+  ) async {
+    useTallScreen(tester);
+    products.failure = const PermissionFailure(
+      debugMessage: 'permission denied',
+      cause: PostgrestException(
+        message: 'permission denied for table products',
+        code: '42501',
+      ),
+    );
+    await tester.pumpWidget(harness());
+    await settle(tester);
+
+    await tester.tap(find.text('Damascus Sofa'));
+    await settle(tester);
+
+    final AppLocalizations l10n = await AppLocalizations.delegate.load(
+      const Locale('en'),
+    );
+
+    await tester.scrollUntilVisible(
+      find.text(l10n.actionSave),
+      240,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await settle(tester);
+    await tester.tap(find.text(l10n.actionSave));
+    await settle(tester);
+
+    expect(find.text(l10n.errorPermission), findsWidgets);
+    expect(find.textContaining('42501'), findsOneWidget);
+    expect(
+      find.textContaining('permission denied for table products'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('a double tap on Save edits one product', (
+    WidgetTester tester,
+  ) async {
+    useTallScreen(tester);
+    products.gate = Completer<void>();
+    await tester.pumpWidget(harness());
+    await settle(tester);
+
+    await tester.tap(find.text('Damascus Sofa'));
+    await settle(tester);
+
+    final AppLocalizations l10n = await AppLocalizations.delegate.load(
+      const Locale('en'),
+    );
+
+    await tester.scrollUntilVisible(
+      find.text(l10n.actionSave),
+      240,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await settle(tester);
+
+    await tester.tap(find.text(l10n.actionSave));
+    await tester.tap(find.text(l10n.actionSave));
+    await settle(tester);
+
+    products.gate!.complete();
+    await settle(tester);
+
+    expect(products.saved, hasLength(1));
+  });
+
   testWidgets('a mother with subcategories is not deleted silently', (
     WidgetTester tester,
   ) async {
@@ -461,6 +615,12 @@ class _FakeCategoryRepository implements CategoryRepository {
   List<Category> rows;
   final List<CategoryDraft> saved = <CategoryDraft>[];
 
+  /// Thrown by the next write, so a refused save can be asserted.
+  Object? failure;
+
+  /// Held open by the double-tap tests to keep `saving` true across two taps.
+  Completer<void>? gate;
+
   @override
   Stream<List<Category>> watchAll() async* {
     yield rows;
@@ -485,6 +645,8 @@ class _FakeCategoryRepository implements CategoryRepository {
   @override
   Future<Category> create(CategoryDraft draft) async {
     saved.add(draft);
+    if (gate != null) await gate!.future;
+    if (failure case final Object error) throw error;
     final Category created = Category(
       id: 'c${rows.length + 1}',
       name: draft.name,
@@ -497,6 +659,8 @@ class _FakeCategoryRepository implements CategoryRepository {
   @override
   Future<Category> update(String id, CategoryDraft draft) async {
     saved.add(draft);
+    if (gate != null) await gate!.future;
+    if (failure case final Object error) throw error;
     final Category updated = Category(
       id: id,
       name: draft.name,
@@ -528,6 +692,12 @@ class _FakeProductRepository implements ProductRepository {
 
   List<Product> rows;
   final List<ProductDraft> saved = <ProductDraft>[];
+
+  /// Thrown by the next write, so a refused save can be asserted.
+  Object? failure;
+
+  /// Held open by the double-tap tests to keep `saving` true across two taps.
+  Completer<void>? gate;
 
   @override
   Stream<List<Product>> watch({
@@ -565,6 +735,8 @@ class _FakeProductRepository implements ProductRepository {
   @override
   Future<Product> create(ProductDraft draft) async {
     saved.add(draft);
+    if (gate != null) await gate!.future;
+    if (failure case final Object error) throw error;
     final Product created = Product(
       id: 'p${rows.length + 1}',
       categoryId: draft.categoryId,
@@ -578,6 +750,8 @@ class _FakeProductRepository implements ProductRepository {
   @override
   Future<Product> update(String id, ProductDraft draft) async {
     saved.add(draft);
+    if (gate != null) await gate!.future;
+    if (failure case final Object error) throw error;
     final Product updated = Product(
       id: id,
       categoryId: draft.categoryId,

@@ -864,6 +864,12 @@ abstract class AppLocalizations {
   /// **'Product saved'**
   String get adminProductSaved;
 
+  /// No description provided for @adminProductSubcategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Subcategory (optional)'**
+  String get adminProductSubcategory;
+
   /// No description provided for @adminProductTitleAr.
   ///
   /// In en, this message translates to:
