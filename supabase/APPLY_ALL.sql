@@ -1494,6 +1494,20 @@ update public.site_settings
  where store_name_om = 'Aamu Sharif Arabiyaan Majlis';
 
 -- ───────────────────────────────────────────────────────────────────────────
+-- 012b · set the stored shop name unconditionally
+-- ───────────────────────────────────────────────────────────────────────────
+--
+-- The guarded updates above only catch the exact spellings they list. This
+-- one is unguarded: whatever the single row holds — an old variant, extra
+-- spaces, a half-edited name from the admin panel — it becomes the current
+-- brand. Run it as-is against the project when the live row still shows
+-- "Amu Sharif Arabiyan Majlis".
+
+update public.site_settings
+   set store_name_en = 'Amusheriff Arabiyan Mejlis and Furniture',
+       updated_at    = now()
+ where id = 1;
+-- ───────────────────────────────────────────────────────────────────────────
 -- Done. Reload PostgREST's schema cache so the app stops answering
 -- "column not found in schema cache" for the columns above.
 -- ───────────────────────────────────────────────────────────────────────────

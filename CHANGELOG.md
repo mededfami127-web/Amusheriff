@@ -9,6 +9,46 @@ and this project adheres to [SemVer](https://semver.org/spec/v2.0.0.html).
 
 No unreleased changes.
 
+## [1.0.9] - 2026-10-22
+
+### Fixed
+
+- The app bar, hero and About page show “Amusheriff Arabiyan Mejlis and Furniture” even when
+  `site_settings.store_name_en` still holds a pre-rename spelling: a blank or legacy stored
+  name now resolves to the localised brand, while a name the owner typed is kept.
+- The app bar grows with the text scale and clamps the wordmark, so the two-line name fits a
+  320 dp screen at a 2.0 text scale without clipping or ellipsis.
+- `supabase/APPLY_ALL.sql` ends with an unguarded update of the stored shop name, so running
+  the file once fixes the live row.
+
+## [1.0.8] - 2026-10-21
+
+### Added
+
+- Category chips beside “All products” on the storefront home, so a shopper can narrow the
+  grid to one subcategory.
+- A subcategory dropdown in the product editor; it appears once a mother category that has
+  children is chosen.
+
+### Changed
+
+- The shop is now “Amusheriff Arabiyan Mejlis and Furniture”: the hero wraps the full name and
+  the app bar shows it on two lines instead of truncating it.
+- Category covers are compressed and resized before upload, the same way product images are.
+
+### Fixed
+
+- Uploaded category covers render on the dashboard; they were read as packaged assets and
+  could never load.
+- A successful upload refreshes the product tile and product page immediately instead of
+  waiting for the next realtime event.
+- Upload failures show the storage gateway's status code and message under the friendly line.
+- A double tap on Save in the product or category form no longer writes the row twice.
+- Deleting a category that still holds products or subcategories explains why it is refused
+  instead of surfacing a database error.
+- `supabase/APPLY_ALL.sql` now creates the catalogue tables, `profiles`, `is_admin()` and
+  `site_settings` when they are missing, so a fresh project can be brought up from that one file.
+
 ## [1.0.0] - 2026-10-20
 
 ### Added

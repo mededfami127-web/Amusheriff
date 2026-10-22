@@ -42,7 +42,12 @@ class AboutPage extends ConsumerWidget {
           const SizedBox(height: 20),
           Center(
             child: Text(
-              settings.storeNameEn,
+              // Same legacy-name fallback as the app bar and hero: the About
+              // page must not resurrect the pre-rename wording either.
+              settings.displayName(
+                Localizations.localeOf(context).languageCode,
+                brandFallback: l10n.appTitle,
+              ),
               textAlign: TextAlign.center,
               style: BrandTypography.brandTitle.copyWith(
                 color: dark ? BrandColors.goldLight : BrandColors.charcoal,

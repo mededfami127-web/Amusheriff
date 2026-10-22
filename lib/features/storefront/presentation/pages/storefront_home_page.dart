@@ -316,7 +316,23 @@ class _Hero extends ConsumerWidget {
       siteContentValueProvider(language),
     );
 
-    String heroTitle(String fallback) => siteContent['heroTitle'] ?? fallback;
+    // An override still carrying the pre-rename spelling loses to the current
+    // brand; any other owner-written title is kept word for word.
+    String heroTitle(String fallback) {
+      final String? override = siteContent['heroTitle'];
+      if (override == null || SiteSettings.isOldBrandSpelling(override)) {
+        return fallback;
+      }
+      return override;
+    }
+
+    // The stored shop name may still be the old wording, so the hero resolves
+    // it the same way the app bar does: legacy or blank falls back to the
+    // localised brand, and the full name wraps onto as many lines as it needs.
+    final String brand = settings.displayName(
+      language,
+      brandFallback: l10n.appTitle,
+    );
     String heroTagline(String fallback) =>
         siteContent['heroTagline'] ?? fallback;
     String heroButtonLabel(String fallback) =>
@@ -351,7 +367,7 @@ class _Hero extends ConsumerWidget {
             // The brand is a full shop name now, so it wraps onto two or
             // three lines instead of being cut off with an ellipsis.
             Text(
-              heroTitle(settings.storeNameFor(language)),
+              heroTitle(brand),
               softWrap: true,
               style: BrandTypography.titleLarge.copyWith(
                 color: BrandColors.ivory,

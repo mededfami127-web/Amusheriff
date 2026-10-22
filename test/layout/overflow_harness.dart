@@ -114,6 +114,7 @@ class FakeBackend {
     this.withFavourites = false,
     this.categoryRows,
     this.productRows,
+    this.siteSettingsValue,
   });
 
   final SourceMode categoriesMode;
@@ -127,6 +128,11 @@ class FakeBackend {
 
   /// Seeds the device favourites list with the sample products.
   final bool withFavourites;
+
+  /// Branding the widgets under test should see. Defaults to
+  /// [SiteSettings.fallback]; a test that needs a stored legacy or custom shop
+  /// name passes its own value instead of overriding the provider twice.
+  final SiteSettings? siteSettingsValue;
 
   late final FakeCategoryRepository categories = FakeCategoryRepository(
     mode: categoriesMode,
@@ -179,7 +185,9 @@ class FakeBackend {
     inquiryRepositoryProvider.overrideWithValue(inquiries),
     siteSettingsRepositoryProvider.overrideWithValue(settings),
     siteContentRepositoryProvider.overrideWithValue(siteContent),
-    siteSettingsValueProvider.overrideWithValue(SiteSettings.fallback),
+    siteSettingsValueProvider.overrideWithValue(
+      siteSettingsValue ?? SiteSettings.fallback,
+    ),
     authRepositoryProvider.overrideWithValue(auth),
     textOverridesRepositoryProvider.overrideWithValue(overrides),
     currentSessionProvider.overrideWithValue(null),
