@@ -179,6 +179,127 @@ create unique index if not exists one_cover_per_product
   on public.product_media (product_id)
   where is_cover;
 
+-- contact_links, inquiries and audit_log
+--
+-- 003 enables RLS on all three, and 005 adds `contact_links` and `inquiries`
+-- to the realtime publication, so they have to exist before those sections run.
+-- On the hosted project they already do; these `create table if not exists`
+-- statements are what make the file runnable start to finish on a fresh one.
+
+do $$
+begin
+  if not exists (select 1 from pg_type where typname = 'contact_kind') then
+    create type public.contact_kind as enum (
+      'whatsapp', 'telegram', 'phone', 'email', 'instagram',
+      'facebook', 'tiktok', 'youtube', 'website', 'location', 'other'
+    );
+  end if;
+end;
+$$;
+
+create table if not exists public.contact_links (
+  id          uuid primary key default gen_random_uuid(),
+  kind        public.contact_kind not null,
+  label       text not null,
+  value       text not null,
+  is_primary  boolean not null default false,
+  is_visible  boolean not null default true,
+  sort_order  int not null default 0,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+
+create index if not exists contact_links_visible_order_idx
+  on public.contact_links (is_visible, is_primary desc, sort_order);
+
+drop trigger if exists contact_links_set_updated_at on public.contact_links;
+create trigger contact_links_set_updated_at
+  before update on public.contact_links
+  for each row execute function public.set_updated_at();
+
+create table if not exists public.inquiries (
+  id          uuid primary key default gen_random_uuid(),
+  product_id  uuid references public.products (id) on delete set null,
+  channel     public.contact_kind not null,
+  device_id   text,
+  ip_hash     text,
+  created_at  timestamptz not null default now()
+);
+
+create index if not exists inquiries_created_idx
+  on public.inquiries (created_at desc);
+create index if not exists inquiries_device_idx
+  on public.inquiries (device_id, created_at desc);
+create index if not exists inquiries_ip_idx
+  on public.inquiries (ip_hash, created_at desc);
+
+create table if not exists public.audit_log (
+  id          bigint generated always as identity primary key,
+  actor       uuid references auth.users (id),
+  action      text not null,
+  table_name  text not null,
+  row_id      text,
+  diff        jsonb,
+  created_at  timestamptz not null default now()
+);
+
+create index if not exists audit_log_created_idx
+  on public.audit_log (created_at desc);
+create index if not exists audit_log_table_idx
+  on public.audit_log (table_name, created_at desc);
+
+create or replace function public.audit_row()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_actor  uuid := auth.uid();
+  v_row_id text;
+  v_diff   jsonb;
+begin
+  if tg_op = 'DELETE' then
+    v_row_id := old.id::text;
+    v_diff := jsonb_build_object('old', to_jsonb(old));
+  elsif tg_op = 'UPDATE' then
+    v_row_id := new.id::text;
+    v_diff := jsonb_build_object('old', to_jsonb(old), 'new', to_jsonb(new));
+  else
+    v_row_id := new.id::text;
+    v_diff := jsonb_build_object('new', to_jsonb(new));
+  end if;
+
+  insert into public.audit_log (actor, action, table_name, row_id, diff)
+  values (v_actor, lower(tg_op), tg_table_name, v_row_id, v_diff);
+
+  if tg_op = 'DELETE' then
+    return old;
+  end if;
+  return new;
+end;
+$$;
+
+comment on function public.audit_row() is
+  'SECURITY DEFINER audit trigger writer. Never fails an admin write on its own.';
+
+do $$
+declare
+  t text;
+begin
+  foreach t in array array['categories', 'products', 'product_media',
+                            'contact_links', 'site_settings']
+  loop
+    execute format('drop trigger if exists %I on public.%I', t || '_audit', t);
+    execute format(
+      'create trigger %I after insert or update or delete on public.%I '
+      'for each row execute function public.audit_row()',
+      t || '_audit', t
+    );
+  end loop;
+end;
+$$;
+
 -- ───────────────────────────────────────────────────────────────────────────
 -- 001c · owner identity and branding (create if missing)
 -- ───────────────────────────────────────────────────────────────────────────
