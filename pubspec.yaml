@@ -1,7 +1,7 @@
 name: amu_sharif_majlis
 description: "Amu Sharif Arabiyan Majlis (ASM) — luxury Arabic majlis & sofa catalogue with an owner admin gateway."
 publish_to: "none"
-version: 1.0.9+12
+version: 1.0.10+13
 
 environment:
   # Language version is derived from this constraint. Generator output
