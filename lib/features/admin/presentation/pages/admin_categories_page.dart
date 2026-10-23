@@ -13,8 +13,10 @@ import '../../../../core/theme/typography.dart';
 import '../../../../core/utils/stream_utils.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
+import '../../../catalog/domain/drafts/catalog_drafts.dart';
 import '../../../catalog/domain/entities/category.dart';
 import '../../../catalog/domain/entities/product.dart';
+import '../../../catalog/domain/repositories/catalog_repositories.dart';
 import '../../../catalog/presentation/providers/catalog_providers.dart';
 import '../controllers/admin_editors.dart';
 import '../widgets/admin_scaffold.dart';
@@ -140,8 +142,9 @@ class _CategoryList extends ConsumerWidget {
     // unpublished ones too, which the published-only count on the row misses.
     final List<Product> products =
         ref.watch(adminProductsProvider()).value ?? const <Product>[];
-    int productsIn(String categoryId) =>
-        products.where((Product p) => p.categoryId == categoryId).length;
+    List<Product> productsIn(String categoryId) => products
+        .where((Product p) => p.categoryId == categoryId)
+        .toList(growable: false);
 
     return ReorderableListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
@@ -161,8 +164,11 @@ class _CategoryList extends ConsumerWidget {
             children: <Widget>[
               _CategoryTile(
                 category: root,
-                childCount: children[root.id]?.length ?? 0,
-                productCount: productsIn(root.id),
+                subcategories: children[root.id] ?? const <Category>[],
+                products: productsIn(root.id),
+                moveTargets: roots
+                    .where((Category other) => other.id != root.id)
+                    .toList(growable: false),
                 onEdit: () => onEditRequested(root),
                 onAddSubcategory: () => onAddSubcategoryRequested(root),
               ),
@@ -172,7 +178,10 @@ class _CategoryList extends ConsumerWidget {
                   key: ValueKey<String>(child.id),
                   category: child,
                   isSubcategory: true,
-                  productCount: productsIn(child.id),
+                  products: productsIn(child.id),
+                  moveTargets: roots
+                      .where((Category other) => other.id != root.id)
+                      .toList(growable: false),
                   onEdit: () => onEditRequested(child),
                 ),
             ],
@@ -196,8 +205,9 @@ class _CategoryTile extends ConsumerWidget {
     required this.category,
     required this.onEdit,
     this.isSubcategory = false,
-    this.childCount = 0,
-    this.productCount = 0,
+    this.subcategories = const <Category>[],
+    this.products = const <Product>[],
+    this.moveTargets = const <Category>[],
     this.onAddSubcategory,
   });
 
@@ -207,12 +217,17 @@ class _CategoryTile extends ConsumerWidget {
   /// True when [category] sits inside its mother's row.
   final bool isSubcategory;
 
-  /// Subcategories directly under [category]; only used for the delete prompt.
-  final int childCount;
+  /// Subcategories directly under [category]; used by the delete prompt, which
+  /// offers to move them under another root instead of refusing the delete.
+  final List<Category> subcategories;
 
   /// Products filed here, published or not. `on delete restrict` refuses the
-  /// write while any exist, so the prompt has to count the drafts too.
-  final int productCount;
+  /// write while any exist, so the prompt has to count the drafts too — and
+  /// offers to move them in one go.
+  final List<Product> products;
+
+  /// Roots a delete could move the rows to. Empty when this is the only root.
+  final List<Category> moveTargets;
   final VoidCallback? onAddSubcategory;
 
   @override
@@ -332,50 +347,48 @@ class _CategoryTile extends ConsumerWidget {
     WidgetRef ref,
     AppLocalizations l10n,
   ) async {
-    // `on delete restrict` refuses both cases, so explain them instead of
-    // offering a Delete button that can only fail. A raw "related data is
-    // missing" from Postgres is exactly what the owner should never read.
-    if (childCount > 0) {
-      await _explain(context, l10n, l10n.adminCategoryHasSubcategories);
-      return;
-    }
-    if (productCount > 0) {
-      await _explain(
-        context,
-        l10n,
-        l10n.adminCategoryHasProducts(productCount),
-      );
-      return;
-    }
+    // `on delete restrict` refuses a category that still has children or
+    // products. Explain that in the owner's language, and offer the way out —
+    // move the rows under another root, then delete — instead of a Delete
+    // button that can only fail with a raw Postgres error.
+    final bool blocked = subcategories.isNotEmpty || products.isNotEmpty;
 
-    final bool confirmed =
-        await showDialog<bool>(
-          context: context,
-          builder: (BuildContext dialogContext) => AlertDialog(
-            title: Text(l10n.adminConfirmDeleteCategory),
-            content: Text(l10n.adminConfirmDeleteMessage),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () => Navigator.of(dialogContext).pop(false),
-                child: Text(l10n.actionCancel),
-              ),
-              FilledButton(
-                style: FilledButton.styleFrom(
-                  backgroundColor: BrandColors.danger,
-                  foregroundColor: BrandColors.ivory,
+    String? target;
+    if (blocked) {
+      target = await _askMove(context, ref, l10n);
+      if (target == null || !context.mounted) return;
+    } else {
+      final bool confirmed =
+          await showDialog<bool>(
+            context: context,
+            builder: (BuildContext dialogContext) => AlertDialog(
+              title: Text(l10n.adminConfirmDeleteCategory),
+              content: Text(l10n.adminConfirmDeleteMessage),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(false),
+                  child: Text(l10n.actionCancel),
                 ),
-                onPressed: () => Navigator.of(dialogContext).pop(true),
-                child: Text(l10n.actionDelete),
-              ),
-            ],
-          ),
-        ) ??
-        false;
-
-    if (!confirmed || !context.mounted) return;
+                FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: BrandColors.danger,
+                    foregroundColor: BrandColors.ivory,
+                  ),
+                  onPressed: () => Navigator.of(dialogContext).pop(true),
+                  child: Text(l10n.actionDelete),
+                ),
+              ],
+            ),
+          ) ??
+          false;
+      if (!confirmed || !context.mounted) return;
+    }
 
     final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
     try {
+      if (target != null) {
+        await _moveRows(ref, target);
+      }
       await ref.read(categoryRepositoryProvider).delete(category.id);
       invalidateCatalogue(ref.invalidate, includeCategories: true);
       messenger.showSnackBar(
@@ -388,30 +401,142 @@ class _CategoryTile extends ConsumerWidget {
       final String message =
           failure is ValidationFailure &&
               failure.messageKey == 'errorForeignKey'
-          ? l10n.adminCategoryHasProducts(1)
+          ? l10n.adminCategoryHasProducts(products.length.clamp(1, 999))
           : localizeFailure(l10n, failure);
       messenger.showSnackBar(SnackBar(content: Text(message)));
     }
   }
 
-  /// A one-button dialog for a delete the database will not allow.
-  Future<void> _explain(
+  /// Asks which root should receive this category's children/products.
+  ///
+  /// Returns the chosen id, or `null` when the owner cancelled. With no other
+  /// root to move to, the dialog merely explains the block.
+  Future<String?> _askMove(
     BuildContext context,
+    WidgetRef ref,
     AppLocalizations l10n,
-    String message,
-  ) => showDialog<void>(
-    context: context,
-    builder: (BuildContext dialogContext) => AlertDialog(
-      title: Text(l10n.adminConfirmDeleteCategory),
-      content: Text(message),
-      actions: <Widget>[
-        TextButton(
-          onPressed: () => Navigator.of(dialogContext).pop(),
-          child: Text(l10n.actionClose),
+  ) async {
+    final String message = subcategories.isNotEmpty
+        ? l10n.adminCategoryHasSubcategories
+        : l10n.adminCategoryHasProducts(products.length);
+
+    if (moveTargets.isEmpty) {
+      await showDialog<void>(
+        context: context,
+        builder: (BuildContext dialogContext) => AlertDialog(
+          title: Text(l10n.adminConfirmDeleteCategory),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(l10n.actionClose),
+            ),
+          ],
         ),
-      ],
-    ),
-  );
+      );
+      return null;
+    }
+
+    final String locale = Localizations.localeOf(context).languageCode;
+    String selected = moveTargets.first.id;
+
+    return showDialog<String>(
+      context: context,
+      builder: (BuildContext dialogContext) => StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) => AlertDialog(
+          title: Text(l10n.adminConfirmDeleteCategory),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(message),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                initialValue: selected,
+                isExpanded: true,
+                decoration: InputDecoration(
+                  labelText: l10n.adminCategoryParent,
+                ),
+                items: <DropdownMenuItem<String>>[
+                  for (final Category target in moveTargets)
+                    DropdownMenuItem<String>(
+                      value: target.id,
+                      child: Text(
+                        target.nameFor(locale),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                ],
+                onChanged: (String? value) {
+                  if (value != null) setState(() => selected = value);
+                },
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(l10n.actionCancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(selected),
+              child: Text(l10n.adminCategoryMove),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Re-files every child and product under [targetId] before the delete.
+  ///
+  /// One row at a time: a partial move is visible and retryable, while a
+  /// half-applied bulk write would hide which rows still block the delete.
+  Future<void> _moveRows(WidgetRef ref, String targetId) async {
+    final CategoryRepository categories = ref.read(categoryRepositoryProvider);
+    final ProductRepository productsRepo = ref.read(productRepositoryProvider);
+
+    for (final Category child in subcategories) {
+      await categories.update(
+        child.id,
+        CategoryDraft(
+          name: child.name,
+          slug: child.slug,
+          nameAm: child.nameAm,
+          nameAr: child.nameAr,
+          nameOm: child.nameOm,
+          coverPath: child.coverPath,
+          parentId: targetId,
+          sortOrder: child.sortOrder,
+          isVisible: child.isVisible,
+        ),
+      );
+    }
+
+    for (final Product product in products) {
+      await productsRepo.update(
+        product.id,
+        ProductDraft(
+          categoryId: targetId,
+          title: product.title,
+          titleAm: product.titleAm,
+          titleAr: product.titleAr,
+          titleOm: product.titleOm,
+          description: product.description,
+          descriptionAm: product.descriptionAm,
+          descriptionAr: product.descriptionAr,
+          descriptionOm: product.descriptionOm,
+          price: product.price,
+          compareAtPrice: product.compareAtPrice,
+          currencyCode: product.currencyCode,
+          isAvailable: product.isAvailable,
+          isFeatured: product.isFeatured,
+          isPublished: product.isPublished,
+          sortOrder: product.sortOrder,
+        ),
+      );
+    }
+  }
 }
 
 class _CategoryAvatar extends StatelessWidget {

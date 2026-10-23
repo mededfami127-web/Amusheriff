@@ -9,6 +9,7 @@ import '../../../../core/theme/brand_colors.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/inline_failure_banner.dart';
 import '../../../catalog/domain/entities/category.dart';
+import '../../../catalog/presentation/providers/catalog_providers.dart';
 import '../controllers/admin_editors.dart';
 import '../widgets/admin_text_field.dart';
 
@@ -44,6 +45,25 @@ class CategoryEditorSheet extends ConsumerWidget {
     // A local so the null checks below promote it: the field itself cannot be
     // promoted, and a `parent!` at every use site would be the alternative.
     final Category? mother = parent;
+    final String locale = Localizations.localeOf(context).languageCode;
+
+    // Only roots may be chosen as a parent — the tree is one level deep, so a
+    // subcategory can never be the mother of another. Editing a row that
+    // already has children keeps it top-level: moving it under another root
+    // would create grandchildren the database rejects.
+    final List<Category> all =
+        ref.watch(allCategoriesProvider).value ?? const <Category>[];
+    final List<Category> parentOptions =
+        all
+            .where((Category c) => c.parentId == null && c.id != existing?.id)
+            .toList(growable: false)
+          ..sort(
+            (Category a, Category b) => a.sortOrder != b.sortOrder
+                ? a.sortOrder.compareTo(b.sortOrder)
+                : a.name.compareTo(b.name),
+          );
+    final bool parentLocked =
+        existing != null && all.any((Category c) => c.parentId == existing!.id);
 
     return Padding(
       padding: EdgeInsets.only(
@@ -140,6 +160,45 @@ class CategoryEditorSheet extends ConsumerWidget {
             ),
             const SizedBox(height: 6),
             Text(l10n.adminSlugAuto, style: BrandTypography.bodySmall),
+            const SizedBox(height: 14),
+            DropdownButtonFormField<String>(
+              // Re-keyed on the current parent so an edit that loads the row a
+              // frame later still opens with the mother selected.
+              key: ValueKey<String>(
+                'category-parent-${state.parentId ?? 'root'}',
+              ),
+              initialValue: state.parentId ?? '',
+              isExpanded: true,
+              decoration: InputDecoration(
+                labelText: l10n.adminCategoryParent,
+                helperText: parentLocked
+                    ? l10n.adminCategoryParentLocked
+                    : null,
+                helperMaxLines: 2,
+              ),
+              items: <DropdownMenuItem<String>>[
+                DropdownMenuItem<String>(
+                  value: '',
+                  child: Text(
+                    l10n.adminCategoryTopLevel,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                for (final Category root in parentOptions)
+                  DropdownMenuItem<String>(
+                    value: root.id,
+                    child: Text(
+                      root.nameFor(locale),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+              ],
+              onChanged: parentLocked || saving
+                  ? null
+                  : (String? value) => controller.setParentId(
+                      value == null || value.isEmpty ? null : value,
+                    ),
+            ),
             const SizedBox(height: 14),
             _CoverField(state: state, controller: controller),
             const SizedBox(height: 6),

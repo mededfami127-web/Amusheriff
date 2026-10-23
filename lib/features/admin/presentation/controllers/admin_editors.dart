@@ -115,6 +115,7 @@ class CategoryEditorState {
     bool? slugTouched,
     FieldErrors? fieldErrors,
     AdminFormStatus? status,
+    bool clearParent = false,
   }) => CategoryEditorState(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -124,7 +125,10 @@ class CategoryEditorState {
     slug: slug ?? this.slug,
     coverPath: coverPath ?? this.coverPath,
     coverUploading: coverUploading ?? this.coverUploading,
-    parentId: parentId ?? this.parentId,
+    // A nullable field needs an explicit way to go back to `null`: the parent
+    // dropdown's "Top level" option is exactly that, and `?? this.parentId`
+    // would otherwise keep the old mother forever.
+    parentId: clearParent ? null : parentId ?? this.parentId,
     isVisible: isVisible ?? this.isVisible,
     sortOrder: sortOrder ?? this.sortOrder,
     isNew: isNew ?? this.isNew,
@@ -189,7 +193,8 @@ class CategoryEditorController extends _$CategoryEditorController {
   void setNameOm(String v) => state = state.copyWith(nameOm: v);
   void setSlug(String v) => state = state.copyWith(slug: v);
   void setCoverPath(String? v) => state = state.copyWith(coverPath: v);
-  void setParentId(String? v) => state = state.copyWith(parentId: v);
+  void setParentId(String? v) =>
+      state = state.copyWith(parentId: v, clearParent: v == null);
   void setVisible(bool v) => state = state.copyWith(isVisible: v);
   void setSortOrder(int v) => state = state.copyWith(sortOrder: v);
   void toggleSlugTouched() => state = state.copyWith(slugTouched: true);
