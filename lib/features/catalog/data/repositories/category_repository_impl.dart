@@ -22,6 +22,16 @@ class CategoryRepositoryImpl implements CategoryRepository {
       _remote.watchCategories(onlyVisible: false).map(_decodeList);
 
   @override
+  Stream<List<Category>> watchVisibleRoots() => _remote
+      .watchCategories(onlyVisible: true, rootsOnly: true)
+      .map(_decodeList);
+
+  @override
+  Stream<List<Category>> watchVisibleChildren(String parentId) => _remote
+      .watchCategories(onlyVisible: true, parentId: parentId)
+      .map(_decodeList);
+
+  @override
   Future<List<Category>> fetchVisible() => ErrorMapper.guard(() async {
     final List<Map<String, dynamic>> rows = await _remote.fetchCategories(
       onlyVisible: true,

@@ -283,6 +283,21 @@ class FakeCategoryRepository implements CategoryRepository {
   Stream<List<Category>> watchVisible() => _answer<List<Category>>(mode, _rows);
 
   @override
+  Stream<List<Category>> watchVisibleRoots() => _answer<List<Category>>(
+    mode,
+    _rows.where((Category c) => c.parentId == null).toList(growable: false),
+  );
+
+  @override
+  Stream<List<Category>> watchVisibleChildren(String parentId) =>
+      _answer<List<Category>>(
+        mode,
+        _rows
+            .where((Category c) => c.parentId == parentId)
+            .toList(growable: false),
+      );
+
+  @override
   Future<List<Category>> fetchVisible() =>
       _answerFuture<List<Category>>(mode, _rows);
 

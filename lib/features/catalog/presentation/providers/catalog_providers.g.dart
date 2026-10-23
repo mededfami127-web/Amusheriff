@@ -244,6 +244,140 @@ final class VisibleCategoriesProvider
 
 String _$visibleCategoriesHash() => r'f1760bb7eb29fc63d5ebb6da74a244b28f73047b';
 
+/// Visible **top-level** categories, live. The one list every storefront
+/// surface builds its category UI from: a subcategory is a name under its
+/// mother, never a card or a top-level chip.
+
+@ProviderFor(rootCategories)
+final rootCategoriesProvider = RootCategoriesProvider._();
+
+/// Visible **top-level** categories, live. The one list every storefront
+/// surface builds its category UI from: a subcategory is a name under its
+/// mother, never a card or a top-level chip.
+
+final class RootCategoriesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<Category>>,
+          List<Category>,
+          Stream<List<Category>>
+        >
+    with $FutureModifier<List<Category>>, $StreamProvider<List<Category>> {
+  /// Visible **top-level** categories, live. The one list every storefront
+  /// surface builds its category UI from: a subcategory is a name under its
+  /// mother, never a card or a top-level chip.
+  RootCategoriesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'rootCategoriesProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$rootCategoriesHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<List<Category>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<List<Category>> create(Ref ref) {
+    return rootCategories(ref);
+  }
+}
+
+String _$rootCategoriesHash() => r'4ed2dd44f61e1d6ec5b7aae18cad383eb8b2c590';
+
+/// Visible subcategories of [parentId], live and already ordered.
+
+@ProviderFor(childCategories)
+final childCategoriesProvider = ChildCategoriesFamily._();
+
+/// Visible subcategories of [parentId], live and already ordered.
+
+final class ChildCategoriesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<Category>>,
+          List<Category>,
+          Stream<List<Category>>
+        >
+    with $FutureModifier<List<Category>>, $StreamProvider<List<Category>> {
+  /// Visible subcategories of [parentId], live and already ordered.
+  ChildCategoriesProvider._({
+    required ChildCategoriesFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'childCategoriesProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$childCategoriesHash();
+
+  @override
+  String toString() {
+    return r'childCategoriesProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $StreamProviderElement<List<Category>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<List<Category>> create(Ref ref) {
+    final argument = this.argument as String;
+    return childCategories(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ChildCategoriesProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$childCategoriesHash() => r'758e7240227f9e6876b4bef4589a9f07d298567e';
+
+/// Visible subcategories of [parentId], live and already ordered.
+
+final class ChildCategoriesFamily extends $Family
+    with $FunctionalFamilyOverride<Stream<List<Category>>, String> {
+  ChildCategoriesFamily._()
+    : super(
+        retry: null,
+        name: r'childCategoriesProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Visible subcategories of [parentId], live and already ordered.
+
+  ChildCategoriesProvider call(String parentId) =>
+      ChildCategoriesProvider._(argument: parentId, from: this);
+
+  @override
+  String toString() => r'childCategoriesProvider';
+}
+
 /// Every category, including hidden ones. Admin surface only.
 
 @ProviderFor(allCategories)
@@ -439,7 +573,9 @@ final class CategoryBySlugFamily extends $Family
 /// Number of visible products per category, for the "Browse by category" grid.
 ///
 /// Counted client-side from the same Realtime stream the storefront already
-/// subscribes to, so no extra view or round trip is needed.
+/// subscribes to, so no extra view or round trip is needed. A top-level
+/// category's count includes the products filed under its subcategories: that
+/// is what "Majlis (12)" promises when the rail shows the mother only.
 
 @ProviderFor(categoryProductCounts)
 final categoryProductCountsProvider = CategoryProductCountsProvider._();
@@ -447,7 +583,9 @@ final categoryProductCountsProvider = CategoryProductCountsProvider._();
 /// Number of visible products per category, for the "Browse by category" grid.
 ///
 /// Counted client-side from the same Realtime stream the storefront already
-/// subscribes to, so no extra view or round trip is needed.
+/// subscribes to, so no extra view or round trip is needed. A top-level
+/// category's count includes the products filed under its subcategories: that
+/// is what "Majlis (12)" promises when the rail shows the mother only.
 
 final class CategoryProductCountsProvider
     extends
@@ -460,7 +598,9 @@ final class CategoryProductCountsProvider
   /// Number of visible products per category, for the "Browse by category" grid.
   ///
   /// Counted client-side from the same Realtime stream the storefront already
-  /// subscribes to, so no extra view or round trip is needed.
+  /// subscribes to, so no extra view or round trip is needed. A top-level
+  /// category's count includes the products filed under its subcategories: that
+  /// is what "Majlis (12)" promises when the rail shows the mother only.
   CategoryProductCountsProvider._()
     : super(
         from: null,
@@ -488,7 +628,7 @@ final class CategoryProductCountsProvider
 }
 
 String _$categoryProductCountsHash() =>
-    r'ddc11e34218e0ad66bbbedf6253df0a074fdcf9f';
+    r'd8f6d37e0a80cd6569c0b4246ab48dc72cf37699';
 
 /// Storefront product list with media joined in memory.
 ///
@@ -663,7 +803,7 @@ final class CategoryThumbnailPathsProvider
 }
 
 String _$categoryThumbnailPathsHash() =>
-    r'3dd5f083b7a9aa37576766b1b6cf651f4ed5befd';
+    r'19b146d1d69b8e198d314176236aad37b5189653';
 
 /// Admin product list, including unpublished rows.
 

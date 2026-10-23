@@ -196,6 +196,20 @@ class _FakeCategoryRepository implements CategoryRepository {
   }
 
   @override
+  Stream<List<Category>> watchVisibleRoots() async* {
+    yield rows
+        .where((Category c) => c.isVisible && c.parentId == null)
+        .toList(growable: false);
+  }
+
+  @override
+  Stream<List<Category>> watchVisibleChildren(String parentId) async* {
+    yield rows
+        .where((Category c) => c.isVisible && c.parentId == parentId)
+        .toList(growable: false);
+  }
+
+  @override
   Future<List<Category>> fetchVisible() async => rows;
 
   @override

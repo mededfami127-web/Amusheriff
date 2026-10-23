@@ -132,26 +132,46 @@ class CatalogRemoteDataSource {
 
   // ── Categories ────────────────────────────────────────────────────────────
 
+  /// Live categories.
+  ///
+  /// [rootsOnly] keeps the top-level rows (`parent_id is null`), [parentId]
+  /// keeps one mother's children. Both filters run in the query — over
+  /// Realtime, so the answer stays live — instead of every widget sifting a
+  /// full list it should never have been handed.
   Stream<List<Map<String, dynamic>>> watchCategories({
     required bool onlyVisible,
+    bool rootsOnly = false,
+    String? parentId,
   }) {
-    final SupabaseStreamFilterBuilder base = _client
+    SupabaseStreamFilterBuilder filtered = _client
         .from(categoriesTable)
         .stream(primaryKey: const <String>['id']);
-    final SupabaseStreamBuilder filtered = onlyVisible
-        ? base.eq('is_visible', true)
-        : base;
+    if (onlyVisible) {
+      filtered = filtered.eq('is_visible', true);
+    }
+    if (rootsOnly) {
+      filtered = filtered.isFilter('parent_id', null);
+    } else if (parentId != null) {
+      filtered = filtered.eq('parent_id', parentId);
+    }
     // `order` defaults to descending; the catalogue is always ascending.
     return filtered.order('sort_order', ascending: true);
   }
 
   Future<List<Map<String, dynamic>>> fetchCategories({
     required bool onlyVisible,
+    bool rootsOnly = false,
+    String? parentId,
   }) => _read(() async {
     PostgrestFilterBuilder<PostgrestList> query = _client
         .from(categoriesTable)
         .select(categoryColumns);
     if (onlyVisible) query = query.eq('is_visible', true);
+    if (rootsOnly) {
+      query = query.isFilter('parent_id', null);
+    } else if (parentId != null) {
+      query = query.eq('parent_id', parentId);
+    }
     final List<Map<String, dynamic>> rows = await query
         .order('sort_order', ascending: true)
         .order('name', ascending: true);

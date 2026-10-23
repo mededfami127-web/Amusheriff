@@ -13,6 +13,17 @@ abstract interface class CategoryRepository {
   /// Live visible categories, ordered by `sort_order`.
   Stream<List<Category>> watchVisible();
 
+  /// Live visible **top-level** categories only (`parent_id is null`).
+  ///
+  /// Every storefront list — the "Browse by category" rail, the chip row
+  /// beside "All products", the grouped home sections, the search filter —
+  /// reads this. A subcategory is a name under its mother, never a card of
+  /// its own.
+  Stream<List<Category>> watchVisibleRoots();
+
+  /// Live visible subcategories of [parentId], ordered by `sort_order`.
+  Stream<List<Category>> watchVisibleChildren(String parentId);
+
   /// Live categories including hidden ones. Admin only (RLS enforces it).
   Stream<List<Category>> watchAll();
 

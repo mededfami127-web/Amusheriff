@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/network/supabase_client_provider.dart';
@@ -39,6 +41,18 @@ ProductMediaRepository productMediaRepository(Ref ref) =>
 Stream<List<Category>> visibleCategories(Ref ref) =>
     ref.watch(categoryRepositoryProvider).watchVisible();
 
+/// Visible **top-level** categories, live. The one list every storefront
+/// surface builds its category UI from: a subcategory is a name under its
+/// mother, never a card or a top-level chip.
+@riverpod
+Stream<List<Category>> rootCategories(Ref ref) =>
+    ref.watch(categoryRepositoryProvider).watchVisibleRoots();
+
+/// Visible subcategories of [parentId], live and already ordered.
+@riverpod
+Stream<List<Category>> childCategories(Ref ref, String parentId) =>
+    ref.watch(categoryRepositoryProvider).watchVisibleChildren(parentId);
+
 /// Every category, including hidden ones. Admin surface only.
 @riverpod
 Stream<List<Category>> allCategories(Ref ref) =>
@@ -55,17 +69,36 @@ Future<Category?> categoryBySlug(Ref ref, String slug) =>
 /// Number of visible products per category, for the "Browse by category" grid.
 ///
 /// Counted client-side from the same Realtime stream the storefront already
-/// subscribes to, so no extra view or round trip is needed.
+/// subscribes to, so no extra view or round trip is needed. A top-level
+/// category's count includes the products filed under its subcategories: that
+/// is what "Majlis (12)" promises when the rail shows the mother only.
 @riverpod
-Stream<Map<String, int>> categoryProductCounts(Ref ref) => ref
-    .watch(productRepositoryProvider)
-    .watch(onlyPublished: true)
-    .map((List<Product> products) {
-      final Map<String, int> counts = <String, int>{};
-      for (final Product product in products) {
-        counts[product.categoryId] = (counts[product.categoryId] ?? 0) + 1;
+Stream<Map<String, int>> categoryProductCounts(Ref ref) =>
+    Stream<Map<String, int>>.multi((StreamController<Map<String, int>> sink) {
+      final List<Category> categories =
+          ref.watch(visibleCategoriesProvider).value ?? const <Category>[];
+      final Map<String, String> parentOf = <String, String>{};
+      for (final Category c in categories) {
+        final String? parent = c.parentId;
+        if (parent != null) parentOf[c.id] = parent;
       }
-      return counts;
+      final StreamSubscription<List<Product>> subscription = ref
+          .watch(productRepositoryProvider)
+          .watch(onlyPublished: true)
+          .listen((List<Product> products) {
+            final Map<String, int> counts = <String, int>{};
+            for (final Product product in products) {
+              counts[product.categoryId] =
+                  (counts[product.categoryId] ?? 0) + 1;
+              // Roll the row up to its mother so a root count is a total.
+              final String? parent = parentOf[product.categoryId];
+              if (parent != null) {
+                counts[parent] = (counts[parent] ?? 0) + 1;
+              }
+            }
+            sink.add(counts);
+          }, onError: sink.addError);
+      sink.onCancel = subscription.cancel;
     });
 
 /// Storefront product list with media joined in memory.
@@ -102,6 +135,8 @@ Stream<List<Product>> storefrontProducts(
 Map<String, String> categoryThumbnailPaths(Ref ref) {
   final List<Product> products =
       ref.watch(storefrontProductsProvider()).value ?? const <Product>[];
+  final List<Category> categories =
+      ref.watch(visibleCategoriesProvider).value ?? const <Category>[];
   final Map<String, String> paths = <String, String>{};
   for (final Product product in products) {
     if (paths.containsKey(product.categoryId)) continue;
@@ -115,6 +150,14 @@ Map<String, String> categoryThumbnailPaths(Ref ref) {
       chosen ??= item;
     }
     if (chosen != null) paths[product.categoryId] = chosen.storagePath;
+  }
+  // A top-level tile may borrow a photo from a product in one of its
+  // subcategories: the mother has no products of its own, but it is not empty.
+  for (final Category category in categories) {
+    final String? parent = category.parentId;
+    if (parent == null || paths.containsKey(parent)) continue;
+    final String? childPath = paths[category.id];
+    if (childPath != null) paths[parent] = childPath;
   }
   return paths;
 }

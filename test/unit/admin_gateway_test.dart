@@ -559,6 +559,123 @@ void main() {
     expect(find.text(l10n.adminCategoryHasSubcategories), findsOneWidget);
   });
 
+  testWidgets('changing the mother category clears the chosen subcategory', (
+    WidgetTester tester,
+  ) async {
+    categories = _FakeCategoryRepository(<Category>[
+      const Category(id: 'c1', name: 'Majlis', slug: 'majlis'),
+      const Category(
+        id: 'c2',
+        name: 'Corner Units',
+        slug: 'corner-units',
+        parentId: 'c1',
+        sortOrder: 1,
+      ),
+      const Category(id: 'c4', name: 'Bedrooms', slug: 'bedrooms'),
+    ]);
+    await tester.pumpWidget(harness(location: Routes.adminProductNew));
+    await settle(tester);
+
+    final AppLocalizations l10n = await AppLocalizations.delegate.load(
+      const Locale('en'),
+    );
+
+    // Majlis → Corner Units.
+    await tester.tap(find.byType(DropdownButtonFormField<String>).first);
+    await settle(tester);
+    await tester.tap(find.text('Majlis').last);
+    await settle(tester);
+    await tester.tap(find.byType(DropdownButtonFormField<String>).last);
+    await settle(tester);
+    await tester.tap(find.text('— Corner Units').last);
+    await settle(tester);
+
+    // Bedrooms has no children, so the second dropdown disappears and the
+    // subcategory that belonged to Majlis is gone with it.
+    await tester.tap(find.byType(DropdownButtonFormField<String>).first);
+    await settle(tester);
+    await tester.tap(find.text('Bedrooms').last);
+    await settle(tester);
+    expect(find.byType(DropdownButtonFormField<String>), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField).first, 'Bed Frame');
+    await settle(tester);
+    await tester.scrollUntilVisible(
+      find.text(l10n.actionSave),
+      240,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await settle(tester);
+    await tester.tap(find.text(l10n.actionSave));
+    await settle(tester);
+
+    expect(products.saved, hasLength(1));
+    expect(products.saved.single.categoryId, 'c4');
+  });
+
+  testWidgets('editing a subcategory keeps it under its mother', (
+    WidgetTester tester,
+  ) async {
+    useTallScreen(tester);
+    categories = _FakeCategoryRepository(<Category>[
+      const Category(id: 'c1', name: 'Majlis', slug: 'majlis'),
+      const Category(
+        id: 'c2',
+        name: 'Corner Units',
+        slug: 'corner-units',
+        parentId: 'c1',
+        sortOrder: 1,
+      ),
+    ]);
+    await tester.pumpWidget(harness(location: Routes.adminCategories));
+    await settle(tester);
+
+    final AppLocalizations l10n = await AppLocalizations.delegate.load(
+      const Locale('en'),
+    );
+
+    // The subcategory row is the second tile, so its edit button is the last.
+    await tester.tap(find.byIcon(Icons.edit_outlined).last);
+    await settle(tester);
+
+    expect(find.text(l10n.adminCategoryParent), findsOneWidget);
+    await tester.ensureVisible(find.text(l10n.actionSave));
+    await settle(tester);
+    await tester.tap(find.text(l10n.actionSave));
+    await settle(tester);
+
+    expect(categories.saved, hasLength(1));
+    expect(categories.saved.single.parentId, 'c1');
+  });
+
+  testWidgets('a root with subcategories cannot become a subcategory', (
+    WidgetTester tester,
+  ) async {
+    useTallScreen(tester);
+    categories = _FakeCategoryRepository(<Category>[
+      const Category(id: 'c1', name: 'Majlis', slug: 'majlis'),
+      const Category(
+        id: 'c2',
+        name: 'Corner Units',
+        slug: 'corner-units',
+        parentId: 'c1',
+      ),
+      const Category(id: 'c3', name: 'Bedrooms', slug: 'bedrooms'),
+    ]);
+    await tester.pumpWidget(harness(location: Routes.adminCategories));
+    await settle(tester);
+
+    final AppLocalizations l10n = await AppLocalizations.delegate.load(
+      const Locale('en'),
+    );
+
+    // The first edit icon belongs to the mother row.
+    await tester.tap(find.byIcon(Icons.edit_outlined).first);
+    await settle(tester);
+
+    expect(find.text(l10n.adminCategoryParentLocked), findsOneWidget);
+  });
+
   testWidgets(
     'the product editor offers category creation when there are none',
     (WidgetTester tester) async {
@@ -629,6 +746,20 @@ class _FakeCategoryRepository implements CategoryRepository {
   @override
   Stream<List<Category>> watchVisible() async* {
     yield rows.where((Category c) => c.isVisible).toList(growable: false);
+  }
+
+  @override
+  Stream<List<Category>> watchVisibleRoots() async* {
+    yield rows
+        .where((Category c) => c.isVisible && c.parentId == null)
+        .toList(growable: false);
+  }
+
+  @override
+  Stream<List<Category>> watchVisibleChildren(String parentId) async* {
+    yield rows
+        .where((Category c) => c.isVisible && c.parentId == parentId)
+        .toList(growable: false);
   }
 
   @override
