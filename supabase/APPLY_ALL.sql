@@ -1628,6 +1628,153 @@ update public.site_settings
    set store_name_en = 'Amusheriff Arabiyan Mejlis and Furniture',
        updated_at    = now()
  where id = 1;
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- NEW: the category tree is one level deep, and only a root can be a parent
+-- ═══════════════════════════════════════════════════════════════════════════
+--
+-- 007 already added `categories.parent_id` and rejected a grandchild. Two
+-- holes are still open, and the app now depends on both being closed:
+--
+--   * a root that already has subcategories could be moved under another root,
+--     which would silently make its children grandchildren;
+--   * `parent_id = id` was only caught by the trigger, not by the table itself.
+--
+-- Everything here is re-appliable: `if not exists`, `create or replace`, and
+-- `drop policy if exists` before `create policy`.
+
+alter table public.categories
+  add column if not exists parent_id uuid
+    references public.categories (id) on delete restrict;
+
+alter table public.products
+  add column if not exists subcategory_id uuid
+    references public.categories (id) on delete set null;
+
+create index if not exists categories_parent_order_idx
+  on public.categories (parent_id, sort_order);
+
+create index if not exists products_subcategory_idx
+  on public.products (subcategory_id, sort_order)
+  where subcategory_id is not null;
+
+-- A row can never be its own mother, at the table level as well as in the
+-- trigger, so a broken client cannot even attempt the cycle.
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint
+     where conname = 'categories_parent_not_self'
+       and conrelid = 'public.categories'::regclass
+  ) then
+    alter table public.categories
+      add constraint categories_parent_not_self
+      check (parent_id is null or parent_id <> id);
+  end if;
+end;
+$$;
+
+-- Rewritten in place (not a second trigger, so the order of checks is clear):
+-- self-reference, grandchild, and a mother with children moving under a root.
+create or replace function public.guard_category_nesting()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+declare
+  v_grandparent uuid;
+begin
+  if new.parent_id is null then
+    return new;
+  end if;
+
+  if new.parent_id = new.id then
+    raise exception 'a category cannot be its own parent'
+      using errcode = '23514';
+  end if;
+
+  -- One level only: the chosen mother must itself be top-level.
+  select c.parent_id
+    into v_grandparent
+    from public.categories c
+   where c.id = new.parent_id;
+
+  if v_grandparent is not null then
+    raise exception 'subcategories cannot be nested more than one level deep'
+      using errcode = '23514';
+  end if;
+
+  -- A root that already has subcategories cannot become a subcategory: that
+  -- would push its children down to a third level.
+  if exists (
+    select 1 from public.categories child
+     where child.parent_id = new.id
+       and child.id <> new.id
+  ) then
+    raise exception 'a category with subcategories cannot become a subcategory'
+      using errcode = '23514';
+  end if;
+
+  return new;
+end;
+$$;
+
+comment on function public.guard_category_nesting() is
+  'Rejects self-parenting, grandchildren, and moving a category that has children under another root.';
+
+drop trigger if exists categories_guard_nesting on public.categories;
+create trigger categories_guard_nesting
+  before insert or update of parent_id on public.categories
+  for each row execute function public.guard_category_nesting();
+
+-- RLS stays strict: reads are public, every write is admin-only. Re-created
+-- only when an older snapshot left them out (a fresh policy, no duplicate).
+alter table public.categories enable row level security;
+alter table public.products enable row level security;
+
+do $$
+declare
+  t text;
+begin
+  foreach t in array array['categories', 'products']
+  loop
+    if not exists (
+      select 1 from pg_policies
+       where schemaname = 'public' and tablename = t
+         and policyname = t || '_admin_insert'
+    ) then
+      execute format(
+        'create policy %I on public.%I for insert to authenticated '
+        'with check (public.is_admin())', t || '_admin_insert', t
+      );
+    end if;
+
+    if not exists (
+      select 1 from pg_policies
+       where schemaname = 'public' and tablename = t
+         and policyname = t || '_admin_update'
+    ) then
+      execute format(
+        'create policy %I on public.%I for update to authenticated '
+        'using (public.is_admin()) with check (public.is_admin())',
+        t || '_admin_update', t
+      );
+    end if;
+
+    if not exists (
+      select 1 from pg_policies
+       where schemaname = 'public' and tablename = t
+         and policyname = t || '_admin_delete'
+    ) then
+      execute format(
+        'create policy %I on public.%I for delete to authenticated '
+        'using (public.is_admin())', t || '_admin_delete', t
+      );
+    end if;
+  end loop;
+end;
+$$;
+
 -- ───────────────────────────────────────────────────────────────────────────
 -- Done. Reload PostgREST's schema cache so the app stops answering
 -- "column not found in schema cache" for the columns above.
