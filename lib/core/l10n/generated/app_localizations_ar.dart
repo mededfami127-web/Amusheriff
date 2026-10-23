@@ -167,6 +167,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String get adminCategoryNameOm => 'الاسم (أورومو)';
 
   @override
+  String get adminCategoryParent => 'الفئة الأم';
+
+  @override
+  String get adminCategoryParentLocked =>
+      'لهذه الفئة فئات فرعية، لذا تبقى في المستوى الأعلى.';
+
+  @override
+  String get adminCategoryMove => 'نقل العناصر';
+
+  @override
+  String get adminCategoryTopLevel => 'المستوى الأعلى (بدون فئة أم)';
+
+  @override
   String get adminCategoryUpdated => 'تم تحديث القسم';
 
   @override
@@ -810,6 +823,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get labelAll => 'الكل';
+
+  @override
+  String labelAllInCategory(String category) {
+    return 'كل $category';
+  }
 
   @override
   String get labelAvailable => 'متوفر';

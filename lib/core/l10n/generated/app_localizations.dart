@@ -396,6 +396,30 @@ abstract class AppLocalizations {
   /// **'Name (Oromo)'**
   String get adminCategoryNameOm;
 
+  /// No description provided for @adminCategoryParent.
+  ///
+  /// In en, this message translates to:
+  /// **'Parent category'**
+  String get adminCategoryParent;
+
+  /// No description provided for @adminCategoryParentLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'This category has subcategories, so it stays top level.'**
+  String get adminCategoryParentLocked;
+
+  /// No description provided for @adminCategoryMove.
+  ///
+  /// In en, this message translates to:
+  /// **'Move items'**
+  String get adminCategoryMove;
+
+  /// No description provided for @adminCategoryTopLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Top level (no parent)'**
+  String get adminCategoryTopLevel;
+
   /// No description provided for @adminCategoryUpdated.
   ///
   /// In en, this message translates to:
@@ -1631,6 +1655,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All'**
   String get labelAll;
+
+  /// No description provided for @labelAllInCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'All {category}'**
+  String labelAllInCategory(String category);
 
   /// No description provided for @labelAvailable.
   ///

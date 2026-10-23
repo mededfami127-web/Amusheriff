@@ -43,12 +43,31 @@ class StorefrontHomePage extends ConsumerStatefulWidget {
 }
 
 class _StorefrontHomePageState extends ConsumerState<StorefrontHomePage> {
-  /// Category the grid is filtered to; `null` means the mixed "All" list.
-  String? _selectedCategoryId;
+  /// Top-level category the screen is showing; `null` means the mixed "All"
+  /// list. A subcategory is never held here — it is a second-level refinement
+  /// of its mother, chosen from the text row under the heading.
+  String? _selectedRootId;
 
-  void _select(String? id) {
-    if (_selectedCategoryId == id) return;
-    setState(() => _selectedCategoryId = id);
+  /// Subcategory narrowing the grid inside [_selectedRootId]; `null` means
+  /// "All <mother>", which includes every subcategory's products.
+  String? _selectedChildId;
+
+  void _selectRoot(String? id) {
+    if (_selectedRootId == id && _selectedChildId == null) return;
+    setState(() {
+      _selectedRootId = id;
+      _selectedChildId = null;
+    });
+  }
+
+  void _selectChild(String id) {
+    if (_selectedChildId == id) return;
+    setState(() => _selectedChildId = id);
+  }
+
+  void _clearChild() {
+    if (_selectedChildId == null) return;
+    setState(() => _selectedChildId = null);
   }
 
   @override
@@ -64,8 +83,10 @@ class _StorefrontHomePageState extends ConsumerState<StorefrontHomePage> {
     String sectionTitle(String key, String fallback) =>
         siteContent['sectionTitle:$key'] ?? fallback;
 
-    final AsyncValue<List<Category>> categories = ref.watch(
-      visibleCategoriesProvider,
+    // Top-level list: the query hands back roots only, so a subcategory can
+    // never turn into a card of its own further down.
+    final AsyncValue<List<Category>> rootsAsync = ref.watch(
+      rootCategoriesProvider,
     );
     final AsyncValue<List<Product>> featured = ref.watch(
       storefrontProductsProvider(featured: true),
@@ -74,33 +95,41 @@ class _StorefrontHomePageState extends ConsumerState<StorefrontHomePage> {
       storefrontProductsProvider(),
     );
 
-    // Everything the chip row under "All products" needs, plus the category
-    // label each card of the mixed grid carries. Derived from the same stream
-    // the rail above already watches — no extra request, and a language switch
-    // re-derives the strings from the entities without touching the backend.
-    final List<Category> categoryList = categories.value ?? const <Category>[];
-    final List<Category> roots = categoryList
-        .where((Category c) => c.parentId == null)
-        .toList(growable: false);
-    final Category? selected = _categoryById(categoryList, _selectedCategoryId);
+    final List<Category> roots = rootsAsync.value ?? const <Category>[];
+    final Category? selected = _categoryById(roots, _selectedRootId);
+    // The children of the selected mother, straight from their own query. With
+    // no mother selected this is empty, so the row disappears instead of
+    // showing an empty strip of space.
     final List<Category> subcategories = selected == null
         ? const <Category>[]
-        : categoryList
-              .where((Category c) => c.parentId == selected.id)
-              .toList(growable: false);
-    final Map<String, String> categoryLabels = <String, String>{
-      for (final Category c in categoryList) c.id: c.nameFor(language),
+        : ref.watch(childCategoriesProvider(selected.id)).value ??
+              const <Category>[];
+    final Category? selectedChild = _childById(subcategories, _selectedChildId);
+
+    // Every category name, used only to label the cards. The lists above come
+    // from their own root/child queries; this one map adds "Mother · Child"
+    // under a product that is filed on a subcategory.
+    final List<Category> categoryList =
+        ref.watch(visibleCategoriesProvider).value ?? const <Category>[];
+    final Map<String, Category> byId = <String, Category>{
+      for (final Category c in categoryList) c.id: c,
     };
-    // A root chip shows its own products *and* those of its subcategories;
-    // a subcategory chip narrows to that subcategory alone.
-    final Set<String> filterIds = <String>{};
-    if (selected != null) {
-      filterIds.add(selected.id);
-      for (final Category c in categoryList) {
-        if (c.parentId == selected.id) filterIds.add(c.id);
-      }
+    final Map<String, String> categoryLabels = <String, String>{};
+    for (final Category c in categoryList) {
+      final Category? mother = c.parentId == null ? null : byId[c.parentId];
+      categoryLabels[c.id] = mother == null
+          ? c.nameFor(language)
+          : '${mother.nameFor(language)} · ${c.nameFor(language)}';
     }
-    final AsyncValue<List<Product>> gridProducts = _selectedCategoryId == null
+
+    // "All <mother>" shows the mother's own products plus every subcategory's;
+    // a subcategory narrows to itself alone.
+    final Set<String>? filterIds = selectedChild != null
+        ? <String>{selectedChild.id}
+        : selected != null
+        ? <String>{selected.id, for (final Category c in subcategories) c.id}
+        : null;
+    final AsyncValue<List<Product>> gridProducts = filterIds == null
         ? all
         : all.whenData(
             (List<Product> items) => items
@@ -155,7 +184,7 @@ class _StorefrontHomePageState extends ConsumerState<StorefrontHomePage> {
               ),
             ),
             SliverToBoxAdapter(
-              child: categories.when(
+              child: rootsAsync.when(
                 loading: () => const ShimmerRail(height: 150, itemCount: 3),
                 error: (Object error, _) => Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -163,34 +192,26 @@ class _StorefrontHomePageState extends ConsumerState<StorefrontHomePage> {
                     failure: error is AppFailure
                         ? error
                         : UnknownFailure(cause: error),
-                    onRetry: () => ref.invalidate(visibleCategoriesProvider),
+                    onRetry: () => ref.invalidate(rootCategoriesProvider),
                   ),
                 ),
-                data: (List<Category> items) {
-                  // Top-level categories only: a subcategory belongs to its
-                  // mother, and is reached from that category's own page.
-                  final List<Category> roots = items
-                      .where((Category c) => c.parentId == null)
-                      .toList(growable: false);
-                  return roots.isEmpty
-                      ? EmptyState(
-                          title: l10n.stateEmptyTitle,
-                          message: l10n.stateEmptyMessage,
-                          compact: true,
-                        )
-                      : _CategoryRail(
-                          categories: roots
-                              .take(categoryLimit)
-                              .toList(growable: false),
-                          hasMore: roots.length > categoryLimit,
-                          onMore: () => ref
-                              .read(
-                                visibleCountProvider('home-categories')
-                                    .notifier,
-                              )
-                              .more(),
-                        );
-                },
+                data: (List<Category> roots) => roots.isEmpty
+                    ? EmptyState(
+                        title: l10n.stateEmptyTitle,
+                        message: l10n.stateEmptyMessage,
+                        compact: true,
+                      )
+                    : _CategoryRail(
+                        categories: roots
+                            .take(categoryLimit)
+                            .toList(growable: false),
+                        hasMore: roots.length > categoryLimit,
+                        onMore: () => ref
+                            .read(
+                              visibleCountProvider('home-categories').notifier,
+                            )
+                            .more(),
+                      ),
               ),
             ),
             if (featured.value?.isNotEmpty ?? false) ...<Widget>[
@@ -220,21 +241,25 @@ class _StorefrontHomePageState extends ConsumerState<StorefrontHomePage> {
                   : _SectionHeader(title: selected.nameFor(language)),
             ),
             SliverToBoxAdapter(
-              child: _CategoryFilterRow(
+              child: _RootFilterRow(
                 categories: roots,
                 selected: selected,
                 language: language,
-                onSelect: _select,
+                onSelect: _selectRoot,
               ),
             ),
+            // Names only: a subcategory is a refinement of the mother above
+            // it, so it reads as small text chips and never as a card. With
+            // no children there is no row at all, not an empty strip.
             if (subcategories.isNotEmpty)
               SliverToBoxAdapter(
-                child: _CategoryFilterRow(
+                child: _SubcategoryNameRow(
+                  motherName: selected!.nameFor(language),
                   categories: subcategories,
-                  selected: selected,
+                  selectedId: selectedChild?.id,
                   language: language,
-                  onSelect: _select,
-                  indented: true,
+                  onAll: _clearChild,
+                  onSelect: _selectChild,
                 ),
               ),
             _ProductGrid(
@@ -253,6 +278,7 @@ class _StorefrontHomePageState extends ConsumerState<StorefrontHomePage> {
               ..._groupedSections(
                 language: language,
                 roots: roots,
+                categoryList: categoryList,
                 products: all.value ?? const <Product>[],
               ),
             const SliverToBoxAdapter(child: _FooterContact()),
@@ -263,20 +289,30 @@ class _StorefrontHomePageState extends ConsumerState<StorefrontHomePage> {
     );
   }
 
-  /// One section per top-level category that has products: its name, its rail,
-  /// and a "See all" into its page. Rendered only while the grid shows the
-  /// mixed "All" list, so nothing is ever listed twice on screen.
+  /// One section per **root** category that has products: its name, its
+  /// children's names as small chips, its rail, and a "See all" into its page.
+  /// Rendered only while the grid shows the mixed "All" list, so nothing is
+  /// ever listed twice on screen. A subcategory never gets a section of its
+  /// own — its products appear in the mother's rail, where they belong.
   List<Widget> _groupedSections({
     required String language,
     required List<Category> roots,
+    required List<Category> categoryList,
     required List<Product> products,
   }) {
     if (products.isEmpty) return const <Widget>[];
 
     final List<Widget> slivers = <Widget>[];
     for (final Category root in roots) {
+      final List<Category> children = categoryList
+          .where((Category c) => c.parentId == root.id)
+          .toList(growable: false);
+      final Set<String> ids = <String>{
+        root.id,
+        for (final Category child in children) child.id,
+      };
       final List<Product> items = products
-          .where((Product p) => p.categoryId == root.id)
+          .where((Product p) => ids.contains(p.categoryId))
           .take(6)
           .toList(growable: false);
       if (items.isEmpty) continue;
@@ -284,6 +320,8 @@ class _StorefrontHomePageState extends ConsumerState<StorefrontHomePage> {
         SliverToBoxAdapter(
           child: _GroupedSectionHeader(
             title: root.nameFor(language),
+            subcategories: children,
+            language: language,
             onSeeAll: () => context.push(Routes.category(root.slug)),
           ),
         ),
@@ -298,6 +336,15 @@ class _StorefrontHomePageState extends ConsumerState<StorefrontHomePage> {
 Category? _categoryById(List<Category> categories, String? id) {
   if (id == null) return null;
   for (final Category candidate in categories) {
+    if (candidate.id == id) return candidate;
+  }
+  return null;
+}
+
+/// The subcategory a chip is narrowing to, or `null` for "All <mother>".
+Category? _childById(List<Category> children, String? id) {
+  if (id == null) return null;
+  for (final Category candidate in children) {
     if (candidate.id == id) return candidate;
   }
   return null;
@@ -539,29 +586,25 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-/// "All" + every category, right under the "All products" heading.
+/// "All" + every **root** category, right under the "All products" heading.
 ///
 /// Horizontally scrolling so a long list never wraps into the grid, RTL-safe
 /// because the scroll direction follows the ambient directionality, and its
 /// height grows with the accessibility text scale so a 2.0 chip is never
-/// clipped by the rail.
-class _CategoryFilterRow extends StatelessWidget {
-  const _CategoryFilterRow({
+/// clipped by the rail. Subcategories are never chips in this row; they
+/// appear as plain names under their mother, in [_SubcategoryNameRow].
+class _RootFilterRow extends StatelessWidget {
+  const _RootFilterRow({
     required this.categories,
     required this.selected,
     required this.language,
     required this.onSelect,
-    this.indented = false,
   });
 
   final List<Category> categories;
   final Category? selected;
   final String language;
   final ValueChanged<String?> onSelect;
-
-  /// True for the subcategory row: its chips are drawn with the parent's
-  /// indent so the hierarchy reads at a glance.
-  final bool indented;
 
   @override
   Widget build(BuildContext context) {
@@ -571,37 +614,141 @@ class _CategoryFilterRow extends StatelessWidget {
     return SizedBox(
       height: 36 + 14 * scale,
       child: ListView(
+        key: const ValueKey<String>('home-root-chips'),
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         children: <Widget>[
-          if (!indented)
+          Padding(
+            padding: const EdgeInsetsDirectional.only(end: 8),
+            child: _FilterChip(
+              label: l10n.labelAll,
+              icon: Icons.grid_view_rounded,
+              isSelected: selected == null,
+              onTap: () => onSelect(null),
+            ),
+          ),
+          for (final Category category in categories)
             Padding(
               padding: const EdgeInsetsDirectional.only(end: 8),
               child: _FilterChip(
-                label: l10n.labelAll,
-                icon: Icons.grid_view_rounded,
-                isSelected: selected == null,
-                onTap: () => onSelect(null),
+                label: category.nameFor(language),
+                icon: Icons.category_outlined,
+                isSelected: selected?.id == category.id,
+                onTap: () => onSelect(category.id),
               ),
             ),
-          for (int i = 0; i < categories.length; i++) ...<Widget>[
-            Padding(
-              padding: const EdgeInsetsDirectional.only(end: 8),
-              child: _FilterChip(
-                label: categories[i].nameFor(language),
-                icon: indented
-                    ? Icons.subdirectory_arrow_right_rounded
-                    : Icons.category_outlined,
-                // A selected subcategory also lights up its mother chip.
-                isSelected:
-                    selected != null &&
-                    (selected!.id == categories[i].id ||
-                        selected!.parentId == categories[i].id),
-                onTap: () => onSelect(categories[i].id),
-              ),
-            ),
-          ],
         ],
+      ),
+    );
+  }
+}
+
+/// The names of one mother's subcategories, as small text chips.
+///
+/// "All <mother>" comes first and is pre-selected: it means the mother's own
+/// products *and* everything filed under a child. No images, no cards, no
+/// icons — a subcategory is a refinement, not a destination of its own.
+///
+/// RTL-safe (the horizontal `ListView` follows the ambient directionality) and
+/// its height grows with the text scale, so a 2.0 label is never clipped.
+class _SubcategoryNameRow extends StatelessWidget {
+  const _SubcategoryNameRow({
+    required this.motherName,
+    required this.categories,
+    required this.selectedId,
+    required this.language,
+    required this.onAll,
+    required this.onSelect,
+  });
+
+  final String motherName;
+  final List<Category> categories;
+  final String? selectedId;
+  final String language;
+  final VoidCallback onAll;
+  final ValueChanged<String> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final double scale = MediaQuery.textScalerOf(context).scale(1);
+
+    return SizedBox(
+      height: 34 + 16 * scale,
+      child: ListView(
+        key: const ValueKey<String>('home-subcategory-chips'),
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsetsDirectional.only(end: 8),
+            child: _NameChip(
+              label: l10n.labelAllInCategory(motherName),
+              isSelected: selectedId == null,
+              onTap: onAll,
+            ),
+          ),
+          for (final Category category in categories)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(end: 8),
+              child: _NameChip(
+                label: category.nameFor(language),
+                isSelected: selectedId == category.id,
+                onTap: () => onSelect(category.id),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A borderless, text-only chip: the subcategory name and nothing else.
+class _NameChip extends StatelessWidget {
+  const _NameChip({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool dark = Theme.of(context).brightness == Brightness.dark;
+
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: isSelected ? '$label (selected)' : label,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(999),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 140),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? BrandColors.gold
+                : (dark ? BrandColors.plumSurface : BrandColors.ivory),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(
+              color: isSelected ? BrandColors.gold : BrandColors.goldHairline,
+            ),
+          ),
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: BrandTypography.labelLarge.copyWith(
+              color: isSelected
+                  ? BrandColors.charcoal
+                  : (dark ? BrandColors.goldLight : BrandColors.charcoal),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -676,10 +823,20 @@ class _FilterChip extends StatelessWidget {
 /// Category heading of a grouped section, with its "See all" into the page
 /// that shows the whole category.
 class _GroupedSectionHeader extends StatelessWidget {
-  const _GroupedSectionHeader({required this.title, required this.onSeeAll});
+  const _GroupedSectionHeader({
+    required this.title,
+    required this.onSeeAll,
+    this.subcategories = const <Category>[],
+    this.language = 'en',
+  });
 
   final String title;
   final VoidCallback onSeeAll;
+
+  /// The root's children. Their names sit under the heading, small and
+  /// text-only, so the home screen shows the tree without extra cards.
+  final List<Category> subcategories;
+  final String language;
 
   @override
   Widget build(BuildContext context) {
@@ -696,7 +853,7 @@ class _GroupedSectionHeader extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style:
                       BrandTypography.displayForLocale(
@@ -712,8 +869,47 @@ class _GroupedSectionHeader extends StatelessWidget {
               TextButton(onPressed: onSeeAll, child: Text(l10n.actionSeeAll)),
             ],
           ),
+          if (subcategories.isNotEmpty)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(end: 8, bottom: 4),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 6,
+                children: <Widget>[
+                  for (final Category child in subcategories)
+                    _SubcategoryLabel(text: child.nameFor(language)),
+                ],
+              ),
+            ),
           const SizedBox(width: 64, child: GoldDivider()),
         ],
+      ),
+    );
+  }
+}
+
+/// A tiny, non-interactive name under a section heading.
+class _SubcategoryLabel extends StatelessWidget {
+  const _SubcategoryLabel({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool dark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: BrandColors.goldHairline),
+      ),
+      child: Text(
+        text,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: BrandTypography.labelSmall.copyWith(
+          color: dark ? BrandColors.goldLight : BrandColors.gold,
+        ),
       ),
     );
   }

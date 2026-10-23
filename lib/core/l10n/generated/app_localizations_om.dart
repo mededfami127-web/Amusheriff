@@ -167,6 +167,19 @@ class AppLocalizationsOm extends AppLocalizations {
   String get adminCategoryNameOm => 'Maqaa (Oromoo)';
 
   @override
+  String get adminCategoryParent => 'Ramaddii haadhaa';
+
+  @override
+  String get adminCategoryParentLocked =>
+      'Ramaddiin kun ramaddiiwwan xixiqqaa qaba, kanaaf sadarkaa ol\'aanaatti hafa.';
+
+  @override
+  String get adminCategoryMove => 'Wanta darbi';
+
+  @override
+  String get adminCategoryTopLevel => 'Sadarkaa ol\'aanaa (haadha hin qabu)';
+
+  @override
   String get adminCategoryUpdated => 'Ramaddiin haaromfame';
 
   @override
@@ -820,6 +833,11 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get labelAll => 'Hunda';
+
+  @override
+  String labelAllInCategory(String category) {
+    return 'Hunda $category';
+  }
 
   @override
   String get labelAvailable => 'Jira';

@@ -1,5 +1,12 @@
 {
   "@@locale": "en",
+  "@labelAllInCategory": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
   "@a11yOpenCategory": {
     "placeholders": {
       "name": {
@@ -135,6 +142,10 @@
   "adminCategoryNameAm": "Name (Amharic)",
   "adminCategoryNameAr": "Name (Arabic)",
   "adminCategoryNameOm": "Name (Oromo)",
+  "adminCategoryParent": "Parent category",
+  "adminCategoryParentLocked": "This category has subcategories, so it stays top level.",
+  "adminCategoryMove": "Move items",
+  "adminCategoryTopLevel": "Top level (no parent)",
   "adminCategoryUpdated": "Category updated",
   "adminChangePassword": "Change password",
   "adminChannel": "Channel",
@@ -341,6 +352,7 @@
   "groupValidation": "Validation messages",
   "inquiryMessageTemplate": "Hello! I am interested in “{product}” ({price}).",
   "labelAll": "All",
+  "labelAllInCategory": "All {category}",
   "labelAvailable": "Available",
   "labelDiscount": "Save {percent}%",
   "labelDuration": "{minutes}m {seconds}s",

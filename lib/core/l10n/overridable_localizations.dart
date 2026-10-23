@@ -220,6 +220,22 @@ class OverridableAppLocalizations extends AppLocalizations {
       _text('adminCategoryNameOm', _base.adminCategoryNameOm);
 
   @override
+  String get adminCategoryParent =>
+      _text('adminCategoryParent', _base.adminCategoryParent);
+
+  @override
+  String get adminCategoryParentLocked =>
+      _text('adminCategoryParentLocked', _base.adminCategoryParentLocked);
+
+  @override
+  String get adminCategoryMove =>
+      _text('adminCategoryMove', _base.adminCategoryMove);
+
+  @override
+  String get adminCategoryTopLevel =>
+      _text('adminCategoryTopLevel', _base.adminCategoryTopLevel);
+
+  @override
   String get adminCategoryUpdated =>
       _text('adminCategoryUpdated', _base.adminCategoryUpdated);
 
@@ -964,6 +980,13 @@ class OverridableAppLocalizations extends AppLocalizations {
 
   @override
   String get labelAll => _text('labelAll', _base.labelAll);
+
+  @override
+  String labelAllInCategory(String category) => _filled(
+    'labelAllInCategory',
+    _base.labelAllInCategory(category),
+    <String, String>{'category': '${category}'},
+  );
 
   @override
   String get labelAvailable => _text('labelAvailable', _base.labelAvailable);

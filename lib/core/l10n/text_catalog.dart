@@ -530,6 +530,16 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
     },
   ),
   AppTextEntry(
+    key: 'adminCategoryMove',
+    sectionKey: 'adminCategories',
+    defaults: <String, String>{
+      'en': 'Move items',
+      'am': 'ዕቃዎችን አንቀሳቅስ',
+      'ar': 'نقل العناصر',
+      'om': 'Wanta darbi',
+    },
+  ),
+  AppTextEntry(
     key: 'adminCategoryName',
     sectionKey: 'adminCategories',
     defaults: <String, String>{
@@ -567,6 +577,36 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
       'am': 'ስም (ኦሮምኛ)',
       'ar': 'الاسم (أورومو)',
       'om': 'Maqaa (Oromoo)',
+    },
+  ),
+  AppTextEntry(
+    key: 'adminCategoryParent',
+    sectionKey: 'adminCategories',
+    defaults: <String, String>{
+      'en': 'Parent category',
+      'am': 'የወላጅ ምድብ',
+      'ar': 'الفئة الأم',
+      'om': 'Ramaddii haadhaa',
+    },
+  ),
+  AppTextEntry(
+    key: 'adminCategoryParentLocked',
+    sectionKey: 'adminCategories',
+    defaults: <String, String>{
+      'en': 'This category has subcategories, so it stays top level.',
+      'am': 'ይህ ምድብ ንዑስ ምድቦች አሉት፣ ስለዚህ ዋና ደረጃ ላይ ይቆያል።',
+      'ar': 'لهذه الفئة فئات فرعية، لذا تبقى في المستوى الأعلى.',
+      'om': 'Ramaddiin kun ramaddiiwwan xixiqqaa qaba, kanaaf sadarkaa ol\'aanaatti hafa.',
+    },
+  ),
+  AppTextEntry(
+    key: 'adminCategoryTopLevel',
+    sectionKey: 'adminCategories',
+    defaults: <String, String>{
+      'en': 'Top level (no parent)',
+      'am': 'ዋና ደረጃ (ወላጅ የለውም)',
+      'ar': 'المستوى الأعلى (بدون فئة أم)',
+      'om': 'Sadarkaa ol\'aanaa (haadha hin qabu)',
     },
   ),
   AppTextEntry(
@@ -2781,6 +2821,17 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
       'ar': 'الكل',
       'om': 'Hunda',
     },
+  ),
+  AppTextEntry(
+    key: 'labelAllInCategory',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'All {category}',
+      'am': 'ሁሉም {category}',
+      'ar': 'كل {category}',
+      'om': 'Hunda {category}',
+    },
+    placeholders: <String>['category'],
   ),
   AppTextEntry(
     key: 'labelAvailable',

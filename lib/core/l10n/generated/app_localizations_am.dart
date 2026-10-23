@@ -167,6 +167,19 @@ class AppLocalizationsAm extends AppLocalizations {
   String get adminCategoryNameOm => 'ስም (ኦሮምኛ)';
 
   @override
+  String get adminCategoryParent => 'የወላጅ ምድብ';
+
+  @override
+  String get adminCategoryParentLocked =>
+      'ይህ ምድብ ንዑስ ምድቦች አሉት፣ ስለዚህ ዋና ደረጃ ላይ ይቆያል።';
+
+  @override
+  String get adminCategoryMove => 'ዕቃዎችን አንቀሳቅስ';
+
+  @override
+  String get adminCategoryTopLevel => 'ዋና ደረጃ (ወላጅ የለውም)';
+
+  @override
   String get adminCategoryUpdated => 'ምድብ ተዘምኗል';
 
   @override
@@ -796,6 +809,11 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get labelAll => 'ሁሉም';
+
+  @override
+  String labelAllInCategory(String category) {
+    return 'ሁሉም $category';
+  }
 
   @override
   String get labelAvailable => 'ይገኛል';

@@ -1,49 +1,72 @@
 import 'package:amu_sharif_majlis/core/l10n/generated/app_localizations.dart';
 import 'package:amu_sharif_majlis/core/router/routes.dart';
-import 'package:amu_sharif_majlis/features/catalog/domain/drafts/catalog_drafts.dart';
+import 'package:amu_sharif_majlis/core/theme/app_theme.dart';
 import 'package:amu_sharif_majlis/features/catalog/domain/entities/category.dart';
 import 'package:amu_sharif_majlis/features/catalog/domain/entities/product.dart';
-import 'package:amu_sharif_majlis/features/catalog/domain/entities/product_media.dart';
-import 'package:amu_sharif_majlis/features/catalog/domain/repositories/catalog_repositories.dart';
 import 'package:amu_sharif_majlis/features/catalog/presentation/providers/catalog_providers.dart';
-import 'package:amu_sharif_majlis/features/settings/domain/entities/site_settings.dart';
-import 'package:amu_sharif_majlis/features/settings/presentation/providers/site_settings_providers.dart';
 import 'package:amu_sharif_majlis/features/storefront/presentation/pages/category_page.dart';
-import 'package:amu_sharif_majlis/features/storefront/presentation/widgets/category_subcategory_line.dart';
+import 'package:amu_sharif_majlis/features/storefront/presentation/pages/storefront_home_page.dart';
+import 'package:amu_sharif_majlis/features/storefront/presentation/widgets/category_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
-/// Storefront half of the subcategory feature.
+import '../layout/overflow_harness.dart';
+
+/// Subcategories are names under their mother, never categories of their own.
 ///
-/// A subcategory is reached from its mother category's page, and only from
-/// there: the mother lists its own children as chips, and a subcategory of
-/// another category — or a top-level category — never appears in that list.
+/// The storefront half of the rule: the "Browse by category" rail, the chip row
+/// beside "All products" and the grouped home sections list **root** rows only,
+/// while a selected mother shows her children as small text chips and an
+/// "All <mother>" chip that includes every child's products.
 void main() {
-  late _FakeCategoryRepository categories;
-  late _FakeProductRepository products;
-  late _FakeProductMediaRepository media;
+  const List<Category> rows = <Category>[
+    Category(id: 'c1', name: 'Majlis', slug: 'majlis', sortOrder: 0),
+    Category(
+      id: 'c2',
+      name: 'Corner Units',
+      slug: 'corner-units',
+      parentId: 'c1',
+      sortOrder: 1,
+    ),
+    Category(
+      id: 'c3',
+      name: 'Floor Seating',
+      slug: 'floor-seating',
+      parentId: 'c1',
+      sortOrder: 2,
+    ),
+    Category(id: 'c4', name: 'Bedrooms', slug: 'bedrooms', sortOrder: 3),
+  ];
+
+  const List<Product> products = <Product>[
+    Product(id: 'p1', categoryId: 'c1', title: 'Damascus Sofa', price: 100),
+    Product(id: 'p2', categoryId: 'c2', title: 'Corner Sofa', price: 200),
+    Product(id: 'p3', categoryId: 'c4', title: 'Bed Frame', price: 300),
+  ];
+
+  late FakeBackend backend;
 
   setUp(() {
-    categories = _FakeCategoryRepository(<Category>[
-      const Category(id: 'c1', name: 'Majlis', slug: 'majlis'),
-      const Category(
-        id: 'c2',
-        name: 'Corner Units',
-        slug: 'corner-units',
-        parentId: 'c1',
-        sortOrder: 1,
-      ),
-      const Category(id: 'c3', name: 'Bedrooms', slug: 'bedrooms'),
-    ]);
-    products = _FakeProductRepository(const <Product>[]);
-    media = _FakeProductMediaRepository();
+    backend = FakeBackend(categoryRows: rows, productRows: products);
   });
 
-  Widget harness({Locale locale = const Locale('en')}) {
+  Widget home({Locale locale = const Locale('en')}) => ProviderScope(
+    retry: (int retryCount, Object error) => null,
+    overrides: backend.overridesList.cast(),
+    child: MaterialApp(
+      locale: locale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      theme: AppTheme.light(),
+      home: const StorefrontHomePage(),
+    ),
+  );
+
+  Widget categoryPage(String slug, {Locale locale = const Locale('en')}) {
     final GoRouter router = GoRouter(
-      initialLocation: Routes.category('majlis'),
+      initialLocation: Routes.category(slug),
       routes: <RouteBase>[
         GoRoute(
           path: Routes.categoryPattern,
@@ -54,17 +77,14 @@ void main() {
     );
 
     return ProviderScope(
-      overrides: [
-        categoryRepositoryProvider.overrideWithValue(categories),
-        productRepositoryProvider.overrideWithValue(products),
-        productMediaRepositoryProvider.overrideWithValue(media),
-        siteSettingsValueProvider.overrideWithValue(SiteSettings.fallback),
-      ],
+      retry: (int retryCount, Object error) => null,
+      overrides: backend.overridesList.cast(),
       child: MaterialApp.router(
         routerConfig: router,
         locale: locale,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        theme: AppTheme.light(),
       ),
     );
   }
@@ -75,222 +95,243 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
   }
 
-  testWidgets('the mother category lists only its own subcategories', (
+  Finder rootChips() => find.byKey(const ValueKey<String>('home-root-chips'));
+  Finder childChips() =>
+      find.byKey(const ValueKey<String>('home-subcategory-chips'));
+
+  Future<void> selectRoot(WidgetTester tester, String name) async {
+    await tester.tap(
+      find.descendant(of: rootChips(), matching: find.text(name)),
+    );
+    await settle(tester);
+  }
+
+  testWidgets('the home rail and root chips list roots only', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(harness());
+    tester.view.physicalSize = const Size(420, 4000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(home());
     await settle(tester);
 
-    expect(find.byType(CategorySubcategoryLine), findsOneWidget);
-    expect(find.text('Corner Units'), findsOneWidget);
-    // A top-level category is not a chip, and neither is another mother's child.
-    expect(find.text('Bedrooms'), findsNothing);
     expect(find.text('Majlis'), findsWidgets);
+    expect(find.text('Bedrooms'), findsWidgets);
+    // Two root tiles, and no subcategory among them.
+    expect(find.byType(CategoryCard), findsNWidgets(2));
+    expect(
+      find.descendant(of: rootChips(), matching: find.text('Corner Units')),
+      findsNothing,
+    );
+    expect(
+      find.descendant(of: rootChips(), matching: find.text('Floor Seating')),
+      findsNothing,
+    );
+    expect(childChips(), findsNothing);
   });
 
-  testWidgets('tapping a subcategory chip opens that subcategory', (
+  testWidgets('selecting a root shows its children as text chips', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(harness());
-    await settle(tester);
+    tester.view.physicalSize = const Size(420, 4000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
 
-    await tester.tap(find.text('Corner Units'));
+    await tester.pumpWidget(home());
     await settle(tester);
+    await selectRoot(tester, 'Majlis');
 
     final AppLocalizations l10n = await AppLocalizations.delegate.load(
       const Locale('en'),
     );
 
-    // The subcategory page has no children of its own and no products yet, so
-    // no chips are left and the empty state is what remains.
-    expect(find.byType(CategoryPage), findsOneWidget);
-    expect(find.byType(CategorySubcategoryLine), findsNothing);
-    expect(find.text(l10n.stateEmptyTitle), findsOneWidget);
-    expect(find.text('Corner Units'), findsWidgets);
+    expect(childChips(), findsOneWidget);
+    expect(
+      find.descendant(
+        of: childChips(),
+        matching: find.text(l10n.labelAllInCategory('Majlis')),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: childChips(), matching: find.text('Corner Units')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: childChips(), matching: find.text('Floor Seating')),
+      findsOneWidget,
+    );
+
+    // "All Majlis" is selected by default: the mother's own product and its
+    // child's product are both on screen.
+    expect(find.text('Damascus Sofa'), findsWidgets);
+    expect(find.text('Corner Sofa'), findsWidgets);
+    expect(find.text('Bed Frame'), findsNothing);
   });
 
-  testWidgets('the subcategory line runs right-to-left in Arabic', (
+  testWidgets('a subcategory chip filters to that child alone', (
     WidgetTester tester,
   ) async {
-    categories = _FakeCategoryRepository(<Category>[
-      const Category(id: 'c1', name: 'Majlis', slug: 'majlis'),
-      for (int i = 0; i < 30; i++)
-        Category(
-          id: 's$i',
-          name: 'Sub $i',
-          slug: 'sub-$i',
-          parentId: 'c1',
-          sortOrder: i,
-        ),
-    ]);
+    tester.view.physicalSize = const Size(420, 4000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(harness(locale: const Locale('ar')));
+    await tester.pumpWidget(home());
+    await settle(tester);
+    await selectRoot(tester, 'Majlis');
+
+    await tester.tap(
+      find.descendant(of: childChips(), matching: find.text('Corner Units')),
+    );
     await settle(tester);
 
-    // The page itself is RTL, so the line inherits the direction.
-    expect(
-      Directionality.of(tester.element(find.byType(CategorySubcategoryLine))),
-      TextDirection.rtl,
-    );
+    expect(find.text('Corner Sofa'), findsWidgets);
+    // The mother's own product and her other child's are filtered out.
+    expect(find.text('Damascus Sofa'), findsNothing);
+    expect(find.text('Bed Frame'), findsNothing);
+  });
 
-    // Chips are laid out from the right edge inwards: the second chip sits to
-    // the left of the first, not to its right.
-    final double first = tester.getCenter(find.text('Sub 0')).dx;
-    final double second = tester.getCenter(find.text('Sub 1')).dx;
+  testWidgets('a root without children shows no subcategory row', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(420, 4000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(home());
+    await settle(tester);
+    await selectRoot(tester, 'Bedrooms');
+
+    expect(childChips(), findsNothing);
+    expect(find.text('Bed Frame'), findsWidgets);
+  });
+
+  testWidgets('the subcategory row runs right-to-left in Arabic', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(420, 4000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(home(locale: const Locale('ar')));
+    await settle(tester);
+    await selectRoot(tester, 'Majlis');
+
+    expect(Directionality.of(tester.element(childChips())), TextDirection.rtl);
+
+    final double first = tester
+        .getCenter(
+          find.descendant(
+            of: childChips(),
+            matching: find.text('Corner Units'),
+          ),
+        )
+        .dx;
+    final double second = tester
+        .getCenter(
+          find.descendant(
+            of: childChips(),
+            matching: find.text('Floor Seating'),
+          ),
+        )
+        .dx;
+    // Chips are laid out from the right edge inwards.
     expect(second, lessThan(first));
-
-    // The line is a horizontal scrollable whose axis points left (RTL), so the
-    // later chips live off-screen and are reached by dragging the rail.
-    final Finder rail = find.descendant(
-      of: find.byType(CategorySubcategoryLine),
-      matching: find.byType(Scrollable),
-    );
-    expect(tester.widget<Scrollable>(rail).axisDirection, AxisDirection.left);
-    expect(find.text('Sub 25'), findsNothing);
-    await tester.scrollUntilVisible(
-      find.text('Sub 25'),
-      400,
-      scrollable: rail.first,
-    );
-    await tester.pump();
-    expect(find.text('Sub 25'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
-}
 
-class _FakeCategoryRepository implements CategoryRepository {
-  _FakeCategoryRepository(this.rows);
+  testWidgets('a root category page lists its children as names only', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(420, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
 
-  List<Category> rows;
+    await tester.pumpWidget(categoryPage('majlis'));
+    await settle(tester);
 
-  @override
-  Stream<List<Category>> watchAll() async* {
-    yield rows;
-  }
+    final Finder chips = find.byKey(
+      const ValueKey<String>('category-name-chips'),
+    );
+    expect(chips, findsOneWidget);
 
-  @override
-  Stream<List<Category>> watchVisible() async* {
-    yield rows.where((Category c) => c.isVisible).toList(growable: false);
-  }
+    final AppLocalizations l10n = await AppLocalizations.delegate.load(
+      const Locale('en'),
+    );
+    expect(
+      find.descendant(
+        of: chips,
+        matching: find.text(l10n.labelAllInCategory('Majlis')),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: chips, matching: find.text('Corner Units')),
+      findsOneWidget,
+    );
 
-  @override
-  Future<List<Category>> fetchVisible() async => rows;
+    // The mother's page shows her own product plus her children's.
+    expect(find.text('Damascus Sofa'), findsWidgets);
+    expect(find.text('Corner Sofa'), findsWidgets);
+    expect(find.text('Bed Frame'), findsNothing);
+  });
 
-  @override
-  Future<Category?> findById(String id) async =>
-      rows.where((Category c) => c.id == id).firstOrNull;
+  testWidgets('a subcategory page shows a breadcrumb and only its products', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(420, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
 
-  @override
-  Future<Category?> findBySlug(String slug) async =>
-      rows.where((Category c) => c.slug == slug).firstOrNull;
+    await tester.pumpWidget(categoryPage('corner-units'));
+    await settle(tester);
 
-  @override
-  Future<Category> create(CategoryDraft draft) async =>
-      throw UnimplementedError();
+    expect(
+      find.byKey(const ValueKey<String>('category-name-chips')),
+      findsNothing,
+    );
+    expect(find.text('Corner Sofa'), findsWidgets);
+    expect(find.text('Damascus Sofa'), findsNothing);
+    // "Majlis › Corner Units" — the mother is a step back into the tree.
+    expect(find.text('Majlis'), findsOneWidget);
+  });
 
-  @override
-  Future<Category> update(String id, CategoryDraft draft) async =>
-      throw UnimplementedError();
+  test(
+    'rootCategories excludes subcategories and childCategories finds them',
+    () async {
+      final ProviderContainer container = ProviderContainer(
+        overrides: [
+          categoryRepositoryProvider.overrideWithValue(backend.categories),
+          productRepositoryProvider.overrideWithValue(backend.products),
+          productMediaRepositoryProvider.overrideWithValue(backend.media),
+        ],
+      );
+      addTearDown(container.dispose);
+      // Keep the stream subscriptions alive: a bare `read` of an auto-disposed
+      // provider is torn down before the fake emits its first value.
+      final rootsSub = container.listen(
+        rootCategoriesProvider,
+        (_, __) {},
+        fireImmediately: true,
+      );
+      final childrenSub = container.listen(
+        childCategoriesProvider('c1'),
+        (_, __) {},
+        fireImmediately: true,
+      );
+      addTearDown(rootsSub.close);
+      addTearDown(childrenSub.close);
 
-  @override
-  Future<void> delete(String id) async {}
+      final List<Category> roots = await container.read(
+        rootCategoriesProvider.future,
+      );
+      expect(roots.map((Category c) => c.id).toList(), <String>['c1', 'c4']);
 
-  @override
-  Future<void> setVisibility(String id, {required bool isVisible}) async {}
-
-  @override
-  Future<void> reorder(List<String> orderedIds) async {}
-}
-
-class _FakeProductRepository implements ProductRepository {
-  _FakeProductRepository(this.rows);
-
-  List<Product> rows;
-
-  @override
-  Stream<List<Product>> watch({
-    String? categoryId,
-    bool onlyPublished = true,
-    bool onlyFeatured = false,
-  }) async* {
-    yield rows
-        .where((Product p) => categoryId == null || p.categoryId == categoryId)
-        .toList(growable: false);
-  }
-
-  @override
-  Stream<Product?> watchOne(String id) async* {
-    yield rows.where((Product p) => p.id == id).firstOrNull;
-  }
-
-  @override
-  Future<List<Product>> fetch({
-    String? categoryId,
-    bool onlyPublished = true,
-    bool onlyFeatured = false,
-  }) async => rows;
-
-  @override
-  Future<Product?> findById(String id) async =>
-      rows.where((Product p) => p.id == id).firstOrNull;
-
-  @override
-  Future<List<Product>> search(String query, {int limit = 40}) async =>
-      const <Product>[];
-
-  @override
-  Future<Product> create(ProductDraft draft) async =>
-      throw UnimplementedError();
-
-  @override
-  Future<Product> update(String id, ProductDraft draft) async =>
-      throw UnimplementedError();
-
-  @override
-  Future<void> delete(String id) async {}
-
-  @override
-  Future<void> setPublished(String id, {required bool isPublished}) async {}
-
-  @override
-  Future<void> setFeatured(String id, {required bool isFeatured}) async {}
-
-  @override
-  Future<void> setAvailability(String id, {required bool isAvailable}) async {}
-
-  @override
-  Future<void> reorder(List<String> orderedIds) async {}
-}
-
-class _FakeProductMediaRepository implements ProductMediaRepository {
-  @override
-  Stream<List<ProductMedia>> watchAll() async* {
-    yield const <ProductMedia>[];
-  }
-
-  @override
-  Stream<List<ProductMedia>> watchForProduct(String productId) async* {
-    yield const <ProductMedia>[];
-  }
-
-  @override
-  Future<List<ProductMedia>> fetchForProduct(String productId) async =>
-      const <ProductMedia>[];
-
-  @override
-  Future<ProductMedia> add(ProductMediaDraft draft) async =>
-      throw UnimplementedError();
-
-  @override
-  Future<ProductMedia> update(String id, ProductMediaDraft draft) async =>
-      throw UnimplementedError();
-
-  @override
-  Future<void> delete(String id) async {}
-
-  @override
-  Future<void> setCover(String productId, String mediaId) async {}
-
-  @override
-  Future<void> reorder(List<String> orderedIds) async {}
+      final List<Category> children = await container.read(
+        childCategoriesProvider('c1').future,
+      );
+      expect(children.map((Category c) => c.id).toList(), <String>['c2', 'c3']);
+    },
+  );
 }

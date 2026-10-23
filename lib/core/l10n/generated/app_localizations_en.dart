@@ -167,6 +167,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminCategoryNameOm => 'Name (Oromo)';
 
   @override
+  String get adminCategoryParent => 'Parent category';
+
+  @override
+  String get adminCategoryParentLocked =>
+      'This category has subcategories, so it stays top level.';
+
+  @override
+  String get adminCategoryMove => 'Move items';
+
+  @override
+  String get adminCategoryTopLevel => 'Top level (no parent)';
+
+  @override
   String get adminCategoryUpdated => 'Category updated';
 
   @override
@@ -811,6 +824,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get labelAll => 'All';
+
+  @override
+  String labelAllInCategory(String category) {
+    return 'All $category';
+  }
 
   @override
   String get labelAvailable => 'Available';

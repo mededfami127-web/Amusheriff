@@ -1,10 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/errors/app_failure.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/network/storage_urls.dart';
+import '../../../../core/router/routes.dart';
 import '../../../../core/theme/brand_colors.dart';
 import '../../../../core/theme/gradients.dart';
 import '../../../../core/theme/typography.dart';
@@ -15,6 +17,7 @@ import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/gold_divider.dart';
 import '../../../../core/widgets/gradient_button.dart';
 import '../../../../core/widgets/shimmer_card.dart';
+import '../../../catalog/domain/entities/category.dart';
 import '../../../catalog/domain/entities/product.dart';
 import '../../../catalog/domain/entities/product_media.dart';
 import '../../../catalog/presentation/providers/catalog_providers.dart';
@@ -99,6 +102,17 @@ class _Body extends ConsumerWidget {
     final List<ContactLink> channels = ref.watch(orderChannelsProvider);
     final ContactSettings settings = ref.watch(contactSettingsValueProvider);
 
+    // The product's own category, and its mother when it sits on a
+    // subcategory: the page states where the piece belongs instead of leaving
+    // the shopper with no way back into the catalogue tree.
+    final Category? category = ref
+        .watch(categoryByIdProvider(product.categoryId))
+        .value;
+    final String? motherId = category?.parentId;
+    final Category? mother = motherId == null
+        ? null
+        : ref.watch(categoryByIdProvider(motherId)).value;
+
     return ListView(
       padding: EdgeInsets.zero,
       children: <Widget>[
@@ -108,6 +122,14 @@ class _Body extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
+              if (category != null) ...<Widget>[
+                _CategoryBreadcrumb(
+                  mother: mother,
+                  category: category,
+                  language: language,
+                ),
+                const SizedBox(height: 6),
+              ],
               Text(
                 product.titleFor(language),
                 style:
@@ -544,4 +566,57 @@ class _ContactActions extends ConsumerWidget {
         label: label,
         value: value,
       );
+}
+
+/// "Category › Subcategory" above the product title.
+///
+/// Both steps are tappable, so a shopper who arrived from search can step back
+/// into the tree one level at a time. A product filed directly on a top-level
+/// category shows that single name.
+class _CategoryBreadcrumb extends StatelessWidget {
+  const _CategoryBreadcrumb({
+    required this.mother,
+    required this.category,
+    required this.language,
+  });
+
+  final Category? mother;
+  final Category category;
+  final String language;
+
+  @override
+  Widget build(BuildContext context) {
+    final TextStyle style = BrandTypography.labelLarge.copyWith(
+      color: BrandColors.gold,
+    );
+    final Category? parent = mother;
+
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: <Widget>[
+        if (parent != null) ...<Widget>[
+          InkWell(
+            onTap: () => context.push(Routes.category(parent.slug)),
+            child: Text(parent.nameFor(language), style: style),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            child: Text(
+              '›',
+              style: style.copyWith(color: BrandColors.goldHairline),
+            ),
+          ),
+        ],
+        InkWell(
+          onTap: () => context.push(Routes.category(category.slug)),
+          child: Text(
+            category.nameFor(language),
+            style: parent == null
+                ? style
+                : style.copyWith(color: BrandColors.goldLight),
+          ),
+        ),
+      ],
+    );
+  }
 }
