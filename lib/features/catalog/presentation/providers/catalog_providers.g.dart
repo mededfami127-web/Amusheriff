@@ -628,7 +628,7 @@ final class CategoryProductCountsProvider
 }
 
 String _$categoryProductCountsHash() =>
-    r'd8f6d37e0a80cd6569c0b4246ab48dc72cf37699';
+    r'cc91ee3baca1a0bc58aecd46df2736836264c1fc';
 
 /// Storefront product list with media joined in memory.
 ///
