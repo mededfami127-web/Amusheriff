@@ -807,10 +807,12 @@ create policy contact_links_admin_delete on public.contact_links
   using (public.is_admin());
 
 -- inquiries - anonymous INSERT only; the owner reads and prunes
+--   `ip_hash` belongs to the inquiry Edge Function's service-role client only;
+--   anon INSERTs must leave it NULL, so it cannot be forged per row.
 drop policy if exists inquiries_public_insert on public.inquiries;
 create policy inquiries_public_insert on public.inquiries
   for insert to anon, authenticated
-  with check (true);
+  with check (ip_hash is null);
 
 drop policy if exists inquiries_admin_select on public.inquiries;
 create policy inquiries_admin_select on public.inquiries

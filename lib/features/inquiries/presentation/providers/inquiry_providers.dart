@@ -60,5 +60,9 @@ List<MapEntry<String, int>> mostContactedProducts(Ref ref) {
 }
 
 /// Clears a lead. Optimistic callers should invalidate on failure.
+///
+/// `read`, not `watch`: this runs from a button callback, not from a provider
+/// build, and reading a provider outside build would register no dependency
+/// while Riverpod asserts against it.
 Future<void> deleteInquiry(Ref ref, String id) =>
-    ref.watch(inquiryRepositoryProvider).remove(id);
+    ref.read(inquiryRepositoryProvider).remove(id);

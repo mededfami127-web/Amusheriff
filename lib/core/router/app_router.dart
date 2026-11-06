@@ -12,6 +12,7 @@ import '../../features/admin/presentation/pages/admin_inquiries_page.dart';
 import '../../features/admin/presentation/pages/admin_login_page.dart';
 import '../../features/admin/presentation/pages/admin_product_editor_page.dart';
 import '../../features/admin/presentation/pages/admin_products_page.dart';
+import '../../features/admin/presentation/pages/admin_site_content_editor_page.dart';
 import '../../features/admin/presentation/pages/admin_system_check_page.dart';
 import '../../features/admin/presentation/providers/admin_gate_providers.dart';
 import '../../features/settings/presentation/pages/about_page.dart';
@@ -150,6 +151,14 @@ GoRouter appRouter(Ref ref) {
             path: 'password',
             name: 'adminChangePassword',
             builder: (_, __) => const AdminChangePasswordPage(),
+          ),
+          // The dashboard's "Site content" shortcut has always pointed at
+          // `Routes.adminSiteContent`; without this route it landed on the
+          // not-found page and the live-text editor was unreachable.
+          GoRoute(
+            path: 'site-content',
+            name: 'adminSiteContent',
+            builder: (_, __) => const AdminSiteContentEditorPage(),
           ),
           GoRoute(
             path: 'text',

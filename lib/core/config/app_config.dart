@@ -43,6 +43,13 @@ class AppConfig {
   static const String privacyPolicyUrl =
       'https://sites.google.com/view/amusheriff-privacy/home';
 
+  /// The released app version, rendered on Settings.
+  ///
+  /// A compile-time constant on purpose: reading the *installed* version would
+  /// mean adding `package_info_plus` for one line of text. Keep it in step with
+  /// the `version:` line in `pubspec.yaml` when cutting a release.
+  static const String appVersion = '1.0.11';
+
   /// Tables the storefront subscribes to. Keeping the list in one place makes
   /// the realtime wiring auditable.
   static const List<String> realtimeTables = <String>[

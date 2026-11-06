@@ -9,6 +9,27 @@ and this project adheres to [SemVer](https://semver.org/spec/v2.0.0.html).
 
 No unreleased changes.
 
+## [1.0.11] - 2026-11-06
+
+### Added
+
+- The release number on the Settings screen, under the owner entry, so a support
+  conversation starts with the version the customer is actually running.
+
+### Fixed
+
+- "Site content" on the gateway dashboard opens the live-text editor again: the
+  route was declared in `Routes` and linked from the dashboard, but the router
+  never registered it, so the tile landed on the not-found page.
+- `deleteInquiry` reads its repository with `ref.read` instead of `ref.watch`;
+  the old call used a provider dependency outside a provider build.
+
+### Security
+
+- An anonymous caller can no longer write `inquiries.ip_hash` with its own
+  INSERT. The column is the inquiry Edge Function's service-role record of the
+  caller's hashed address, and the public insert policy now pins it to NULL.
+
 ## [1.0.9] - 2026-10-22
 
 ### Fixed
@@ -94,5 +115,6 @@ No unreleased changes.
   `android/key.properties` locally or through the CI `ANDROID_KEYSTORE_BASE64` secret for a
   publishable build.
 
-[Unreleased]: https://github.com/mededfami127-web/Amusheriff/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/mededfami127-web/Amusheriff/compare/v1.0.11...HEAD
+[1.0.11]: https://github.com/mededfami127-web/Amusheriff/releases/tag/v1.0.11
 [1.0.0]: https://github.com/mededfami127-web/Amusheriff/releases/tag/v1.0.0

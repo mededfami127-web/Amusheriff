@@ -179,6 +179,17 @@ class SettingsPage extends ConsumerWidget {
               ),
             ),
           ),
+          const SizedBox(height: 14),
+          // Which release the customer is running, so a support conversation
+          // starts with the number instead of a guess.
+          Center(
+            child: Text(
+              '${l10n.settingsVersion} ${AppConfig.appVersion}',
+              style: BrandTypography.bodySmall.copyWith(
+                color: BrandTypography.mutedOn(Theme.of(context).brightness),
+              ),
+            ),
+          ),
         ],
       ),
     );

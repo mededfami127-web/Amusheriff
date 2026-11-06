@@ -179,10 +179,14 @@ create policy contact_links_admin_delete on public.contact_links
   using (public.is_admin());
 
 -- inquiries - anonymous INSERT only; the owner reads and prunes
+--   `ip_hash` is written exclusively by the inquiry Edge Function, which runs
+--   with the service-role key (and therefore bypasses RLS). Pinning the column
+--   to NULL here stops an anonymous caller from forging another visitor's
+--   hashed address into the lead log with a hand-written INSERT.
 drop policy if exists inquiries_public_insert on public.inquiries;
 create policy inquiries_public_insert on public.inquiries
   for insert to anon, authenticated
-  with check (true);
+  with check (ip_hash is null);
 
 drop policy if exists inquiries_admin_select on public.inquiries;
 create policy inquiries_admin_select on public.inquiries

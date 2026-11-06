@@ -7,11 +7,10 @@ fails if it regresses; those are not repeated here.
 
 | # | Item | Why it is still open | Who can close it |
 | --- | --- | --- | --- |
-| 1 | No version number on Settings/About | `l10n.settingsVersion` exists but nothing renders it. Reading the installed version needs `package_info_plus` (a new dependency) or a build-time constant; deliberately not added in the last three changes. | Any follow-up change |
-| 2 | No Terms screen | The privacy policy is published and linked; terms are owner-authored copy we do not have. | Owner supplies the text |
-| 3 | Play listing assets | Screenshots, feature graphic, short/full description, and the Data Safety form (content below) are filled in the Play Console, not in this repo. | Owner, in Play Console |
-| 4 | Crash reports are only active when `SENTRY_DSN` is set | `bootstrap()` reports to Sentry only when a DSN is compiled in; without the secret the app just logs locally. Nothing crashes when it is missing. | Set the `SENTRY_DSN` repository secret |
-| 5 | RLS suite needs a PostgreSQL 15+ instance | `scripts/run_rls_tests.sh` boots a shim schema and runs `tests/rls/*.sql`; CI's `rls` job provides the service, a laptop needs one too. | Nobody — by design |
+| 1 | No Terms screen | The privacy policy is published and linked; terms are owner-authored copy we do not have. | Owner supplies the text |
+| 2 | Play listing assets | Screenshots, feature graphic, short/full description, and the Data Safety form (content below) are filled in the Play Console, not in this repo. | Owner, in Play Console |
+| 3 | Crash reports are only active when `SENTRY_DSN` is set | `bootstrap()` reports to Sentry only when a DSN is compiled in; without the secret the app just logs locally. Nothing crashes when it is missing. | Set the `SENTRY_DSN` repository secret |
+| 4 | RLS suite needs a PostgreSQL 15+ instance | `scripts/run_rls_tests.sh` boots a shim schema and runs `tests/rls/*.sql`; CI's `rls` job provides the service, a laptop needs one too. | Nobody — by design |
 
 ## 2. Data Safety (Play Console) — what to declare
 
