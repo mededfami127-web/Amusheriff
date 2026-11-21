@@ -23,13 +23,12 @@ void main() {
     });
 
     test('builds a tel URI with the international number', () {
-      expect(
-        PhoneNumbers.telUri('0917928950').toString(),
-        'tel:+251917928950',
-      );
+      expect(PhoneNumbers.telUri('0917928950').toString(), 'tel:+251917928950');
       expect(PhoneNumbers.telUri('').toString(), 'tel:+251917928950');
-      expect(PhoneNumbers.telUri('+251 918 959 071').toString(),
-          'tel:+251918959071');
+      expect(
+        PhoneNumbers.telUri('+251 918 959 071').toString(),
+        'tel:+251918959071',
+      );
     });
 
     test('a value with no digits is not dialable', () {

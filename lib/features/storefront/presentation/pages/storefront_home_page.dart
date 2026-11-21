@@ -941,9 +941,7 @@ class _CategorySliverGrid extends ConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: InlineFailureBanner(
-            failure: error is AppFailure
-                ? error
-                : UnknownFailure(cause: error),
+            failure: error is AppFailure ? error : UnknownFailure(cause: error),
             onRetry: () => ref.invalidate(rootCategoriesProvider),
           ),
         ),
@@ -1151,8 +1149,11 @@ class _FooterContact extends ConsumerWidget {
                 OutlinedButton.icon(
                   onPressed: () => open(link),
                   icon: Icon(link.kind.icon, size: 18),
-                  label: Text(link.label, maxLines: 1,
-                      overflow: TextOverflow.ellipsis),
+                  label: Text(
+                    link.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
             ],
           ),

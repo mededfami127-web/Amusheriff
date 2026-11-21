@@ -34,10 +34,8 @@ abstract final class PhoneNumbers {
   }
 
   /// The `tel:` URI for the dialer, with the international number.
-  static Uri telUri(String? raw) => Uri(
-    scheme: 'tel',
-    path: international(display(raw)),
-  );
+  static Uri telUri(String? raw) =>
+      Uri(scheme: 'tel', path: international(display(raw)));
 
   /// True when a value can produce a dialable URI.
   static bool isDialable(String? raw) => international(raw).length > 4;
