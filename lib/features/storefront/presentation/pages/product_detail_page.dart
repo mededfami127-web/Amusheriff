@@ -28,7 +28,6 @@ import '../../../contacts/domain/entities/contact_settings.dart';
 import '../../../contacts/presentation/providers/contact_providers.dart';
 import '../../../contacts/presentation/providers/contact_settings_providers.dart';
 import '../../../../core/utils/launcher.dart';
-import '../providers/storefront_providers.dart';
 import '../widgets/call_button.dart';
 import '../widgets/favourite_button.dart';
 

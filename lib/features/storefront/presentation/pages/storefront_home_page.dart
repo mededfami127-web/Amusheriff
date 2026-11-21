@@ -797,16 +797,18 @@ class _FilterChip extends StatelessWidget {
                 color: isSelected ? BrandColors.charcoal : BrandColors.gold,
               ),
               const SizedBox(width: 6),
-              // No fixed width: a chip grows with its (translated) label and
-              // the rail simply scrolls, so nothing truncates at 320 dp.
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: BrandTypography.labelLarge.copyWith(
-                  color: isSelected
-                      ? BrandColors.charcoal
-                      : (dark ? BrandColors.goldLight : BrandColors.charcoal),
+              // A chip grows with its translated label but never past the
+              // row: a long name ellipsizes instead of overflowing the Wrap.
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: BrandTypography.labelLarge.copyWith(
+                    color: isSelected
+                        ? BrandColors.charcoal
+                        : (dark ? BrandColors.goldLight : BrandColors.charcoal),
+                  ),
                 ),
               ),
             ],

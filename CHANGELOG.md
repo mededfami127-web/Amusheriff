@@ -9,6 +9,32 @@ and this project adheres to [SemVer](https://semver.org/spec/v2.0.0.html).
 
 No unreleased changes.
 
+## [1.0.12] - 2026-11-21
+
+### Added
+
+- A Call button on every product card and on the product page, dialling one
+  global owner number (`0917928950`, sent to the dialer as `+251917928950`).
+  The number is `admin_contact_settings.owner_phone`, editable from the admin
+  Contact settings panel.
+- A "Links" item in the admin sidebar for the owner's WhatsApp, Telegram,
+  social and web links, with URL validation and a delete confirmation. The
+  storefront shows them under "Contact the owner" and hides the block when
+  there are none.
+- Replace and remove actions for category and subcategory covers, with the
+  old file deleted from storage after the row stops using it.
+
+### Changed
+
+- The storefront is vertical throughout: the category carousel, category and
+  subcategory chips, product rails, and the product-page pager plus thumbnail
+  strip are now two-column grids and wraps that scroll with the page.
+- Cards read photo, price, title, Call; the detail page stacks every photo
+  before the title, price, description and Call button.
+- The product form accepts price and title for any product, old or new; an
+  empty price stores 0 and renders as "Call for price" instead of `ETB 0`.
+- Category covers are downscaled to ~1080 px at JPEG quality 80 before upload.
+
 ## [1.0.11] - 2026-11-06
 
 ### Added

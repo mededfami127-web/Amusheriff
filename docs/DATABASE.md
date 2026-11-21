@@ -123,6 +123,9 @@ tiktok | youtube | website | location | other`.
 | `20260101000800_site_content.sql` | `site_content` (`key`, `locale`) → owner-editable home copy, public read |
 | `20260101000900_admin_contact_settings.sql` | single-row `admin_contact_settings` for the owner's private contact channels, public read |
 | `20260101001000_catalogue_omoro_text.sql` | `products.title_om` / `description_om`, `categories.name_om`, Oromo trigram index, refreshed `v_products_public` / `v_categories_with_counts` and Oromo-aware `search_products()` |
+| `20260101001100_products_subcategory_id.sql` | `products.subcategory_id` (nullable) |
+| `20260101001200_brand_name.sql` | the shop's rename-safe brand name |
+| `20260101001300_owner_phone_setting.sql` | `admin_contact_settings.owner_phone` gains the `0917928950` default; existing blank rows are filled, a number the owner already set is left untouched |
 
 Migrations are idempotent — `create table if not exists`, `create or replace
 function` / view, `drop trigger if exists` before every `create trigger`, and

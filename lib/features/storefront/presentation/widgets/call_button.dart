@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/theme/brand_colors.dart';
-import '../../../../core/theme/gradients.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/utils/launcher.dart';
 import '../../../../core/utils/phone_numbers.dart';
@@ -62,9 +61,11 @@ class CallButton extends ConsumerWidget {
           child: InkWell(
             onTap: dial,
             borderRadius: BorderRadius.circular(999),
+            // A minimum rather than a fixed height: at a 2.0 accessibility
+            // scale the label is twice as tall and must not be clipped.
             child: Container(
-              height: 34,
-              padding: const EdgeInsets.symmetric(horizontal: 10),
+              constraints: const BoxConstraints(minHeight: 34),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(999),
                 border: Border.all(color: BrandColors.gold),
@@ -126,20 +127,6 @@ class CallButton extends ConsumerWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-/// Gold hairline divider used above a Call button on a card.
-class CallButtonDivider extends StatelessWidget {
-  const CallButtonDivider({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 1,
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      decoration: const BoxDecoration(gradient: BrandGradients.goldHorizontal),
     );
   }
 }
