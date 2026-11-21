@@ -511,17 +511,23 @@ class _MediaSection extends ConsumerWidget {
             if (media.isEmpty) {
               return Text(l10n.adminNoMedia, style: BrandTypography.bodySmall);
             }
-            return SizedBox(
-              height: 128,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: media.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 10),
-                itemBuilder: (BuildContext context, int index) => _MediaCard(
-                  productId: productId,
-                  media: media[index],
-                  l10n: l10n,
-                ),
+            // Media scrolls with the form, like every other image list: no
+            // sideways strip that hides the last uploaded photo.
+            return GridView.builder(
+              padding: EdgeInsets.zero,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: media.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                childAspectRatio: 0.78,
+              ),
+              itemBuilder: (BuildContext context, int index) => _MediaCard(
+                productId: productId,
+                media: media[index],
+                l10n: l10n,
               ),
             );
           },
@@ -590,7 +596,7 @@ class _MediaCard extends ConsumerWidget {
     final StorageUrls urls = ref.read(storageUrlsProvider);
 
     return SizedBox(
-      width: 104,
+      width: double.infinity,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
