@@ -456,13 +456,16 @@ String? validateContactValue(ContactKind kind, String raw) {
     ContactKind.whatsapp || ContactKind.phone => Validators.phone(value),
     ContactKind.email => Validators.email(value),
     ContactKind.telegram => _validateTelegram(value),
-    ContactKind.website ||
+    ContactKind.website => Validators.url(value),
     ContactKind.instagram ||
     ContactKind.facebook ||
     ContactKind.tiktok ||
-    ContactKind.youtube ||
-    ContactKind.location => Validators.url(value),
-    ContactKind.other => Validators.required(value, max: 300),
+    ContactKind.youtube => Validators.url(value),
+    // A showroom is free text ("Jimma, Ethiopia"), which the maps intent
+    // searches for; requiring http:// here would reject every real value.
+    ContactKind.location => Validators.required(value, max: 200),
+    // A free-form link still has to be openable: http(s), tel: or mailto:.
+    ContactKind.other => Validators.linkTarget(value),
   };
 }
 

@@ -54,10 +54,10 @@ List<AdminDestination> _destinations(AppLocalizations l10n) =>
         route: Routes.adminProducts,
       ),
       AdminDestination(
-        label: l10n.adminContacts,
-        textKey: 'adminContacts',
-        icon: Icons.share_outlined,
-        route: Routes.adminContacts,
+        label: l10n.adminLinks,
+        textKey: 'adminLinks',
+        icon: Icons.link_rounded,
+        route: Routes.adminLinks,
       ),
       AdminDestination(
         label: l10n.adminInquiries,

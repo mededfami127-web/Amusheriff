@@ -77,7 +77,12 @@ class ContactsEditorSheet extends ConsumerWidget {
             AdminTextField(
               label: l10n.adminContactValue,
               value: state.value,
-              keyboardType: TextInputType.url,
+              // A saved value must be openable: http(s) for every web kind,
+              // tel:/mailto: for a direct line, handled per type by the
+              // validator. The field no longer pretends "Jimma" is a URL.
+              keyboardType: state.kind == ContactKind.phone
+                  ? TextInputType.phone
+                  : TextInputType.url,
               textInputAction: TextInputAction.done,
               onChanged: controller.setValue,
               error: localizeFieldKey(l10n, state.fieldErrors['value']),
@@ -125,7 +130,16 @@ class ContactsEditorSheet extends ConsumerWidget {
     BuildContext context,
     ContactsEditorController controller,
   ) async {
-    if (controller.validate().isNotEmpty) return;
+    // A rejected URL used to look like a dead button; the field messages now
+    // appear above (and this says so, because a bottom sheet can cover them).
+    if (controller.validate().isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).errorValidation),
+        ),
+      );
+      return;
+    }
     final bool saved = await controller.save();
     if (saved && context.mounted) Navigator.of(context).pop();
   }

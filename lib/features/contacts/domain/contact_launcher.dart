@@ -81,6 +81,9 @@ class ContactLauncher {
     if (value.startsWith('http://') || value.startsWith('https://')) {
       return value;
     }
+    if (value.startsWith('tel:') || value.startsWith('mailto:')) {
+      return value;
+    }
     if (RegExp(r'^[\w.-]+\.[a-z]{2,}(/.*)?$').hasMatch(value)) {
       return 'https://$value';
     }

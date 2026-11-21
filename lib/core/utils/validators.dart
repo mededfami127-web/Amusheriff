@@ -58,6 +58,23 @@ abstract final class Validators {
     return null;
   }
 
+  /// A link the owner publishes: a web address, or a `tel:` / `mailto:` target.
+  ///
+  /// Stricter than [required] because a link whose value is not openable is a
+  /// dead button on the storefront. `http(s)` is required for web links (no
+  /// bare domains, matching the other social kinds), and the two intent schemes
+  /// are accepted only in their valid shape.
+  static String? linkTarget(String? value) {
+    final String v = (value ?? '').trim();
+    if (v.isEmpty) return 'validateRequired';
+    if (_url.hasMatch(v)) return null;
+    if (RegExp(r'^tel:\+?[0-9\s\-()]{7,}$').hasMatch(v)) return null;
+    if (RegExp(r'^mailto:[^@\s]+@[^@\s]+\.[^@\s]{2,}$').hasMatch(v)) {
+      return null;
+    }
+    return 'validateUrl';
+  }
+
   /// Admin password rule: 10+ chars with upper, lower and a digit.
   static String? strongPassword(String? value) {
     final String v = value ?? '';

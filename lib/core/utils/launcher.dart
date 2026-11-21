@@ -118,6 +118,11 @@ class LinkLauncher {
     if (v.startsWith('http://') || v.startsWith('https://')) {
       return _open(Uri.parse(v));
     }
+    // The admin link validator also accepts these two intent schemes; without
+    // this branch a saved tel:/mailto: link would be a dead button.
+    if (v.startsWith('tel:') || v.startsWith('mailto:')) {
+      return _open(Uri.parse(v));
+    }
     // Bare domains and handles: try once as https, then give up gracefully.
     if (RegExp(r'^[\w.-]+\.[a-z]{2,}(/.*)?$').hasMatch(v)) {
       return _open(Uri.parse('https://$v'));
