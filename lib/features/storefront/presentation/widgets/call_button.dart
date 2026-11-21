@@ -36,8 +36,13 @@ class CallButton extends ConsumerWidget {
     final ContactSettings settings = ref.watch(contactSettingsValueProvider);
     final String dialNumber = settings.callPhone;
     final Uri uri = settings.callUri;
+    // A card has ~130dp of usable width, so its line is the bare number; the
+    // full panel form spells out "Call · number".
     final String text =
-        label ?? '${l10n.actionCall} · ${PhoneNumbers.display(dialNumber)}';
+        label ??
+        (dense
+            ? PhoneNumbers.display(dialNumber)
+            : '${l10n.actionCall} · ${PhoneNumbers.display(dialNumber)}');
 
     Future<void> dial() async {
       final bool opened = await ref.read(linkLauncherProvider).openTel(uri);

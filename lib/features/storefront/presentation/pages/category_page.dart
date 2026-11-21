@@ -277,8 +277,8 @@ class _Breadcrumb extends StatelessWidget {
 /// "All <mother>" plus every subcategory name, as small text chips.
 ///
 /// Only shown on a top-level category's page, so a visitor can narrow the grid
-/// to one child without losing the mother's heading. Text only, RTL-safe and
-/// tall enough for a 2.0 accessibility scale.
+/// to one child without losing the mother's heading. Text only, wrapped onto
+/// as many lines as it needs, so nothing hides behind a sideways swipe.
 class _CategoryNameRow extends StatelessWidget {
   const _CategoryNameRow({
     required this.mother,
@@ -297,33 +297,26 @@ class _CategoryNameRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
-    final double scale = MediaQuery.textScalerOf(context).scale(1);
 
-    return SizedBox(
-      height: 34 + 16 * scale,
-      child: ListView(
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(16, 2, 16, 6),
+      child: Wrap(
         key: const ValueKey<String>('category-name-chips'),
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        spacing: 8,
+        runSpacing: 8,
         children: <Widget>[
-          Padding(
-            padding: const EdgeInsetsDirectional.only(end: 8),
-            child: _NameChip(
-              label: l10n.labelAllInCategory(mother.nameFor(language)),
-              isSelected: selectedSlug == mother.slug,
-              onTap: selectedSlug == mother.slug
-                  ? null
-                  : () => context.go(Routes.category(mother.slug)),
-            ),
+          _NameChip(
+            label: l10n.labelAllInCategory(mother.nameFor(language)),
+            isSelected: selectedSlug == mother.slug,
+            onTap: selectedSlug == mother.slug
+                ? null
+                : () => context.go(Routes.category(mother.slug)),
           ),
           for (final Category category in categories)
-            Padding(
-              padding: const EdgeInsetsDirectional.only(end: 8),
-              child: _NameChip(
-                label: category.nameFor(language),
-                isSelected: selectedSlug == category.slug,
-                onTap: () => context.go(Routes.category(category.slug)),
-              ),
+            _NameChip(
+              label: category.nameFor(language),
+              isSelected: selectedSlug == category.slug,
+              onTap: () => context.go(Routes.category(category.slug)),
             ),
         ],
       ),

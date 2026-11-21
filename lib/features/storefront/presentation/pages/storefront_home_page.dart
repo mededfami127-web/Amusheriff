@@ -19,7 +19,10 @@ import '../../../../core/widgets/shimmer_card.dart';
 import '../../../catalog/domain/entities/category.dart';
 import '../../../catalog/domain/entities/product.dart';
 import '../../../catalog/presentation/providers/catalog_providers.dart';
+import '../../../contacts/domain/contact_launcher.dart';
+import '../../../contacts/domain/entities/contact_link.dart';
 import '../../../contacts/presentation/providers/contact_providers.dart';
+import '../../../../core/utils/launcher.dart';
 import '../../../settings/domain/entities/site_settings.dart';
 import '../../../settings/presentation/providers/site_settings_providers.dart';
 import '../../../settings/presentation/providers/site_content_providers.dart';
@@ -183,36 +186,15 @@ class _StorefrontHomePageState extends ConsumerState<StorefrontHomePage> {
                 onSeeAll: null,
               ),
             ),
-            SliverToBoxAdapter(
-              child: rootsAsync.when(
-                loading: () => const ShimmerRail(height: 150, itemCount: 3),
-                error: (Object error, _) => Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: InlineFailureBanner(
-                    failure: error is AppFailure
-                        ? error
-                        : UnknownFailure(cause: error),
-                    onRetry: () => ref.invalidate(rootCategoriesProvider),
-                  ),
-                ),
-                data: (List<Category> roots) => roots.isEmpty
-                    ? EmptyState(
-                        title: l10n.stateEmptyTitle,
-                        message: l10n.stateEmptyMessage,
-                        compact: true,
-                      )
-                    : _CategoryRail(
-                        categories: roots
-                            .take(categoryLimit)
-                            .toList(growable: false),
-                        hasMore: roots.length > categoryLimit,
-                        onMore: () => ref
-                            .read(
-                              visibleCountProvider('home-categories').notifier,
-                            )
-                            .more(),
-                      ),
-              ),
+            // Two columns, scrolling with the page. A horizontal rail hid
+            // most of the catalogue behind a swipe; a grid shows the shape of
+            // the shop at a glance.
+            _CategorySliverGrid(
+              asyncCategories: rootsAsync,
+              limit: categoryLimit,
+              onMore: () => ref
+                  .read(visibleCountProvider('home-categories').notifier)
+                  .more(),
             ),
             if (featured.value?.isNotEmpty ?? false) ...<Widget>[
               SliverToBoxAdapter(
@@ -223,9 +205,23 @@ class _StorefrontHomePageState extends ConsumerState<StorefrontHomePage> {
               ),
               SliverToBoxAdapter(
                 child: featured.when(
-                  loading: () => const ShimmerRail(),
+                  loading: () => const ShimmerGrid(
+                    itemCount: 2,
+                    aspectRatio: 0.56,
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                  ),
                   error: (Object error, _) => const SizedBox.shrink(),
-                  data: (List<Product> items) => _ProductRail(products: items),
+                  data: (List<Product> items) => GridView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: items.length,
+                    gridDelegate: productGridDelegate(context),
+                    itemBuilder: (_, int index) => ProductCard(
+                      key: ValueKey<String>(items[index].id),
+                      product: items[index],
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -241,7 +237,7 @@ class _StorefrontHomePageState extends ConsumerState<StorefrontHomePage> {
                   : _SectionHeader(title: selected.nameFor(language)),
             ),
             SliverToBoxAdapter(
-              child: _RootFilterRow(
+              child: _RootFilterWrap(
                 categories: roots,
                 selected: selected,
                 language: language,
@@ -253,7 +249,7 @@ class _StorefrontHomePageState extends ConsumerState<StorefrontHomePage> {
             // no children there is no row at all, not an empty strip.
             if (subcategories.isNotEmpty)
               SliverToBoxAdapter(
-                child: _SubcategoryNameRow(
+                child: _SubcategoryNameWrap(
                   motherName: selected!.nameFor(language),
                   categories: subcategories,
                   selectedId: selectedChild?.id,
@@ -276,6 +272,7 @@ class _StorefrontHomePageState extends ConsumerState<StorefrontHomePage> {
             // shows the same product twice.
             if (selected == null)
               ..._groupedSections(
+                gridContext: context,
                 language: language,
                 roots: roots,
                 categoryList: categoryList,
@@ -295,6 +292,7 @@ class _StorefrontHomePageState extends ConsumerState<StorefrontHomePage> {
   /// ever listed twice on screen. A subcategory never gets a section of its
   /// own — its products appear in the mother's rail, where they belong.
   List<Widget> _groupedSections({
+    required BuildContext gridContext,
     required String language,
     required List<Category> roots,
     required List<Category> categoryList,
@@ -326,7 +324,21 @@ class _StorefrontHomePageState extends ConsumerState<StorefrontHomePage> {
           ),
         ),
       );
-      slivers.add(SliverToBoxAdapter(child: _ProductRail(products: items)));
+      slivers.add(
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          sliver: SliverGrid(
+            gridDelegate: productGridDelegate(gridContext),
+            delegate: SliverChildBuilderDelegate(
+              (_, int index) => ProductCard(
+                key: ValueKey<String>(items[index].id),
+                product: items[index],
+              ),
+              childCount: items.length,
+            ),
+          ),
+        ),
+      );
     }
     return slivers;
   }
@@ -588,13 +600,12 @@ class _SectionHeader extends StatelessWidget {
 
 /// "All" + every **root** category, right under the "All products" heading.
 ///
-/// Horizontally scrolling so a long list never wraps into the grid, RTL-safe
-/// because the scroll direction follows the ambient directionality, and its
-/// height grows with the accessibility text scale so a 2.0 chip is never
-/// clipped by the rail. Subcategories are never chips in this row; they
-/// appear as plain names under their mother, in [_SubcategoryNameRow].
-class _RootFilterRow extends StatelessWidget {
-  const _RootFilterRow({
+/// A [Wrap], never a horizontal rail: the chips flow onto as many rows as the
+/// screen needs, so nothing is hidden behind a sideways swipe and the page
+/// scrolls in one direction only. Subcategories are never chips in this row;
+/// they appear as plain names under their mother, in [_SubcategoryNameWrap].
+class _RootFilterWrap extends StatelessWidget {
+  const _RootFilterWrap({
     required this.categories,
     required this.selected,
     required this.language,
@@ -609,33 +620,26 @@ class _RootFilterRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
-    final double scale = MediaQuery.textScalerOf(context).scale(1);
 
-    return SizedBox(
-      height: 36 + 14 * scale,
-      child: ListView(
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(16, 2, 16, 6),
+      child: Wrap(
         key: const ValueKey<String>('home-root-chips'),
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        spacing: 8,
+        runSpacing: 8,
         children: <Widget>[
-          Padding(
-            padding: const EdgeInsetsDirectional.only(end: 8),
-            child: _FilterChip(
-              label: l10n.labelAll,
-              icon: Icons.grid_view_rounded,
-              isSelected: selected == null,
-              onTap: () => onSelect(null),
-            ),
+          _FilterChip(
+            label: l10n.labelAll,
+            icon: Icons.grid_view_rounded,
+            isSelected: selected == null,
+            onTap: () => onSelect(null),
           ),
           for (final Category category in categories)
-            Padding(
-              padding: const EdgeInsetsDirectional.only(end: 8),
-              child: _FilterChip(
-                label: category.nameFor(language),
-                icon: Icons.category_outlined,
-                isSelected: selected?.id == category.id,
-                onTap: () => onSelect(category.id),
-              ),
+            _FilterChip(
+              label: category.nameFor(language),
+              icon: Icons.category_outlined,
+              isSelected: selected?.id == category.id,
+              onTap: () => onSelect(category.id),
             ),
         ],
       ),
@@ -649,10 +653,10 @@ class _RootFilterRow extends StatelessWidget {
 /// products *and* everything filed under a child. No images, no cards, no
 /// icons — a subcategory is a refinement, not a destination of its own.
 ///
-/// RTL-safe (the horizontal `ListView` follows the ambient directionality) and
-/// its height grows with the text scale, so a 2.0 label is never clipped.
-class _SubcategoryNameRow extends StatelessWidget {
-  const _SubcategoryNameRow({
+/// A [Wrap] rather than a sideways strip: every subcategory is visible without
+/// a swipe, and the row grows downwards as the text scale grows.
+class _SubcategoryNameWrap extends StatelessWidget {
+  const _SubcategoryNameWrap({
     required this.motherName,
     required this.categories,
     required this.selectedId,
@@ -671,31 +675,24 @@ class _SubcategoryNameRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
-    final double scale = MediaQuery.textScalerOf(context).scale(1);
 
-    return SizedBox(
-      height: 34 + 16 * scale,
-      child: ListView(
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(16, 2, 16, 6),
+      child: Wrap(
         key: const ValueKey<String>('home-subcategory-chips'),
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        spacing: 8,
+        runSpacing: 8,
         children: <Widget>[
-          Padding(
-            padding: const EdgeInsetsDirectional.only(end: 8),
-            child: _NameChip(
-              label: l10n.labelAllInCategory(motherName),
-              isSelected: selectedId == null,
-              onTap: onAll,
-            ),
+          _NameChip(
+            label: l10n.labelAllInCategory(motherName),
+            isSelected: selectedId == null,
+            onTap: onAll,
           ),
           for (final Category category in categories)
-            Padding(
-              padding: const EdgeInsetsDirectional.only(end: 8),
-              child: _NameChip(
-                label: category.nameFor(language),
-                isSelected: selectedId == category.id,
-                onTap: () => onSelect(category.id),
-              ),
+            _NameChip(
+              label: category.nameFor(language),
+              isSelected: selectedId == category.id,
+              onTap: () => onSelect(category.id),
             ),
         ],
       ),
@@ -915,93 +912,97 @@ class _SubcategoryLabel extends StatelessWidget {
   }
 }
 
-class _CategoryRail extends StatelessWidget {
-  const _CategoryRail({
-    required this.categories,
-    this.hasMore = false,
-    this.onMore,
+/// "Browse by category" as a vertical grid that scrolls with the page.
+///
+/// Two columns on a phone, three on a tablet; a "Load more" row replaces the
+/// old end-of-rail card, so the whole catalogue stays reachable without a
+/// sideways swipe.
+class _CategorySliverGrid extends ConsumerWidget {
+  const _CategorySliverGrid({
+    required this.asyncCategories,
+    required this.limit,
+    required this.onMore,
   });
 
-  final List<Category> categories;
-  final bool hasMore;
-  final VoidCallback? onMore;
+  final AsyncValue<List<Category>> asyncCategories;
+  final int limit;
+  final VoidCallback onMore;
 
   @override
-  Widget build(BuildContext context) {
-    // The tile's text block grows with the accessibility scale; the rail has
-    // to grow with it, or the two-line name overflows the card.
-    final double scale = MediaQuery.textScalerOf(context).scale(1);
-    return SizedBox(
-      height: 148 + (scale - 1).clamp(0.0, 1.0) * 76,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: categories.length + (hasMore ? 1 : 0),
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
-        itemBuilder: (BuildContext context, int index) {
-          if (index == categories.length) {
-            return SizedBox(
-              width: 138,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(18),
-                onTap: onMore,
-                child: Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: BrandColors.goldHairline),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      const Icon(
-                        Icons.expand_more_rounded,
-                        color: BrandColors.gold,
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        AppLocalizations.of(context).actionLoadMore,
-                        textAlign: TextAlign.center,
-                        style: BrandTypography.labelSmall,
-                      ),
-                    ],
-                  ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    return switch (asyncCategories) {
+      AsyncLoading() => const SliverToBoxAdapter(
+        child: ShimmerGrid(itemCount: 4, aspectRatio: 1.05),
+      ),
+      AsyncError(:final Object error) => SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: InlineFailureBanner(
+            failure: error is AppFailure
+                ? error
+                : UnknownFailure(cause: error),
+            onRetry: () => ref.invalidate(rootCategoriesProvider),
+          ),
+        ),
+      ),
+      AsyncValue<List<Category>>(:final List<Category>? value) => _grid(
+        context,
+        l10n,
+        value ?? const <Category>[],
+      ),
+    };
+  }
+
+  Widget _grid(
+    BuildContext context,
+    AppLocalizations l10n,
+    List<Category> roots,
+  ) {
+    if (roots.isEmpty) {
+      return SliverToBoxAdapter(
+        child: EmptyState(
+          title: l10n.stateEmptyTitle,
+          message: l10n.stateEmptyMessage,
+          compact: true,
+        ),
+      );
+    }
+    final List<Category> page = roots.take(limit).toList(growable: false);
+    final bool hasMore = roots.length > page.length;
+
+    return SliverMainAxisGroup(
+      slivers: <Widget>[
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          sliver: SliverGrid(
+            gridDelegate: categoryGridDelegate(context),
+            delegate: SliverChildBuilderDelegate(
+              (_, int index) => RepaintBoundary(
+                child: CategoryCard(
+                  key: ValueKey<String>(page[index].id),
+                  category: page[index],
+                  onTap: () => context.push(Routes.category(page[index].slug)),
                 ),
               ),
-            );
-          }
-          final Category category = categories[index];
-          return CategoryCard(
-            category: category,
-            width: 138,
-            onTap: () => context.push(Routes.category(category.slug)),
-          );
-        },
-      ),
-    );
-  }
-}
-
-/// Horizontal rail of product cards — used by the featured row and by every
-/// per-category "See all" section.
-class _ProductRail extends StatelessWidget {
-  const _ProductRail({required this.products});
-
-  final List<Product> products;
-
-  @override
-  Widget build(BuildContext context) {
-    final double scale = MediaQuery.textScalerOf(context).scale(1);
-    return SizedBox(
-      height: 296 + (scale - 1).clamp(0.0, 1.0) * 108,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: products.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 14),
-        itemBuilder: (_, int index) =>
-            ProductCard(product: products[index], width: 208),
-      ),
+              childCount: page.length,
+            ),
+          ),
+        ),
+        if (hasMore)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: Center(
+                child: OutlinedButton.icon(
+                  onPressed: onMore,
+                  icon: const Icon(Icons.expand_more_rounded, size: 18),
+                  label: Text(l10n.actionLoadMore),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
@@ -1095,25 +1096,63 @@ class _ProductGrid extends StatelessWidget {
   }
 }
 
+/// "Contact the owner": every visible owner link, opened in the browser or the
+/// matching app.
+///
+/// The whole block is absent when the owner has published no links, which is
+/// what the empty `contact_links` table means — not an empty heading.
 class _FooterContact extends ConsumerWidget {
   const _FooterContact();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final AppLocalizations l10n = AppLocalizations.of(context);
-    final int count = ref.watch(visibleContactLinksProvider).value?.length ?? 0;
+    final List<ContactLink> links =
+        ref.watch(visibleContactLinksProvider).value ?? const <ContactLink>[];
+    if (links.isEmpty) return const SizedBox.shrink();
+
+    Future<void> open(ContactLink link) async {
+      final ContactLauncher launcher = ref.read(contactLauncherProvider);
+      final bool opened = await launcher.launch(link);
+      if (!opened && context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.contactLaunchFailed)));
+      }
+    }
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 34, 16, 0),
       child: Column(
         children: <Widget>[
           const GoldDivider(withOrnament: true),
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
           Text(
-            count == 0 ? l10n.stateEmptyMessage : l10n.actionContactOwner,
+            l10n.actionContactOwner,
+            textAlign: TextAlign.center,
+            style: BrandTypography.titleMedium,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            l10n.contactOwnerHint,
             textAlign: TextAlign.center,
             style: BrandTypography.bodySmall.copyWith(
               color: BrandTypography.mutedOn(Theme.of(context).brightness),
             ),
+          ),
+          const SizedBox(height: 14),
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 10,
+            runSpacing: 10,
+            children: <Widget>[
+              for (final ContactLink link in links)
+                OutlinedButton.icon(
+                  onPressed: () => open(link),
+                  icon: Icon(link.kind.icon, size: 18),
+                  label: Text(link.label, maxLines: 1,
+                      overflow: TextOverflow.ellipsis),
+                ),
+            ],
           ),
         ],
       ),

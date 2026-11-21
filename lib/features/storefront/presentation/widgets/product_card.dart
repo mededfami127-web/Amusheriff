@@ -11,6 +11,7 @@ import '../../../../core/theme/gradients.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../catalog/domain/entities/product.dart';
+import 'call_button.dart';
 import 'favourite_button.dart';
 
 /// A single catalogue tile. Tapping opens the product detail route.
@@ -119,8 +120,11 @@ class ProductCard extends ConsumerWidget {
                   ],
                 ),
               ),
+              // Jiji reading order: the price is the first thing under the
+              // photo, then the title, then the one action that converts — a
+              // Call button dialling the shop's single owner number.
               Padding(
-                padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+                padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
@@ -134,23 +138,14 @@ class ProductCard extends ConsumerWidget {
                           letterSpacing: 0.8,
                         ),
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 4),
                     ],
-                    Text(
-                      title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: BrandTypography.titleMedium.copyWith(
-                        color: dark ? BrandColors.ivory : BrandColors.charcoal,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
                     // A price and a struck-through price side by side do not fit
                     // a 136dp tile at 2.0 text; a Wrap puts the second one on
                     // its own line instead of clipping the first.
                     Wrap(
                       spacing: 8,
-                      runSpacing: 2,
+                      runSpacing: 0,
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: <Widget>[
                         ShaderMask(
@@ -163,8 +158,12 @@ class ProductCard extends ConsumerWidget {
                               currency: product.currencyCode,
                               locale: language,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: BrandTypography.price.copyWith(
                               color: BrandColors.gold,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ),
@@ -175,6 +174,7 @@ class ProductCard extends ConsumerWidget {
                               currency: product.currencyCode,
                               locale: language,
                             ),
+                            maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: BrandTypography.priceStruck.copyWith(
                               color: BrandTypography.mutedOn(
@@ -184,6 +184,20 @@ class ProductCard extends ConsumerWidget {
                           ),
                       ],
                     ),
+                    const SizedBox(height: 4),
+                    Text(
+                      title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: BrandTypography.titleMedium.copyWith(
+                        color: dark ? BrandColors.ivory : BrandColors.charcoal,
+                        fontSize: 13.5,
+                        height: 1.25,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    // One tap, straight to the dialer, on every card.
+                    CallButton(dense: true),
                   ],
                 ),
               ),
@@ -212,8 +226,24 @@ SliverGridDelegate productGridDelegate(BuildContext context) {
   return SliverGridDelegateWithFixedCrossAxisCount(
     crossAxisCount: singleColumn ? 1 : 2,
     mainAxisSpacing: 16,
-    crossAxisSpacing: 16,
-    childAspectRatio: singleColumn ? 0.9 : 0.62 / (1 + extra),
+    crossAxisSpacing: 14,
+    // 0.56 rather than 0.62: the card gained a Call button under the title, and
+    // the photo should give up the room instead of the text overflowing.
+    childAspectRatio: singleColumn ? 0.9 : 0.56 / (1 + extra),
+  );
+}
+
+/// The category grid metrics: two columns, square-ish photo tiles.
+SliverGridDelegate categoryGridDelegate(BuildContext context) {
+  final double width = MediaQuery.sizeOf(context).width;
+  // A tablet gets three columns; the tiles are photos with a caption, and two
+  // 300dp-wide blocks on a 1000dp screen read as stretched cards.
+  final int columns = width >= 900 ? 3 : 2;
+  return SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: columns,
+    mainAxisSpacing: 12,
+    crossAxisSpacing: 12,
+    childAspectRatio: 1.05,
   );
 }
 
