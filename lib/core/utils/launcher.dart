@@ -46,7 +46,21 @@ class LinkLauncher {
   /// Separate from [openPhone] so the Call button can hand over the exact
   /// international number — `tel:+251917928950` — instead of letting a second
   /// sanitiser strip the `+` the dialer needs for a country code.
-  Future<bool> openTel(Uri uri) => _open(uri);
+  ///
+  /// Android's package-visibility rules can make `canLaunchUrl` answer "no"
+  /// for an intent the device can actually handle; the dialer is present on
+  /// every phone, so a negative probe falls back to firing the intent anyway
+  /// instead of leaving the Call button looking dead.
+  Future<bool> openTel(Uri uri) async {
+    if (await url_launcher.canLaunchUrl(uri)) {
+      return _launch(uri, url_launcher.LaunchMode.externalApplication);
+    }
+    try {
+      return await _launch(uri, url_launcher.LaunchMode.externalApplication);
+    } on Object {
+      return false;
+    }
+  }
 
   Future<bool> openEmail(String address, {String? subject, String? body}) =>
       _open(
