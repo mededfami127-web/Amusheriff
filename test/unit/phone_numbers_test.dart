@@ -19,6 +19,7 @@ void main() {
       expect(PhoneNumbers.international('+251917928950'), '+251917928950');
       expect(PhoneNumbers.international('251917928950'), '+251917928950');
       expect(PhoneNumbers.international('00917928950'), '+251917928950');
+      expect(PhoneNumbers.international('00251917928950'), '+251917928950');
       expect(PhoneNumbers.international('917928950'), '+251917928950');
     });
 

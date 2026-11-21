@@ -210,7 +210,10 @@ void main() {
   testWidgets('the subcategory row runs right-to-left in Arabic', (
     WidgetTester tester,
   ) async {
-    tester.view.physicalSize = const Size(420, 4000);
+    // Wide enough for one run: the chips are a Wrap now, so at phone width the
+    // Arabic labels wrap onto a second line and comparing raw dx values across
+    // two runs says nothing about direction.
+    tester.view.physicalSize = const Size(1200, 4000);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
 
