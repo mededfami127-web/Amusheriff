@@ -35,6 +35,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actionCallNow => 'Call now';
 
   @override
+  String get actionCall => 'Call';
+
+  @override
+  String get labelCallForPrice => 'Call for price';
+
+  @override
+  String get adminLinks => 'Links';
+
+  @override
+  String get adminLinksHint =>
+      'Social and web links customers can open from the app. They open in the browser or the matching app.';
+
+  @override
+  String get adminOwnerPhoneHint =>
+      'The number every Call button dials. Leave empty to use the default.';
+
+  @override
+  String get adminPriceHint => 'Leave empty to show "Call for price".';
+
+  @override
+  String get adminReplaceImage => 'Replace image';
+
+  @override
+  String get adminRemoveImage => 'Remove image';
+
+  @override
+  String get adminConfirmDeleteImage =>
+      'Delete this image? The file is removed from storage.';
+
+  @override
   String get actionCancel => 'Cancel';
 
   @override

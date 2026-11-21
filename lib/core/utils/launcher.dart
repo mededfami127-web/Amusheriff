@@ -41,6 +41,13 @@ class LinkLauncher {
     Uri(scheme: 'tel', path: number.replaceAll(RegExp(r'[^0-9+]'), '')),
   );
 
+  /// Opens a `tel:` URI that is already normalised (see `PhoneNumbers.telUri`).
+  ///
+  /// Separate from [openPhone] so the Call button can hand over the exact
+  /// international number — `tel:+251917928950` — instead of letting a second
+  /// sanitiser strip the `+` the dialer needs for a country code.
+  Future<bool> openTel(Uri uri) => _open(uri);
+
   Future<bool> openEmail(String address, {String? subject, String? body}) =>
       _open(
         Uri(

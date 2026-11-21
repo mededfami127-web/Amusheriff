@@ -138,6 +138,60 @@ abstract class AppLocalizations {
   /// **'Call now'**
   String get actionCallNow;
 
+  /// The label of a Call button.
+  ///
+  /// In en, this message translates to:
+  /// **'Call'**
+  String get actionCall;
+
+  /// Price placeholder when the owner has not set a price.
+  ///
+  /// In en, this message translates to:
+  /// **'Call for price'**
+  String get labelCallForPrice;
+
+  /// Admin sidebar entry for the owner's links.
+  ///
+  /// In en, this message translates to:
+  /// **'Links'**
+  String get adminLinks;
+
+  /// Explanation above the links screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Social and web links customers can open from the app.'**
+  String get adminLinksHint;
+
+  /// Hint under the owner phone field.
+  ///
+  /// In en, this message translates to:
+  /// **'The number every Call button dials.'**
+  String get adminOwnerPhoneHint;
+
+  /// Hint under the price field.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave empty to show "Call for price".'**
+  String get adminPriceHint;
+
+  /// Replaces an existing category cover.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace image'**
+  String get adminReplaceImage;
+
+  /// Removes a category cover.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove image'**
+  String get adminRemoveImage;
+
+  /// Confirmation before deleting a category cover.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this image? The file is removed from storage.'**
+  String get adminConfirmDeleteImage;
+
   /// No description provided for @actionCancel.
   ///
   /// In en, this message translates to:
