@@ -48,6 +48,10 @@ class MediaProcessor {
   static const int imageMaxHeight = 1600;
   static const int imageQuality = 80;
 
+  /// Category and subcategory covers are painted in tiles, not full screen, so
+  /// they are downscaled further before they reach the bucket.
+  static const int categoryMaxDimension = 1080;
+
   /// Video poster frame quality (1–100) and the frame to grab.
   static const int thumbnailQuality = 60;
   static const int thumbnailPositionMs = 0;
@@ -55,13 +59,16 @@ class MediaProcessor {
   Future<ProcessedMedia> process({
     required XFile file,
     required MediaKind kind,
-  }) => kind.isVideo ? _processVideo(file) : _processImage(file);
+    int maxDimension = imageMaxWidth,
+  }) => kind.isVideo ? _processVideo(file) : _processImage(file, maxDimension);
 
-  Future<ProcessedMedia> _processImage(XFile file) async {
+  Future<ProcessedMedia> _processImage(XFile file, int maxDimension) async {
     final Uint8List? bytes = await FlutterImageCompress.compressWithFile(
       file.path,
-      minWidth: imageMaxWidth,
-      minHeight: imageMaxHeight,
+      // Both bounds are a *maximum*: the plugin keeps the aspect ratio and only
+      // shrinks a photo that is larger than the box.
+      minWidth: maxDimension,
+      minHeight: maxDimension,
       quality: imageQuality,
       format: CompressFormat.jpeg,
     );

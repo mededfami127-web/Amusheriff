@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../../core/utils/phone_numbers.dart';
+
 /// The owner's own contact channels, backed by the single-row
 /// `public.admin_contact_settings` table (id = 1).
 ///
@@ -83,6 +85,17 @@ class ContactSettings {
   );
 
   bool get hasPhone => ownerPhone.trim().isNotEmpty;
+
+  /// The number a Call button uses: the owner's saved phone, or the shop's
+  /// default when the singleton row has not been filled in yet.
+  ///
+  /// Read through this getter rather than [ownerPhone] everywhere a `tel:` is
+  /// built, so one missing setting can never leave a product without a Call
+  /// button.
+  String get callPhone => PhoneNumbers.display(ownerPhone);
+
+  /// `tel:+251917928950` for the dialer intent.
+  Uri get callUri => PhoneNumbers.telUri(ownerPhone);
   bool get hasEmail => ownerEmail.trim().isNotEmpty;
   bool get hasWhatsApp => whatsappNumber.trim().isNotEmpty;
   bool get hasTelegram => telegramHandle.trim().isNotEmpty;

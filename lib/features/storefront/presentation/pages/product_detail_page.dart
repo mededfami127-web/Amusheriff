@@ -28,7 +28,7 @@ import '../../../contacts/domain/entities/contact_settings.dart';
 import '../../../contacts/presentation/providers/contact_providers.dart';
 import '../../../contacts/presentation/providers/contact_settings_providers.dart';
 import '../../../../core/utils/launcher.dart';
-import '../providers/storefront_providers.dart';
+import '../widgets/call_button.dart';
 import '../widgets/favourite_button.dart';
 
 /// Full product page. Everything is streamed, so an admin price change or a
@@ -154,13 +154,15 @@ class _Body extends ConsumerWidget {
                     shaderCallback: BrandGradients.goldHorizontal.createShader,
                     blendMode: BlendMode.srcIn,
                     child: Text(
-                      Formatters.money(
-                        product.price,
-                        currency: product.currencyCode,
-                        locale: language,
-                      ),
+                      product.hasPrice
+                          ? Formatters.money(
+                              product.price,
+                              currency: product.currencyCode,
+                              locale: language,
+                            )
+                          : l10n.labelCallForPrice,
                       style: BrandTypography.price.copyWith(
-                        fontSize: 26,
+                        fontSize: product.hasPrice ? 26 : 20,
                         color: BrandColors.gold,
                       ),
                     ),
@@ -231,6 +233,11 @@ class _Body extends ConsumerWidget {
                   ),
                 ),
               ],
+              // The one action that matters on a marketplace listing: call the
+              // shop about this exact piece. Sits after the description so the
+              // page reads photo → title → price → details → Call.
+              const SizedBox(height: 24),
+              const CallButton(),
               const SizedBox(height: 26),
               _ContactActions(
                 product: product,
@@ -245,68 +252,67 @@ class _Body extends ConsumerWidget {
   }
 }
 
-class _Gallery extends ConsumerStatefulWidget {
+/// Every photo of the piece, stacked down the page.
+///
+/// The old [PageView] hid all but one photo behind a swipe and then repeated
+/// them as a horizontal thumbnail strip. A Jiji-style listing shows the whole
+/// set in one vertical scroll instead — nothing to swipe sideways, and the
+/// video badge stays exactly where it was.
+class _Gallery extends ConsumerWidget {
   const _Gallery({required this.product});
 
   final Product product;
 
   @override
-  ConsumerState<_Gallery> createState() => _GalleryState();
-}
-
-class _GalleryState extends ConsumerState<_Gallery> {
-  late final PageController _controller = PageController();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final AppLocalizations l10n = AppLocalizations.of(context);
     final bool dark = Theme.of(context).brightness == Brightness.dark;
-    final List<ProductMedia> media = widget.product.media;
-    final int index = ref.watch(galleryIndexProvider);
+    final List<ProductMedia> media = product.media;
+    final String title = product.titleFor(
+      Localizations.localeOf(context).languageCode,
+    );
     final int cacheWidth =
         (MediaQuery.sizeOf(context).width *
                 MediaQuery.devicePixelRatioOf(context))
             .round()
             .clamp(320, 1600);
-    final int safeIndex = index.clamp(0, media.isEmpty ? 0 : media.length - 1);
 
     if (media.isEmpty) {
       return AspectRatio(
-        aspectRatio: 1.15,
+        aspectRatio: 4 / 3,
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: dark ? BrandColors.plumSurface : const Color(0xFFF3ECE1),
           ),
-          child: Icon(
-            Icons.chair_outlined,
-            size: 52,
-            color: BrandColors.gold.withValues(alpha: 0.5),
+          child: Center(
+            child: Icon(
+              Icons.chair_outlined,
+              size: 52,
+              color: BrandColors.gold.withValues(alpha: 0.5),
+            ),
           ),
         ),
       );
     }
 
+    final StorageUrls urls = ref.read(storageUrlsProvider);
+
     return Column(
       children: <Widget>[
-        AspectRatio(
-          aspectRatio: 1.15,
-          child: PageView.builder(
-            controller: _controller,
-            itemCount: media.length,
-            onPageChanged: (int i) =>
-                ref.read(galleryIndexProvider.notifier).select(i),
-            itemBuilder: (BuildContext context, int i) {
-              final ProductMedia item = media[i];
-              return CachedNetworkImage(
-                imageUrl: ref
-                    .read(storageUrlsProvider)
-                    .productMedia(item.storagePath),
+        for (int i = 0; i < media.length; i++)
+          Padding(
+            padding: EdgeInsets.only(top: i == 0 ? 0 : 10),
+            child: AspectRatio(
+              aspectRatio: 4 / 3,
+              child: CachedNetworkImage(
+                // A video has no decodable still of its own; its poster frame
+                // is what the old gallery showed anyway, so the same source is
+                // used and the play badge marks it as a clip.
+                imageUrl: urls.productMedia(
+                  media[i].isVideo && media[i].hasThumbnail
+                      ? media[i].thumbnailPath!
+                      : media[i].storagePath,
+                ),
                 memCacheWidth: cacheWidth,
                 fit: BoxFit.cover,
                 placeholder: (_, __) =>
@@ -317,20 +323,18 @@ class _GalleryState extends ConsumerState<_Gallery> {
                         ? BrandColors.plumSurface
                         : const Color(0xFFF3ECE1),
                   ),
-                  child: const Icon(Icons.broken_image_outlined, size: 40),
+                  child: const Center(
+                    child: Icon(Icons.broken_image_outlined, size: 40),
+                  ),
                 ),
                 imageBuilder: (_, ImageProvider provider) => Semantics(
-                  label: l10n.a11yProductImage(
-                    widget.product.titleFor(
-                      Localizations.localeOf(context).languageCode,
-                    ),
-                  ),
+                  label: l10n.a11yProductImage(title),
                   image: true,
                   child: Stack(
                     fit: StackFit.expand,
                     children: <Widget>[
                       Image(image: provider, fit: BoxFit.cover),
-                      if (item.isVideo)
+                      if (media[i].isVideo)
                         Center(
                           child: Container(
                             padding: const EdgeInsets.all(14),
@@ -349,52 +353,9 @@ class _GalleryState extends ConsumerState<_Gallery> {
                     ],
                   ),
                 ),
-              );
-            },
-          ),
-        ),
-        if (media.length > 1) ...<Widget>[
-          const SizedBox(height: 12),
-          SizedBox(
-            height: 62,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              itemCount: media.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 10),
-              itemBuilder: (_, int i) => GestureDetector(
-                onTap: () {
-                  ref.read(galleryIndexProvider.notifier).select(i);
-                  _controller.animateToPage(
-                    i,
-                    duration: const Duration(milliseconds: 260),
-                    curve: Curves.easeOutCubic,
-                  );
-                },
-                child: Container(
-                  width: 62,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: i == safeIndex
-                          ? BrandColors.gold
-                          : BrandColors.goldHairline,
-                      width: i == safeIndex ? 1.8 : 1,
-                    ),
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: CachedNetworkImage(
-                    imageUrl: ref
-                        .read(storageUrlsProvider)
-                        .productMediaThumb(media[i].storagePath, width: 180),
-                    memCacheWidth: 180,
-                    fit: BoxFit.cover,
-                  ),
-                ),
               ),
             ),
           ),
-        ],
       ],
     );
   }
@@ -417,11 +378,15 @@ class _ContactActions extends ConsumerWidget {
     final String language = Localizations.localeOf(context).languageCode;
     final ContactLauncher launcher = ref.read(contactLauncherProvider);
     final String title = product.titleFor(language);
-    final String price = Formatters.money(
-      product.price,
-      currency: product.currencyCode,
-      locale: language,
-    );
+    // A piece without a price still has an inquiry message; it just asks for
+    // the price instead of quoting ETB 0.
+    final String price = product.hasPrice
+        ? Formatters.money(
+            product.price,
+            currency: product.currencyCode,
+            locale: language,
+          )
+        : l10n.labelCallForPrice;
     final String message = l10n.inquiryMessageTemplate(title, price);
 
     // Channels from `admin_contact_settings`, minus any kind already rendered

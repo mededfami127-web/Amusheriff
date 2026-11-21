@@ -116,6 +116,7 @@ class CategoryEditorState {
     FieldErrors? fieldErrors,
     AdminFormStatus? status,
     bool clearParent = false,
+    bool clearCoverPath = false,
   }) => CategoryEditorState(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -123,7 +124,9 @@ class CategoryEditorState {
     nameAr: nameAr ?? this.nameAr,
     nameOm: nameOm ?? this.nameOm,
     slug: slug ?? this.slug,
-    coverPath: coverPath ?? this.coverPath,
+    // "Remove image" has to be able to put the field back to null, which
+    // `coverPath ?? this.coverPath` cannot express.
+    coverPath: clearCoverPath ? null : coverPath ?? this.coverPath,
     coverUploading: coverUploading ?? this.coverUploading,
     // A nullable field needs an explicit way to go back to `null`: the parent
     // dropdown's "Top level" option is exactly that, and `?? this.parentId`
@@ -152,6 +155,10 @@ class CategoryEditorController extends _$CategoryEditorController {
   CategoryEditorState build() => const CategoryEditorState();
 
   void load(Category? existing, {String? parentId}) {
+    // The row's picture when the sheet opened. Replace/remove defer the storage
+    // delete to a successful save, so cancelling can never break a cover that
+    // is still live on the storefront.
+    _originalCoverPath = existing?.coverPath;
     if (existing == null) {
       state = CategoryEditorState(parentId: parentId);
       return;
@@ -204,6 +211,29 @@ class CategoryEditorController extends _$CategoryEditorController {
   /// it, and a successful save clears it.
   String? _pendingCoverPath;
 
+  /// `cover_path` the row had when the sheet opened, if any.
+  String? _originalCoverPath;
+
+  /// Removes the picture from the form.
+  ///
+  /// A file uploaded in this same opening is deleted immediately (nothing
+  /// references it). An existing row's file is only removed after the row is
+  /// saved without it, so a cancel leaves the live cover untouched.
+  Future<void> removeCover() async {
+    final String? current = state.coverPath;
+    if (current == null || current.isEmpty) return;
+    state = state.copyWith(clearCoverPath: true);
+    if (current != _pendingCoverPath) return;
+    _pendingCoverPath = null;
+    try {
+      await ref
+          .read(storageDataSourceProvider)
+          .removeQuietly(StorageDataSource.brandBucket, current);
+    } on Object catch (error) {
+      AppLog.error('CATEGORY COVER DELETE failed for $current', error);
+    }
+  }
+
   /// Uploads the optional cover image **before** the row is written.
   ///
   /// Storage first, row second: `cover_path` then points at an object that
@@ -229,6 +259,8 @@ class CategoryEditorController extends _$CategoryEditorController {
       final ProcessedMedia processed = await const MediaProcessor().process(
         file: picked,
         kind: MediaKind.image,
+        // ~1080 px, JPEG quality 80: a tile-sized cover, not a 4K photo.
+        maxDimension: MediaProcessor.categoryMaxDimension,
       );
 
       final String uploaded = await storage.upload(
@@ -347,6 +379,22 @@ class CategoryEditorController extends _$CategoryEditorController {
       final Category saved = category!;
       // The row now references the uploaded cover, so it is no longer pending.
       _pendingCoverPath = null;
+      // A replaced or removed picture is only deleted once the row no longer
+      // points at it; this is the step that keeps the bucket free of orphans
+      // without ever deleting a file a live row still uses.
+      final String? original = _originalCoverPath;
+      if (original != null &&
+          original.isNotEmpty &&
+          original != saved.coverPath) {
+        _originalCoverPath = null;
+        try {
+          await ref
+              .read(storageDataSourceProvider)
+              .removeQuietly(StorageDataSource.brandBucket, original);
+        } on Object catch (error) {
+          AppLog.error('CATEGORY OLD COVER CLEANUP failed for $original', error);
+        }
+      }
       // The storefront reads through Realtime streams *and* one-shot futures;
       // invalidating both means the dashboard cards and any open category page
       // show the new row without the app being restarted.
@@ -408,13 +456,16 @@ String? validateContactValue(ContactKind kind, String raw) {
     ContactKind.whatsapp || ContactKind.phone => Validators.phone(value),
     ContactKind.email => Validators.email(value),
     ContactKind.telegram => _validateTelegram(value),
-    ContactKind.website ||
+    ContactKind.website => Validators.url(value),
     ContactKind.instagram ||
     ContactKind.facebook ||
     ContactKind.tiktok ||
-    ContactKind.youtube ||
-    ContactKind.location => Validators.url(value),
-    ContactKind.other => Validators.required(value, max: 300),
+    ContactKind.youtube => Validators.url(value),
+    // A showroom is free text ("Jimma, Ethiopia"), which the maps intent
+    // searches for; requiring http:// here would reject every real value.
+    ContactKind.location => Validators.required(value, max: 200),
+    // A free-form link still has to be openable: http(s), tel: or mailto:.
+    ContactKind.other => Validators.linkTarget(value),
   };
 }
 

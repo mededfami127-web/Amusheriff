@@ -289,7 +289,6 @@ class _CoverField extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final AppLocalizations l10n = AppLocalizations.of(context);
-    final bool dark = Theme.of(context).brightness == Brightness.dark;
     final String? cover = state.coverPath;
 
     return Column(
@@ -322,43 +321,79 @@ class _CoverField extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
         ],
-        Material(
-          color: dark ? BrandColors.plumSurface : BrandColors.ivory,
-          borderRadius: BorderRadius.circular(12),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(12),
-            onTap: state.coverUploading ? null : controller.pickCover,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  state.coverUploading
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2.2),
-                        )
-                      : const Icon(
-                          Icons.upload_outlined,
-                          size: 18,
-                          color: BrandColors.gold,
-                        ),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: Text(
-                      cover == null ? l10n.actionSelectImage : l10n.adminCover,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: BrandTypography.bodyMedium,
-                    ),
-                  ),
-                ],
+        // Upload, replace and delete are three explicit actions, so a cover can
+        // be changed or cleared without deleting the whole category.
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: <Widget>[
+            OutlinedButton.icon(
+              onPressed: state.coverUploading ? null : controller.pickCover,
+              icon: state.coverUploading
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2.2),
+                    )
+                  : const Icon(Icons.upload_outlined, size: 18),
+              label: Text(
+                cover == null ? l10n.actionSelectImage : l10n.adminReplaceImage,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-          ),
+            if (cover != null)
+              TextButton.icon(
+                onPressed: state.coverUploading
+                    ? null
+                    : () => _confirmRemove(context, l10n, controller),
+                icon: const Icon(
+                  Icons.delete_outline_rounded,
+                  size: 18,
+                  color: BrandColors.danger,
+                ),
+                label: Text(
+                  l10n.adminRemoveImage,
+                  style: const TextStyle(color: BrandColors.danger),
+                ),
+              ),
+          ],
         ),
       ],
     );
+  }
+
+  /// Deleting a cover is confirmed, because the file leaves the bucket once the
+  /// row is saved and there is no undo.
+  Future<void> _confirmRemove(
+    BuildContext context,
+    AppLocalizations l10n,
+    CategoryEditorController controller,
+  ) async {
+    final bool confirmed =
+        await showDialog<bool>(
+          context: context,
+          builder: (BuildContext dialogContext) => AlertDialog(
+            title: Text(l10n.adminRemoveImage),
+            content: Text(l10n.adminConfirmDeleteImage),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: Text(l10n.actionCancel),
+              ),
+              FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: BrandColors.danger,
+                  foregroundColor: BrandColors.ivory,
+                ),
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                child: Text(l10n.actionDelete),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+    if (!confirmed) return;
+    await controller.removeCover();
   }
 }

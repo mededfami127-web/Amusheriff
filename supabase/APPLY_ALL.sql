@@ -28,6 +28,7 @@
 --     010 · the Afaan Oromo catalogue columns
 --     011 · products.subcategory_id
 --     012 · the shop's brand name
+--     013 · the global owner phone default (every Call button dials it)
 --   001 (core schema) is left out because every table and column it defines is
 --   already answering reads on the project — the storefront loads products,
 --   categories, contact links and site settings — so it has been applied.
@@ -1776,6 +1777,28 @@ begin
   end loop;
 end;
 $$;
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- 013 · One global owner phone (see 20260101001300_owner_phone_setting.sql)
+--
+-- Additive: a DEFAULT plus a backfill that only touches NULL/blank values.
+-- ═══════════════════════════════════════════════════════════════════════════
+alter table public.admin_contact_settings
+  alter column owner_phone set default '0917928950';
+
+comment on column public.admin_contact_settings.owner_phone is
+  'Global owner phone. Every Call button in the app dials this number, '
+  'normalised to +251… for the tel: intent. Blank means the app default '
+  '(0917928950). Editable from the admin Contact settings panel.';
+
+insert into public.admin_contact_settings as s (id)
+values (1)
+on conflict (id) do nothing;
+
+update public.admin_contact_settings
+   set owner_phone = '0917928950'
+ where owner_phone is null
+    or btrim(owner_phone) = '';
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- Done. Reload PostgREST's schema cache so the app stops answering

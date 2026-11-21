@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../core/theme/brand_colors.dart';
 import '../../../../core/theme/typography.dart';
@@ -19,6 +20,7 @@ class AdminTextField extends StatefulWidget {
     this.autofocus = false,
     this.textInputAction,
     this.keyboardType,
+    this.inputFormatters,
   });
 
   final String label;
@@ -33,6 +35,9 @@ class AdminTextField extends StatefulWidget {
   final bool autofocus;
   final TextInputAction? textInputAction;
   final TextInputType? keyboardType;
+
+  /// Optional keystroke filter, e.g. digits only for a price box.
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   State<AdminTextField> createState() => _AdminTextFieldState();
@@ -107,6 +112,7 @@ class _AdminTextFieldState extends State<AdminTextField> {
                     autofocus: widget.autofocus,
                     textInputAction: widget.textInputAction,
                     keyboardType: widget.keyboardType,
+                    inputFormatters: widget.inputFormatters,
                     style: BrandTypography.bodyMedium.copyWith(color: ink),
                     decoration: const InputDecoration(
                       border: InputBorder.none,

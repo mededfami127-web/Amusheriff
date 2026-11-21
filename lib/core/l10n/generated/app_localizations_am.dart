@@ -35,6 +35,37 @@ class AppLocalizationsAm extends AppLocalizations {
   String get actionCallNow => 'አሁን ይደውሉ';
 
   @override
+  String get actionCall => 'ደውል';
+
+  @override
+  String get labelCallForPrice => 'ዋጋ ለማወቅ ይደውሉ';
+
+  @override
+  String get adminLinks => 'አገናኞች';
+
+  @override
+  String get adminLinksHint =>
+      'ደንበኞች ከመተግበሪያው ሊከፍቷቸው የሚችሉ የሶሻል ሚዲያና የድረ-ገጽ አገናኞች።';
+
+  @override
+  String get adminOwnerPhoneHint =>
+      'የሁሉም የመደወያ ቁልፎች ቁጥር። ባዶ ከሆነ ነባሪው ይጠቀማል።';
+
+  @override
+  String get adminPriceHint =>
+      'ዋጋ ከሌለው ባዶ ይተዉት፤ "ዋጋ ለማወቅ ይደውሉ" ይታያል።';
+
+  @override
+  String get adminReplaceImage => 'ምስል ቀይር';
+
+  @override
+  String get adminRemoveImage => 'ምስል አስወግድ';
+
+  @override
+  String get adminConfirmDeleteImage =>
+      'ይህን ምስል ያጥፉ? ፋይሉ ከማከማቻው ይወገዳል።';
+
+  @override
   String get actionCancel => 'ሰርዝ';
 
   @override

@@ -32,6 +32,37 @@ class AppLocalizationsOm extends AppLocalizations {
   String get actionAdd => 'Ida\'i';
 
   @override
+  String get actionCall => 'Bilbili';
+
+  @override
+  String get labelCallForPrice => 'Gatii beekuuf bilbili';
+
+  @override
+  String get adminLinks => 'Geessituuwwan';
+
+  @override
+  String get adminLinksHint =>
+      "Geessituuwwan miidiyaa hawaasaa fi weebsaayitii maamiltoonni appii irraa banuu danda'an.";
+
+  @override
+  String get adminOwnerPhoneHint =>
+      "Lakkoofsa buttonii bilbilaa hunda. Duwwaa yoo ta'e lakkoofsa durtii fayyadama.";
+
+  @override
+  String get adminPriceHint =>
+      "Gatii hin qabu yoo ta'e duwwaa dhiisi; \"Gatii beekuuf bilbili\" ni mul'ata.";
+
+  @override
+  String get adminReplaceImage => 'Suuraa jijjiiri';
+
+  @override
+  String get adminRemoveImage => 'Suuraa baasi';
+
+  @override
+  String get adminConfirmDeleteImage =>
+      'Suuraa kana haquu? Faayilli kuusaa irraa ni haqama.';
+
+  @override
   String get actionCallNow => 'Amma bilbilii';
 
   @override

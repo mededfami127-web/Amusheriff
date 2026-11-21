@@ -62,6 +62,16 @@ abstract class Product with _$Product {
   );
 
   // ── Pricing ───────────────────────────────────────────────────────────────
+
+  /// False when the owner has not priced the piece yet.
+  ///
+  /// The column is `numeric not null default 0`, and 0 is the "no price"
+  /// sentinel the admin form writes when the price box is left empty. Every
+  /// surface reads this getter and prints "Call for price" instead of
+  /// `ETB 0`, so old rows created before prices were enforced still read
+  /// correctly.
+  bool get hasPrice => price > 0;
+
   bool get hasDiscount =>
       compareAtPrice != null && compareAtPrice! > price && price > 0;
 

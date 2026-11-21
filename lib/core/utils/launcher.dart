@@ -41,6 +41,27 @@ class LinkLauncher {
     Uri(scheme: 'tel', path: number.replaceAll(RegExp(r'[^0-9+]'), '')),
   );
 
+  /// Opens a `tel:` URI that is already normalised (see `PhoneNumbers.telUri`).
+  ///
+  /// Separate from [openPhone] so the Call button can hand over the exact
+  /// international number — `tel:+251917928950` — instead of letting a second
+  /// sanitiser strip the `+` the dialer needs for a country code.
+  ///
+  /// Android's package-visibility rules can make `canLaunchUrl` answer "no"
+  /// for an intent the device can actually handle; the dialer is present on
+  /// every phone, so a negative probe falls back to firing the intent anyway
+  /// instead of leaving the Call button looking dead.
+  Future<bool> openTel(Uri uri) async {
+    if (await url_launcher.canLaunchUrl(uri)) {
+      return _launch(uri, url_launcher.LaunchMode.externalApplication);
+    }
+    try {
+      return await _launch(uri, url_launcher.LaunchMode.externalApplication);
+    } on Object {
+      return false;
+    }
+  }
+
   Future<bool> openEmail(String address, {String? subject, String? body}) =>
       _open(
         Uri(
@@ -109,6 +130,11 @@ class LinkLauncher {
   Future<bool> openRaw(String value) {
     final String v = value.trim();
     if (v.startsWith('http://') || v.startsWith('https://')) {
+      return _open(Uri.parse(v));
+    }
+    // The admin link validator also accepts these two intent schemes; without
+    // this branch a saved tel:/mailto: link would be a dead button.
+    if (v.startsWith('tel:') || v.startsWith('mailto:')) {
       return _open(Uri.parse(v));
     }
     // Bare domains and handles: try once as https, then give up gracefully.

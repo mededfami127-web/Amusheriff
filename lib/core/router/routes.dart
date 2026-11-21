@@ -29,6 +29,14 @@ abstract final class Routes {
   static const String adminProductEditorPattern = '/admin/products/:id';
   static String adminProductEditor(String id) => '/admin/products/$id';
   static const String adminContacts = '/admin/contacts';
+
+  /// The owner's links: WhatsApp, Telegram, social pages, website.
+  ///
+  /// Same screen and table as [adminContacts] — `public.contact_links` already
+  /// stores exactly a title, a URL and a type with public read / admin write —
+  /// so the sidebar's "Links" item is an alias rather than a second store that
+  /// would need its own RLS and could drift out of sync.
+  static const String adminLinks = adminContacts;
   static const String adminSiteSettings = '/admin/settings';
   static const String adminInquiries = '/admin/inquiries';
   static const String adminChangePassword = '/admin/password';

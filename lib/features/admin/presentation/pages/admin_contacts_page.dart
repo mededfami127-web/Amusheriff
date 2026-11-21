@@ -31,8 +31,8 @@ class AdminContactsPage extends ConsumerWidget {
     );
 
     return AdminScaffold(
-      title: l10n.adminContacts,
-      selectedRoute: Routes.adminContacts,
+      title: l10n.adminLinks,
+      selectedRoute: Routes.adminLinks,
       floatingActionButton: FloatingActionButton(
         backgroundColor: BrandColors.royalViolet,
         foregroundColor: BrandColors.ivory,
@@ -40,31 +40,42 @@ class AdminContactsPage extends ConsumerWidget {
         onPressed: () => _openSheet(context, ref, null),
         child: const Icon(Icons.add, size: 28),
       ),
-      child: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (Object error, StackTrace _) => ErrorStateView(
-          failure: ErrorMapper.map(error),
-          onRetry: () => ref.invalidate(allContactLinksProvider),
-        ),
-        data: (List<ContactLink> links) {
-          if (links.isEmpty) {
-            return EmptyState(
-              title: l10n.adminContacts,
-              message: l10n.adminNoContacts,
-              icon: Icons.share_outlined,
-              action: FilledButton.icon(
-                onPressed: () => _openSheet(context, ref, null),
-                icon: const Icon(Icons.add),
-                label: Text(l10n.adminAddContact),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+            child: Text(l10n.adminLinksHint, style: BrandTypography.bodySmall),
+          ),
+          Expanded(
+            child: async.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (Object error, StackTrace _) => ErrorStateView(
+                failure: ErrorMapper.map(error),
+                onRetry: () => ref.invalidate(allContactLinksProvider),
               ),
-            );
-          }
-          return _ContactList(
-            links: links,
-            onEditRequested: (ContactLink link) =>
-                _openSheet(context, ref, link),
-          );
-        },
+              data: (List<ContactLink> links) {
+                if (links.isEmpty) {
+                  return EmptyState(
+                    title: l10n.adminLinks,
+                    message: l10n.adminNoContacts,
+                    icon: Icons.link_rounded,
+                    action: FilledButton.icon(
+                      onPressed: () => _openSheet(context, ref, null),
+                      icon: const Icon(Icons.add),
+                      label: Text(l10n.adminAddContact),
+                    ),
+                  );
+                }
+                return _ContactList(
+                  links: links,
+                  onEditRequested: (ContactLink link) =>
+                      _openSheet(context, ref, link),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

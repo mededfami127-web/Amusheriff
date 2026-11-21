@@ -75,6 +75,10 @@ class _AdminContactSettingsSectionState
             textInputAction: TextInputAction.next,
             onChanged: (String v) => change(current.copyWith(ownerPhone: v)),
           ),
+          const SizedBox(height: 6),
+          // One number, every Call button: the storefront reads this field and
+          // falls back to the shop default when it is left empty.
+          Text(l10n.adminOwnerPhoneHint, style: BrandTypography.bodySmall),
           const SizedBox(height: 14),
           AdminTextField(
             label: l10n.adminOwnerEmail,
