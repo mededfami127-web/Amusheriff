@@ -22,7 +22,6 @@ import '../../../catalog/presentation/providers/catalog_providers.dart';
 import '../../../contacts/domain/contact_launcher.dart';
 import '../../../contacts/domain/entities/contact_link.dart';
 import '../../../contacts/presentation/providers/contact_providers.dart';
-import '../../../../core/utils/launcher.dart';
 import '../../../settings/domain/entities/site_settings.dart';
 import '../../../settings/presentation/providers/site_settings_providers.dart';
 import '../../../settings/presentation/providers/site_content_providers.dart';
