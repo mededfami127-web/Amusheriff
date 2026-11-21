@@ -134,9 +134,7 @@ class ContactsEditorSheet extends ConsumerWidget {
     // appear above (and this says so, because a bottom sheet can cover them).
     if (controller.validate().isNotEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context).errorValidation),
-        ),
+        SnackBar(content: Text(AppLocalizations.of(context).errorValidation)),
       );
       return;
     }

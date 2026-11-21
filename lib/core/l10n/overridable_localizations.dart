@@ -66,6 +66,9 @@ class OverridableAppLocalizations extends AppLocalizations {
   String get actionAdd => _text('actionAdd', _base.actionAdd);
 
   @override
+  String get actionCall => _text('actionCall', _base.actionCall);
+
+  @override
   String get actionCallNow => _text('actionCallNow', _base.actionCallNow);
 
   @override
@@ -295,6 +298,31 @@ class OverridableAppLocalizations extends AppLocalizations {
 
   @override
   String get adminCover => _text('adminCover', _base.adminCover);
+
+  @override
+  String get adminLinks => _text('adminLinks', _base.adminLinks);
+
+  @override
+  String get adminLinksHint => _text('adminLinksHint', _base.adminLinksHint);
+
+  @override
+  String get adminOwnerPhoneHint =>
+      _text('adminOwnerPhoneHint', _base.adminOwnerPhoneHint);
+
+  @override
+  String get adminPriceHint => _text('adminPriceHint', _base.adminPriceHint);
+
+  @override
+  String get adminReplaceImage =>
+      _text('adminReplaceImage', _base.adminReplaceImage);
+
+  @override
+  String get adminRemoveImage =>
+      _text('adminRemoveImage', _base.adminRemoveImage);
+
+  @override
+  String get adminConfirmDeleteImage =>
+      _text('adminConfirmDeleteImage', _base.adminConfirmDeleteImage);
 
   @override
   String get adminCoverImage => _text('adminCoverImage', _base.adminCoverImage);
@@ -1014,6 +1042,10 @@ class OverridableAppLocalizations extends AppLocalizations {
 
   @override
   String get labelPrice => _text('labelPrice', _base.labelPrice);
+
+  @override
+  String get labelCallForPrice =>
+      _text('labelCallForPrice', _base.labelCallForPrice);
 
   @override
   String get labelUnavailable =>

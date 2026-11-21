@@ -895,9 +895,7 @@ class _PriceFieldState extends State<_PriceField> {
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: BrandTypography.labelSmall.copyWith(
-              color: BrandColors.gold,
-            ),
+            style: BrandTypography.labelSmall.copyWith(color: BrandColors.gold),
           ),
         ],
       ],

@@ -22,7 +22,6 @@ import '../../../catalog/presentation/providers/catalog_providers.dart';
 import '../../../contacts/domain/contact_launcher.dart';
 import '../../../contacts/domain/entities/contact_link.dart';
 import '../../../contacts/presentation/providers/contact_providers.dart';
-import '../../../../core/utils/launcher.dart';
 import '../../../settings/domain/entities/site_settings.dart';
 import '../../../settings/presentation/providers/site_settings_providers.dart';
 import '../../../settings/presentation/providers/site_content_providers.dart';
@@ -941,9 +940,7 @@ class _CategorySliverGrid extends ConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: InlineFailureBanner(
-            failure: error is AppFailure
-                ? error
-                : UnknownFailure(cause: error),
+            failure: error is AppFailure ? error : UnknownFailure(cause: error),
             onRetry: () => ref.invalidate(rootCategoriesProvider),
           ),
         ),
@@ -1151,8 +1148,11 @@ class _FooterContact extends ConsumerWidget {
                 OutlinedButton.icon(
                   onPressed: () => open(link),
                   icon: Icon(link.kind.icon, size: 18),
-                  label: Text(link.label, maxLines: 1,
-                      overflow: TextOverflow.ellipsis),
+                  label: Text(
+                    link.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
             ],
           ),

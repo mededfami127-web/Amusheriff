@@ -202,6 +202,7 @@ class _FakeProcessor implements MediaProcessor {
   Future<ProcessedMedia> process({
     required XFile file,
     required MediaKind kind,
+    int maxDimension = MediaProcessor.imageMaxWidth,
   }) async =>
       ProcessedMedia(bytes: jpeg, extension: 'jpg', contentType: 'image/jpeg');
 }
@@ -213,6 +214,7 @@ class _FailingProcessor implements MediaProcessor {
   Future<ProcessedMedia> process({
     required XFile file,
     required MediaKind kind,
+    int maxDimension = MediaProcessor.imageMaxWidth,
   }) async => throw const MediaFailure(messageKey: 'errorMediaImageTooLarge');
 }
 

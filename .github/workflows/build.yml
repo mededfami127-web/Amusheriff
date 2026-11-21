@@ -50,6 +50,10 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          # Same pin as ci.yml: Flutter 3.50 deprecates package:flutter/material
+          # and `--fatal-infos` in the verify job fails without the import
+          # migration, which is a separate change.
+          flutter-version: 3.47.9
           cache: true
 
       - name: Install dependencies
@@ -139,6 +143,10 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          # Same pin as ci.yml: Flutter 3.50 deprecates package:flutter/material
+          # and `--fatal-infos` in the verify job fails without the import
+          # migration, which is a separate change.
+          flutter-version: 3.47.9
           cache: true
 
       - name: Resolve flavor

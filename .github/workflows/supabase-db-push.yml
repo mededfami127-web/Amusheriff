@@ -25,7 +25,11 @@ concurrency:
 jobs:
   db-push:
     name: migration dry-run
-    runs-on: ubuntu-latest
+    # Pinned on purpose: this job pairs the `postgres:16` service with
+    # `postgresql-client-16`, and that package only exists on runners that
+    # ship PostgreSQL 16 (ubuntu-24.04). On ubuntu-latest the image drifted to
+    # 26.04, where the apt install fails with "Unable to locate package".
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
 
     # The dry run talks to the throwaway database created below, not to
@@ -36,6 +40,10 @@ jobs:
       PGUSER: postgres
       PGPASSWORD: postgres
       PGDATABASE: asm_migration_dryrun
+      # Hard guard: scripts/apply_migrations.sh would otherwise use this
+      # variable to reach a hosted project. Blank means it stays local, so
+      # nothing in this job can ever touch the live database.
+      SUPABASE_DB_URL: ""
 
     services:
       postgres:

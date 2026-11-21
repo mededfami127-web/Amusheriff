@@ -392,7 +392,10 @@ class CategoryEditorController extends _$CategoryEditorController {
               .read(storageDataSourceProvider)
               .removeQuietly(StorageDataSource.brandBucket, original);
         } on Object catch (error) {
-          AppLog.error('CATEGORY OLD COVER CLEANUP failed for $original', error);
+          AppLog.error(
+            'CATEGORY OLD COVER CLEANUP failed for $original',
+            error,
+          );
         }
       }
       // The storefront reads through Realtime streams *and* one-shot futures;

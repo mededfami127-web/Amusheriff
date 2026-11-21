@@ -26,7 +26,10 @@ abstract final class PhoneNumbers {
   static String international(String? raw) {
     final String digits = (raw ?? '').replaceAll(RegExp(r'[^0-9]'), '');
     if (digits.isEmpty) return '';
-    if (digits.startsWith('00')) return '+${digits.substring(2)}';
+    // `00` is the international prefix, not part of the number: `00917928950`
+    // and `00251917928950` both have to end up as `+251917928950`, so the rest
+    // is normalised again instead of being trusted as already complete.
+    if (digits.startsWith('00')) return international(digits.substring(2));
     if (digits.startsWith('251')) return '+$digits';
     if (digits.startsWith('0')) return '+251${digits.substring(1)}';
     if (digits.length == 9) return '+251$digits';
@@ -34,10 +37,8 @@ abstract final class PhoneNumbers {
   }
 
   /// The `tel:` URI for the dialer, with the international number.
-  static Uri telUri(String? raw) => Uri(
-    scheme: 'tel',
-    path: international(display(raw)),
-  );
+  static Uri telUri(String? raw) =>
+      Uri(scheme: 'tel', path: international(display(raw)));
 
   /// True when a value can produce a dialable URI.
   static bool isDialable(String? raw) => international(raw).length > 4;

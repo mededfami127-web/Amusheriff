@@ -32,37 +32,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get actionAdd => 'إضافة';
 
   @override
-  String get actionCallNow => 'اتصل الآن';
-
-  @override
   String get actionCall => 'اتصل';
 
   @override
-  String get labelCallForPrice => 'اتصل لمعرفة السعر';
-
-  @override
-  String get adminLinks => 'الروابط';
-
-  @override
-  String get adminLinksHint =>
-      'روابط التواصل والموقع التي يمكن للعملاء فتحها من التطبيق.';
-
-  @override
-  String get adminOwnerPhoneHint =>
-      'الرقم الذي يتصل به زر الاتصال. اتركه فارغًا لاستخدام الرقم الافتراضي.';
-
-  @override
-  String get adminPriceHint => 'اتركه فارغًا لإظهار «اتصل لمعرفة السعر».';
-
-  @override
-  String get adminReplaceImage => 'استبدال الصورة';
-
-  @override
-  String get adminRemoveImage => 'إزالة الصورة';
-
-  @override
-  String get adminConfirmDeleteImage =>
-      'حذف هذه الصورة؟ سيُحذف الملف من التخزين.';
+  String get actionCallNow => 'اتصل الآن';
 
   @override
   String get actionCancel => 'إلغاء';
@@ -256,6 +229,30 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get adminCover => 'الغلاف';
+
+  @override
+  String get adminLinks => 'الروابط';
+
+  @override
+  String get adminLinksHint =>
+      'روابط التواصل والموقع التي يمكن للعملاء فتحها من التطبيق.';
+
+  @override
+  String get adminOwnerPhoneHint =>
+      'الرقم الذي يتصل به زر الاتصال. اتركه فارغًا لاستخدام الرقم الافتراضي.';
+
+  @override
+  String get adminPriceHint => 'اتركه فارغًا لإظهار «اتصل لمعرفة السعر».';
+
+  @override
+  String get adminReplaceImage => 'استبدال الصورة';
+
+  @override
+  String get adminRemoveImage => 'إزالة الصورة';
+
+  @override
+  String get adminConfirmDeleteImage =>
+      'حذف هذه الصورة؟ سيُحذف الملف من التخزين.';
 
   @override
   String get adminCoverImage => 'صورة الغلاف';
@@ -879,6 +876,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get labelPrice => 'السعر';
+
+  @override
+  String get labelCallForPrice => 'اتصل لمعرفة السعر';
 
   @override
   String get labelUnavailable => 'غير متوفر';

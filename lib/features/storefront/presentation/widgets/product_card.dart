@@ -199,7 +199,7 @@ class ProductCard extends ConsumerWidget {
                     ),
                     const SizedBox(height: 8),
                     // One tap, straight to the dialer, on every card.
-                    CallButton(dense: true),
+                    const CallButton(dense: true),
                   ],
                 ),
               ),

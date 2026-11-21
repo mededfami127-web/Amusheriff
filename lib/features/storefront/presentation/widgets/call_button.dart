@@ -46,9 +46,8 @@ class CallButton extends ConsumerWidget {
     Future<void> dial() async {
       final bool opened = await ref.read(linkLauncherProvider).openTel(uri);
       if (!opened && context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.contactLaunchFailed)));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.contactLaunchFailed)));
       }
     }
 

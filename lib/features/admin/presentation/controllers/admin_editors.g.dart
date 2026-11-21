@@ -66,7 +66,7 @@ final class CategoryEditorControllerProvider
 }
 
 String _$categoryEditorControllerHash() =>
-    r'c83302e0da7f385726b74d6139bb9fc7dcd77ecc';
+    r'50c167f18e12db3da2fb2e6c761e728498d5557c';
 
 /// Create / edit a category, including its optional place under a mother
 /// category.

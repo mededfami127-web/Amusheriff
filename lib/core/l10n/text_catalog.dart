@@ -128,6 +128,16 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
     },
   ),
   AppTextEntry(
+    key: 'actionCall',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'Call',
+      'am': 'ደውል',
+      'ar': 'اتصل',
+      'om': 'Bilbili',
+    },
+  ),
+  AppTextEntry(
     key: 'actionCallNow',
     sectionKey: 'groupStorefront',
     defaults: <String, String>{
@@ -680,6 +690,16 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
     },
   ),
   AppTextEntry(
+    key: 'adminConfirmDeleteImage',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'Delete this image? The file is removed from storage.',
+      'am': 'ይህን ምስል ያጥፉ? ፋይሉ ከማከማቻው ይወገዳል።',
+      'ar': 'حذف هذه الصورة؟ سيُحذف الملف من التخزين.',
+      'om': 'Suuraa kana haquu? Faayilli kuusaa irraa ni haqama.',
+    },
+  ),
+  AppTextEntry(
     key: 'adminConfirmDeleteMessage',
     sectionKey: 'groupCommon',
     defaults: <String, String>{
@@ -1090,6 +1110,26 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
     },
   ),
   AppTextEntry(
+    key: 'adminLinks',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'Links',
+      'am': 'አገናኞች',
+      'ar': 'الروابط',
+      'om': 'Geessituuwwan',
+    },
+  ),
+  AppTextEntry(
+    key: 'adminLinksHint',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'Social and web links customers can open from the app. They open in the browser or the matching app.',
+      'am': 'ደንበኞች ከመተግበሪያው ሊከፍቷቸው የሚችሉ የሶሻል ሚዲያና የድረ-ገጽ አገናኞች።',
+      'ar': 'روابط التواصل والموقع التي يمكن للعملاء فتحها من التطبيق.',
+      'om': 'Geessituuwwan miidiyaa hawaasaa fi weebsaayitii maamiltoonni appii irraa banuu danda\'an.',
+    },
+  ),
+  AppTextEntry(
     key: 'adminLiveEdit',
     sectionKey: 'adminTextEditor',
     defaults: <String, String>{
@@ -1320,6 +1360,17 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
     },
   ),
   AppTextEntry(
+    key: 'adminOwnerPhoneHint',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en':
+          'The number every Call button dials. Leave empty to use the default.',
+      'am': 'የሁሉም የመደወያ ቁልፎች ቁጥር። ባዶ ከሆነ ነባሪው ይጠቀማል።',
+      'ar': 'الرقم الذي يتصل به زر الاتصال. اتركه فارغًا لاستخدام الرقم الافتراضي.',
+      'om': 'Lakkoofsa buttonii bilbilaa hunda. Duwwaa yoo ta\'e lakkoofsa durtii fayyadama.',
+    },
+  ),
+  AppTextEntry(
     key: 'adminPasswordChanged',
     sectionKey: 'adminAccount',
     defaults: <String, String>{
@@ -1367,6 +1418,16 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
       'am': 'ዋጋ',
       'ar': 'السعر',
       'om': 'Gatii',
+    },
+  ),
+  AppTextEntry(
+    key: 'adminPriceHint',
+    sectionKey: 'adminProducts',
+    defaults: <String, String>{
+      'en': 'Leave empty to show "Call for price".',
+      'am': 'ዋጋ ከሌለው ባዶ ይተዉት፤ "ዋጋ ለማወቅ ይደውሉ" ይታያል።',
+      'ar': 'اتركه فارغًا لإظهار «اتصل لمعرفة السعر».',
+      'om': 'Gatii hin qabu yoo ta\'e duwwaa dhiisi; "Gatii beekuuf bilbili" ni mul\'ata.',
     },
   ),
   AppTextEntry(
@@ -1540,6 +1601,16 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
     },
   ),
   AppTextEntry(
+    key: 'adminRemoveImage',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'Remove image',
+      'am': 'ምስል አስወግድ',
+      'ar': 'إزالة الصورة',
+      'om': 'Suuraa baasi',
+    },
+  ),
+  AppTextEntry(
     key: 'adminRemoveMedia',
     sectionKey: 'adminProducts',
     defaults: <String, String>{
@@ -1547,6 +1618,16 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
       'am': 'ሚዲያውን አስወግድ',
       'ar': 'إزالة الوسائط',
       'om': 'Miidiyaa haqi',
+    },
+  ),
+  AppTextEntry(
+    key: 'adminReplaceImage',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'Replace image',
+      'am': 'ምስል ቀይር',
+      'ar': 'استبدال الصورة',
+      'om': 'Suuraa jijjiiri',
     },
   ),
   AppTextEntry(
@@ -2841,6 +2922,16 @@ const List<AppTextEntry> kAppTextEntries = <AppTextEntry>[
       'am': 'ይገኛል',
       'ar': 'متوفر',
       'om': 'Jira',
+    },
+  ),
+  AppTextEntry(
+    key: 'labelCallForPrice',
+    sectionKey: 'groupCommon',
+    defaults: <String, String>{
+      'en': 'Call for price',
+      'am': 'ዋጋ ለማወቅ ይደውሉ',
+      'ar': 'اتصل لمعرفة السعر',
+      'om': 'Gatii beekuuf bilbili',
     },
   ),
   AppTextEntry(
