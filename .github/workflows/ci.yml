@@ -18,6 +18,12 @@ concurrency:
 
 env:
   FLUTTER_CHANNEL: stable
+  # Pinned to the release this tree was last verified against. Flutter 3.50
+  # deprecated `package:flutter/material.dart` in favour of `material_ui`,
+  # which turns every widget file into a `deprecated_member_use` info and makes
+  # `--fatal-infos` fail on code that has not changed. Bump this together with
+  # the import migration, not before it.
+  FLUTTER_VERSION: 3.47.9
 
 jobs:
   # ── Dart / Flutter ────────────────────────────────────────────────────────
@@ -32,6 +38,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
 
       - name: Install dependencies
@@ -176,6 +183,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
 
       - name: Install dependencies
