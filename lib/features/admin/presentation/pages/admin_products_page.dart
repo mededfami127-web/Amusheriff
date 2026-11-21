@@ -275,11 +275,13 @@ class _ProductTile extends ConsumerWidget {
             crossAxisAlignment: WrapCrossAlignment.center,
             children: <Widget>[
               Text(
-                Formatters.money(
-                  product.price,
-                  currency: product.currencyCode,
-                  locale: locale,
-                ),
+                product.hasPrice
+                    ? Formatters.money(
+                        product.price,
+                        currency: product.currencyCode,
+                        locale: locale,
+                      )
+                    : l10n.labelCallForPrice,
                 style: BrandTypography.bodyMedium,
               ),
               if (!product.isPublished) _Badge(label: l10n.adminFilterDraft),

@@ -155,13 +155,15 @@ class _Body extends ConsumerWidget {
                     shaderCallback: BrandGradients.goldHorizontal.createShader,
                     blendMode: BlendMode.srcIn,
                     child: Text(
-                      Formatters.money(
-                        product.price,
-                        currency: product.currencyCode,
-                        locale: language,
-                      ),
+                      product.hasPrice
+                          ? Formatters.money(
+                              product.price,
+                              currency: product.currencyCode,
+                              locale: language,
+                            )
+                          : l10n.labelCallForPrice,
                       style: BrandTypography.price.copyWith(
-                        fontSize: 26,
+                        fontSize: product.hasPrice ? 26 : 20,
                         color: BrandColors.gold,
                       ),
                     ),
@@ -377,11 +379,15 @@ class _ContactActions extends ConsumerWidget {
     final String language = Localizations.localeOf(context).languageCode;
     final ContactLauncher launcher = ref.read(contactLauncherProvider);
     final String title = product.titleFor(language);
-    final String price = Formatters.money(
-      product.price,
-      currency: product.currencyCode,
-      locale: language,
-    );
+    // A piece without a price still has an inquiry message; it just asks for
+    // the price instead of quoting ETB 0.
+    final String price = product.hasPrice
+        ? Formatters.money(
+            product.price,
+            currency: product.currencyCode,
+            locale: language,
+          )
+        : l10n.labelCallForPrice;
     final String message = l10n.inquiryMessageTemplate(title, price);
 
     // Channels from `admin_contact_settings`, minus any kind already rendered

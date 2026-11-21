@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -11,6 +12,7 @@ import '../../../../core/network/storage_urls.dart';
 import '../../../../core/router/routes.dart';
 import '../../../../core/theme/brand_colors.dart';
 import '../../../../core/theme/typography.dart';
+import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/inline_failure_banner.dart';
 import '../../../catalog/data/datasources/storage_datasource.dart';
@@ -309,27 +311,23 @@ class _AdminProductEditorPageState
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Expanded(
-                child: AdminTextField(
+                child: _PriceField(
                   label: l10n.adminPrice,
-                  value: state.price.toString(),
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  onChanged: (String value) =>
-                      controller.setPrice(double.tryParse(value) ?? 0),
+                  value: state.price,
+                  currencyCode: state.currencyCode,
+                  language: locale,
+                  onChanged: controller.setPrice,
                   error: localizeFieldKey(l10n, state.fieldErrors['price']),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: AdminTextField(
+                child: _PriceField(
                   label: l10n.adminCompareAtPrice,
-                  value: state.compareAtPrice.toString(),
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  onChanged: (String value) =>
-                      controller.setCompareAtPrice(double.tryParse(value) ?? 0),
+                  value: state.compareAtPrice,
+                  currencyCode: state.currencyCode,
+                  language: locale,
+                  onChanged: controller.setCompareAtPrice,
                   error: localizeFieldKey(
                     l10n,
                     state.fieldErrors['compareAtPrice'],
@@ -338,6 +336,10 @@ class _AdminProductEditorPageState
               ),
             ],
           ),
+          const SizedBox(height: 6),
+          // Clearing the box is how the owner says "price on request"; the
+          // storefront then prints "Call for price" instead of ETB 0.
+          Text(l10n.adminPriceHint, style: BrandTypography.bodySmall),
           const SizedBox(height: 8),
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
@@ -794,4 +796,105 @@ _CategorySelection _resolveSelection(List<Category> categories, String id) {
 int _bySortThenName(Category a, Category b) {
   final int byOrder = a.sortOrder.compareTo(b.sortOrder);
   return byOrder != 0 ? byOrder : a.name.compareTo(b.name);
+}
+
+/// Price box for the product form.
+///
+/// Keeps its own controller instead of round-tripping through a `double` on
+/// every keystroke: a shared value would rewrite `96000.` to `96000` mid-typing
+/// and delete the decimal point. Only the parsed value goes back to the
+/// controller, and only when the draft changed for a reason other than typing
+/// (e.g. loading another product).
+class _PriceField extends StatefulWidget {
+  const _PriceField({
+    required this.label,
+    required this.value,
+    required this.currencyCode,
+    required this.language,
+    required this.onChanged,
+    this.error,
+  });
+
+  final String label;
+  final double value;
+  final String currencyCode;
+  final String language;
+  final ValueChanged<double> onChanged;
+  final String? error;
+
+  @override
+  State<_PriceField> createState() => _PriceFieldState();
+}
+
+class _PriceFieldState extends State<_PriceField> {
+  late final TextEditingController _controller = TextEditingController(
+    text: _format(widget.value),
+  );
+
+  static String _format(double value) {
+    if (value <= 0) return '';
+    return value % 1 == 0 ? value.toStringAsFixed(0) : value.toString();
+  }
+
+  static double _parse(String raw) {
+    final String cleaned = raw.replaceAll(RegExp(r'[^0-9.]'), '');
+    if (cleaned.isEmpty) return 0;
+    final double? parsed = double.tryParse(cleaned);
+    return parsed == null || parsed < 0 ? 0 : parsed;
+  }
+
+  @override
+  void didUpdateWidget(covariant _PriceField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.value == widget.value) return;
+    if (_parse(_controller.text) != widget.value) {
+      _controller.text = _format(widget.value);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final String typed = _controller.text;
+    final double parsed = _parse(typed);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        AdminTextField(
+          label: widget.label,
+          value: typed,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          inputFormatters: <TextInputFormatter>[
+            FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+          ],
+          onChanged: (String raw) {
+            setState(() {});
+            widget.onChanged(_parse(raw));
+          },
+          error: widget.error,
+        ),
+        if (parsed > 0) ...<Widget>[
+          const SizedBox(height: 4),
+          Text(
+            Formatters.money(
+              parsed,
+              currency: widget.currencyCode,
+              locale: widget.language,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: BrandTypography.labelSmall.copyWith(
+              color: BrandColors.gold,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
 }

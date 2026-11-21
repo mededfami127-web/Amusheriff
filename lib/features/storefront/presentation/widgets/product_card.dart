@@ -153,11 +153,13 @@ class ProductCard extends ConsumerWidget {
                               BrandGradients.goldHorizontal.createShader,
                           blendMode: BlendMode.srcIn,
                           child: Text(
-                            Formatters.money(
-                              product.price,
-                              currency: product.currencyCode,
-                              locale: language,
-                            ),
+                            product.hasPrice
+                                ? Formatters.money(
+                                    product.price,
+                                    currency: product.currencyCode,
+                                    locale: language,
+                                  )
+                                : l10n.labelCallForPrice,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: BrandTypography.price.copyWith(
